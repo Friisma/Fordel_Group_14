@@ -1,0 +1,31 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="da">
+
+<head th:replace="~{fragments/head ::head}"></head>
+
+<body>
+    <header th:replace="~{fragments/header ::header}"></header>
+
+    <main class="container">
+        <section id="login">
+            <h1>Velkommen, Log ind</h1>
+            <form action="/login" method="post">
+                <label for="email">E-mail</label>
+                <input type="email" name="email" placeholder="E-mail" th:aria-invalid="${error_email != null}">
+                <small class="error" id="email-helper" th:if="${error_email != null}" th:text="${error_email}">
+                </small>
+                <label for="password">Kodeord</label>
+                <input type="password" name="password" placeholder="Kodeord"
+                    th:aria-invalid="${error_password != null}">
+                <small class="error" id="password-helper" th:if="${error_password != null}" th:text="${error_password}">
+                </small>
+                <button type="submit">Log in</button>
+                <label class="center">eller <a href="/create-user">opret en ny bruger</a></label>
+            </form>
+        </section>
+    </main>
+
+    <footer th:replace="~{fragments/footer ::footer}"></footer>
+</body>
+
+</html>

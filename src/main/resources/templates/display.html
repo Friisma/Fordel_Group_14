@@ -1,0 +1,73 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="da">
+
+<head th:replace="~{fragments/head ::head}"></head>
+
+<body>
+    <header th:replace="~{fragments/header ::header}"></header>
+
+    <main class="container">
+        <section>
+            <h1 th:text="${title}"></h1>
+            <p>
+                The goal of this page is to display different things you can do.
+                Also check out <a href="https://4mrnhq.csb.app/">https://4mrnhq.csb.app/</a>
+            </p>
+        </section>
+
+        <section>
+            <hgroup>
+                <h2>A Simple table</h1>
+                    <p>A subheadding</p>
+            </hgroup>
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">Planet</th>
+                        <th scope="col">Diameter (km)</th>
+                        <th scope="col">Distance to Sun (AU)</th>
+                        <th scope="col">Orbit (days)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">Mercury</th>
+                        <td>4,880</td>
+                        <td>0.39</td>
+                        <td>88</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Venus</th>
+                        <td>12,104</td>
+                        <td>0.72</td>
+                        <td>225</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Earth</th>
+                        <td>12,742</td>
+                        <td>1.00</td>
+                        <td>365</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Mars</th>
+                        <td>6,779</td>
+                        <td>1.52</td>
+                        <td>687</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th scope="row">Average</th>
+                        <td>9,126</td>
+                        <td>0.91</td>
+                        <td>341</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </section>
+    </main>
+
+    <footer th:replace="~{fragments/footer ::footer}"></footer>
+</body>
+
+</html>

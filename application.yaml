@@ -1,0 +1,35 @@
+
+logging:
+  file: 
+    name: "runtime/log.txt"
+
+application:
+  name: fordel
+
+# Enable JDBC session (if using JDBC)
+session:
+  store-type: jdbc
+
+# Configure session cookie
+server:
+  port: 8080
+  servlet:
+    session: 
+      timeout: 600
+    cookie: 
+      name: FORDEL_SESSION_ID
+      http-only: true
+      secure: true
+
+# Database configuration
+spring:
+  datasource:
+    url: "jdbc:h2:file:./runtime/fordel.h2"
+
+  h2:
+    console:
+      enabled: true
+    database:
+      file: "./runtime/fordel.h2"
+    web:
+      enabled: true

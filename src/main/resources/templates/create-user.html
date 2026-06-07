@@ -1,0 +1,23 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="da">
+
+<head th:replace="~{fragments/head ::head}"></head>
+
+<body>
+    <header th:replace="~{fragments/header ::header}"></header>
+
+    <main class="container">
+        <section id="create-new-user">
+            <h1>Opret Ny Bruger</h1>
+            <form action="/create-user" method="post">
+                <label th:replace="~{fragments/field :: field(${name})}"></label>
+                <label th:replace="~{fragments/field :: field(${email})}"></label>
+                <label th:replace="~{fragments/field :: field(${password})}"></label>
+                <button type="submit">Opret bruger</button>
+        </section>
+    </main>
+
+    <footer th:replace="~{fragments/footer ::footer}"></footer>
+</body>
+
+</html>

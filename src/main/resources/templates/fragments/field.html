@@ -1,0 +1,7 @@
+<label th:fragment="field(field)">
+    [[${field.description}]]
+    <input th:type="${field.type}" th:name="${field.name}" th:placeholder="${field.description}"
+        th:value="${field.value}" th:aria-invalid="${field.isInvalid()} ? true : (${field.isValid()} ? false : null)">
+    <small th:if="${field.isInvalid()}" th:text="${field.message}">
+    </small>
+</label>
