@@ -1,6 +1,13 @@
 # to-do & user story analysis
 
-## US2 Create A Study Line: As the administrator I want to create study lines so that I can assign students and study leaders
+## Project overview 
+- View: UI / brugerinput
+- Services: use cases og forretningslogik
+- Domain: hvad systemet handler om (User, Email osv.)
+- Repository: databaseadgang
+- H2Repository: konkret implementation mod H2-databasen
+
+### US2 Create A Study Line: As the administrator I want to create study lines so that I can assign students and study leaders
 - **"As the administrator"**
   - meaning there must be an administrator role. This could be implemented in the model - maybe extending the user?
   - Should also reflect the state of the database 
