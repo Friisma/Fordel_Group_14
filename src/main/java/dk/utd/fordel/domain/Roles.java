@@ -8,7 +8,9 @@ public enum Roles {
     USER(1),
     STUDENT(2),
     ADVISOR(3),
-    ADMIN(4);
+    TEACHER(4),
+    STUDY_LEADER(5),
+    ADMIN(6);
 
     private final int clearanceLevel;
 
