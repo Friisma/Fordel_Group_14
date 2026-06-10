@@ -5,12 +5,11 @@ package dk.utd.fordel.domain;
  * This way we make sure that the users use the same role logic.
  */
 public enum Roles {
-    USER(1),
-    STUDENT(2),
-    ADVISOR(3),
-    TEACHER(4),
-    STUDY_LEADER(5),
-    ADMIN(6);
+    STUDENT(1),
+    ADVISOR(2),
+    TEACHER(3),
+    STUDY_LEADER(4),
+    ADMIN(5);
 
     private final int clearanceLevel;
 
