@@ -93,29 +93,38 @@ def extra(workdir: Path, output):
     encode_tokens(workdir, "src/**/*.css", css_parser, output)
 
 
-def test_coverage(workdir: Path):
-    output = sp.run(["mvn", "verify"], cwd=workdir)
+def test_coverage(api, target):
+    while val := (yield):
+        commit, result = val
 
-    if output.returncode != 0:
-        return 0
+        if "inst_covered" in result and "inst_total" in result:
+            continue
 
-    covered = 0
-    missed = 0
-    with open(workdir / "target" / "site" / "jacoco" / "jacoco.csv") as f:
-        reader = csv.DictReader(f)
-        for line in reader:
-            covered += int(line["INSTRUCTION_COVERED"])
-            missed += int(line["INSTRUCTION_MISSED"])
+        workdir = api.checkout(commit)
 
-    return {"covered": covered, "missed": missed}
+        output = sp.run(["mvn", "verify"], cwd=workdir)
+
+        if output.returncode != 0:
+            return 0
+
+        covered = 0
+        missed = 0
+        with open(workdir / "target" / "site" / "jacoco" / "jacoco.csv") as f:
+            reader = csv.DictReader(f)
+            for line in reader:
+                covered += int(line["INSTRUCTION_COVERED"])
+                missed += int(line["INSTRUCTION_MISSED"])
+
+        result["inst_covered"] = {"score": covered}
+        result["inst_total"] = {"score": covered + missed}
 
 
 if __name__ == "__main__":
     gitscore.main(
-        judges={
-            "source": gitscore.make_judge_from_encoder(source),
-            "extra": gitscore.make_judge_from_encoder(extra),
-            "test_source": gitscore.make_judge_from_encoder(test_source),
-            "test_coverage": gitscore.make_judge_from_compute(test_coverage),
-        }
+        judges=[
+            gitscore.make_judge_from_encoder("source", source),
+            gitscore.make_judge_from_encoder("extra", extra),
+            gitscore.make_judge_from_encoder("test", test_source),
+            # test_coverage,
+        ]
     )

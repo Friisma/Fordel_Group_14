@@ -1,0 +1,149 @@
+name = "fordel-14"
+milestones = [ "M1" ]
+
+[[members]]
+name = "Mahmoud Mohammad Mustafa"
+id = "s244632"
+
+[[members]]
+name = "Magnus Friis"
+id = "s251019"
+
+[[members]]
+name = "Casper Krogh Rasmussen"
+id = "s255762"
+
+[[members]]
+name = "Lasse Pedersen"
+id = "s255896"
+
+[[requirements]]
+id = "US1"
+title = "Login"
+description = """
+*As* any user of the site
+*I want to* be able to authenticate myself
+*such that* I can get a personalized view and options
+"""
+completed = true
+
+[[requirements]]
+id = "US2"
+title = "Create A Study Line"
+description = """
+*As* the administrator
+*I want to* create study lines
+*such that* I can assign students and study leaders
+"""
+completed = false
+
+[[requirements]]
+id = "US3"
+title = "Create Advisors"
+description = """
+*As* the administrator
+*I want to* assign users as advisors
+*such that* they can advise students
+"""
+completed = false
+
+[[requirements]]
+id = "US4"
+title = "Assign Study Leaders"
+description = """
+*As* the administrator
+*I want to* assign a study leader to a study line
+*such that* they can administrate the students of that line
+"""
+completed = false
+
+[[requirements]]
+id = "US5"
+title = "Assign Students"
+description = """
+*As* a study leader
+*I want to* assign students to a study line
+*such that* I can monitor and help them complete their projects
+"""
+completed = false
+
+[[requirements]]
+id = "US8"
+title = "Advisor Project Choice"
+description = """
+*As* an advisor
+*I want to* see a list of potential projects
+*such that* I can choose some to advise
+"""
+completed = false
+
+[[requirements]]
+id = "US10"
+title = "Project Creation"
+description = """
+*As* a student
+*I want to* to create a project
+*such that* it can be chosen by an advisor
+"""
+completed = false
+
+[[requirements]]
+id = "US14"
+title = "Project Advisor Invitation"
+description = """
+*As* a student
+*I want to* see a list of potential advisors
+*such that* I can send a request to join the project
+"""
+completed = false
+
+[[requirements]]
+id = "US16"
+title = "Advisor Workload"
+description = """
+*As* an advisor
+*I want to* set my acceptable workload
+*such that* students do not contact me when I am full
+"""
+completed = false
+
+[[requirements]]
+id = "US20"
+title = "Have a Cookie Notice"
+description = """
+*As* any user
+*I want to* to be informed about the use of cookies
+*such that* my rights are upheld
+"""
+completed = false
+
+[[requirements]]
+id = "US22"
+title = "Change name"
+description = """
+*As* any user
+*I want to* to be able change my name and information
+*such that* be represented as I prefer
+"""
+completed = false
+
+[[requirements]]
+id = "US23"
+title = "Add student progress."
+description = """
+*As* as a student
+*I want to* to be able set my start date
+*such that* the system can calculate approximate start dates for internship and the project
+"""
+completed = false
+
+[[requirements]]
+id = "US28"
+title = "Expire Passwords"
+description = """
+*As* as a system administrator
+*I want to* require passwords to expire after 3 months
+*such that* to harden the security of the system
+"""
+completed = false
+
