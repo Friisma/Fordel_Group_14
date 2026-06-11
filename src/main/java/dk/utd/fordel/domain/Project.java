@@ -18,6 +18,7 @@ public class Project {
     public int getProjectID() {
         return this.projectID;
     }
+    public String getProjectIDAsString(){return String.valueOf(this.projectID);}
 
     public String getProjectName() {
         return projectName;

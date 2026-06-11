@@ -170,12 +170,19 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
             }
             throw Log.giveUp(logger, e, "Failed to create project: " + project);
         }
-        var stmt2 = "INSERT INTO project_students (user, project_id) VALUES (?,?)";
+        var stmt2 = "INSERT INTO project_students (user_id, project_id) VALUES (?,?)";
 
         try (var statement2 = getConnection().prepareStatement(stmt2)){
             statement2.setString(1, currUser.getEmail().asString());
-            statement2.setString(1, project.getProjectID());
+            statement2.setInt(1, project.getProjectID());
+            statement2.executeUpdate();
+        } catch (SQLException e) {
+            logger.error("SQL error code: {}, SQL state: {}, message: {}",
+                    e.getErrorCode(), e.getSQLState(), e.getMessage());
+
+            throw Log.giveUp(logger, e, "Failed to create project: " + project);
         }
+
     }
 
     @Override

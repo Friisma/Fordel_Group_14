@@ -72,7 +72,8 @@ public class CreateProject {
         if (isValid){
             try (var uow = unitOfWork.begin()){
                 logger.info("UnitOfWork started: {}", uow);
-                User user = (User)session.getAttribute("auth");
+                Authenticator.Auth auth = (Authenticator.Auth)session.getAttribute("auth");
+                User user = auth.user();
                 projectManager.createProject(project, user);
                 uow.commit();
 
