@@ -68,6 +68,6 @@ public class UserController {
             throw Log.giveUp(logger, e, "Could not grant user role");
         }
 
-        return "redirect:/users";
+        return "redirect:/adminpage";
     }
 }
