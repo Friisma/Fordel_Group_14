@@ -9,14 +9,47 @@
     </ul>
     <ul>
       <li>
-        <a href="/login" class="secondary"><svg width="1rem" height="1rem" viewBox="0 0 16 16" fill="none"
+        <a th:if="${session.auth == null || session.auth.user == null}"
+           href="/login"
+           class="secondary">
+          <svg width="1rem" height="1rem" viewBox="0 0 16 16" fill="none"
             xmlns="http://www.w3.org/2000/svg">
             <path
               d="M8 7C9.65685 7 11 5.65685 11 4C11 2.34315 9.65685 1 8 1C6.34315 1 5 2.34315 5 4C5 5.65685 6.34315 7 8 7Z"
               fill="#969eaf"></path>
             <path d="M14 12C14 10.3431 12.6569 9 11 9H5C3.34315 9 2 10.3431 2 12V15H14V12Z" fill="#969eaf"></path>
           </svg></a>
+
+        <a th:if="${session.auth != null && session.auth.user != null}"
+           href="#"
+           data-target="modal-user-settings"
+           class="secondary"
+           onclick="toggleModal(event)">
+          <svg width="1rem" height="1rem" viewBox="0 0 16 16" fill="none"
+               xmlns="http://www.w3.org/2000/svg">
+            <path
+                    d="M8 7C9.65685 7 11 5.65685 11 4C11 2.34315 9.65685 1 8 1C6.34315 1 5 2.34315 5 4C5 5.65685 6.34315 7 8 7Z"
+                    fill="#969eaf"></path>
+            <path d="M14 12C14 10.3431 12.6569 9 11 9H5C3.34315 9 2 10.3431 2 12V15H14V12Z" fill="#969eaf"></path>
+          </svg></a>
       </li>
     </ul>
   </nav>
+
+  <dialog id="modal-user-settings">
+    <article>
+      <header>
+        <button aria-label="Close" rel="prev" data-target="modal-user-settings" onclick="toggleModal(event)"></button>
+        <h3>User Settings</h3>
+      </header>
+      <div style="display: flex; gap: 1rem;">
+        <input type="text" name="username" placeholder="Username" aria-label="Username" required="">
+        <button type="submit" style="width: auto;">
+          Change
+        </button>
+      </div>
+      </article>
+  </dialog>
+
+  <script th:src="@{/js/modal.js}" defer></script>
 </header>
