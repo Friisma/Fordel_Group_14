@@ -5,7 +5,14 @@ public class Project {
     private String projectName;
     private String description;
 
-
+    /**
+     * Represents the 
+     *
+     * @param projectID
+     * @param projectName
+     * @param description
+     * @throws InvalidProject
+     */
     public Project(int projectID, String projectName, String description) throws InvalidProject {
 
         if (projectName.isEmpty()){

@@ -8,7 +8,7 @@
 
   <main class="container">
     <section id="welcome">
-      <h1>Velkommen, <span th:text="${session.auth.user()}">User</span></h1>
+      <h1>Velkommen, <span th:text="${session.auth.user().toString()}">User</span></h1>
       <a th:href="@{/create-Project}">Projects</a>
     </section>
   </main>
