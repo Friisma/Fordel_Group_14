@@ -17,13 +17,13 @@ public class TopController {
         if (session.getAttribute("auth") == null) {
             return "redirect:/login";
         }
-        model.addAttribute("title", "Fordel - en klar fordel");
+        model.addAttribute("title", "Fordel");
         return "home";
     }
 
     @GetMapping("/display")
     public String getDisplay(Model model) {
-        model.addAttribute("title", "Fremvisining");
+        model.addAttribute("title", "Display");
         return "display";
     }
 
