@@ -29,9 +29,13 @@ CREATE TABLE study_line_leaders (
 
 -- Extend Users
 ALTER TABLE users
-    ADD COLUMN study_start_date DATE,
-ADD COLUMN max_workload INT DEFAULT 5,
-ADD COLUMN password_changed_at TIMESTAMP;
+    ADD COLUMN study_start_date DATE;
+
+ALTER TABLE users
+    ADD COLUMN max_workload INT DEFAULT 5;
+
+ALTER TABLE users
+    ADD COLUMN password_changed_at TIMESTAMP;
 
 -- Projects
 -- (Every project belongs to exactly one study line)
