@@ -1,0 +1,35 @@
+.invitation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.badge.pending {
+    background-color: #fdd835;
+    color: #000;
+}
+
+.badge.accepted {
+    background-color: #4aad52;
+    color: #fff;
+}
+
+.badge.declined {
+    background-color: #ff595e;
+    color: #fff;
+}
+
+.font-normal {
+  font-weight: normal;
+}
