@@ -32,4 +32,9 @@ public class TopController {
         return "error";
     }
 
+    @GetMapping("/forbidden")
+    public String getForbidden(Model model) {
+        return "forbidden";
+    }
+
 }
