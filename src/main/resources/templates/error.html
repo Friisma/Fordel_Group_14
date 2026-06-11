@@ -4,15 +4,29 @@
 <head th:replace="~{fragments/head :: head}"></head>
 
 <body>
-    <header th:replace="~{fragments/header :: header}"></header>
-    <main class="container">
-        <section>
-            <h1>Something went wrong</h1>
-            <p>The server ran into an unknown error. Please try again later.</p>
-            <p><a href="/" th:href="@{/}">Go back to the frontpage</a></p>
-        </section>
-    </main>
-    <footer th:replace="~{fragments/footer :: footer}"></footer>
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="container">
+    <section style="text-align: center; padding: 2rem 0;">
+
+        <img th:src="@{/images/error.png}"
+             alt="Error"
+             style="max-width: 250px; width: 100%; margin-bottom: 1.5rem;" />
+
+        <h1>Something went wrong</h1>
+
+        <p>
+            The server ran into an unknown error. Please try again later.
+        </p>
+
+        <p>
+            <a href="/" th:href="@{/}">Go back to the frontpage</a>
+        </p>
+
+    </section>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 
 </html>
