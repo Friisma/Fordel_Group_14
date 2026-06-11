@@ -155,8 +155,9 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     public void delete(Project project){}
 
     @Override
-    public void create(Project project){
+    public void create(Project project, User currUser){
         var stmt = "INSERT INTO projects (title, description) VALUES (?, ?)";
+
         try (var statement = getConnection().prepareStatement(stmt)) {
             statement.setString(1, project.getProjectName());
             statement.setString(2, project.getDescription());
@@ -168,6 +169,12 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
                 throw new ProjectTitleAlreadyInUse("Project name already being used: " + project.getProjectName());
             }
             throw Log.giveUp(logger, e, "Failed to create project: " + project);
+        }
+        var stmt2 = "INSERT INTO project_students (user, project_id) VALUES (?,?)";
+
+        try (var statement2 = getConnection().prepareStatement(stmt2)){
+            statement2.setString(1, currUser.getEmail().asString());
+            statement2.setString(1, project.getProjectID());
         }
     }
 

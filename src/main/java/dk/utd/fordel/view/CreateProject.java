@@ -1,10 +1,13 @@
 package dk.utd.fordel.view;
 
 import dk.utd.fordel.domain.Project;
+import dk.utd.fordel.domain.User;
+import dk.utd.fordel.services.Authenticator;
 import dk.utd.fordel.services.ProjectManager;
 import dk.utd.fordel.utils.Log;
 import dk.utd.fordel.utils.UnitOfWork;
 import dk.utd.fordel.view.utils.Field;
+import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,10 +21,12 @@ public class CreateProject {
     private static final Logger logger = Log.getLogger(CreateProject.class);
     private final UnitOfWork unitOfWork;
     private final ProjectManager projectManager;
+    private final Authenticator authenticator;
 
-    public CreateProject(UnitOfWork unitOfWork, ProjectManager projectManager){
+    public CreateProject(UnitOfWork unitOfWork, ProjectManager projectManager, Authenticator authenticator){
         this.unitOfWork = unitOfWork;
         this.projectManager = projectManager;
+        this.authenticator = authenticator;
     }
 
     @GetMapping("/create-project")
@@ -38,8 +43,9 @@ public class CreateProject {
 
     @PostMapping("/create-project")
     public String postCreateProject(Model model,
-        @RequestParam("project_name") String projectName,
-        @RequestParam("project_description") String projectDescription){
+                                    @RequestParam("project_name") String projectName,
+                                    @RequestParam("project_description") String projectDescription,
+                                    HttpSession session){
         model.addAttribute("title", "Opret projekt");
 
         boolean isValid = true;
@@ -66,7 +72,8 @@ public class CreateProject {
         if (isValid){
             try (var uow = unitOfWork.begin()){
                 logger.info("UnitOfWork started: {}", uow);
-                projectManager.createProject(project);
+                User user = (User)session.getAttribute("auth");
+                projectManager.createProject(project, user);
                 uow.commit();
 
             } catch (Project.InvalidProject e) {
