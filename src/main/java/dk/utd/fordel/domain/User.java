@@ -1,5 +1,8 @@
 package dk.utd.fordel.domain;
 
+import java.time.LocalDate;
+import java.util.List;
+
 /*
  * A User is an entity with a string Id.
  */
@@ -18,7 +21,7 @@ public record User(Email id) {
     return this.id;
   }
 
-  public record Data(String name) {
+  public record Data(String name, List<Roles> roles, String studyLine, LocalDate studyStart) {
   }
 
 }

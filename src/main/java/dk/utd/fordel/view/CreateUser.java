@@ -19,6 +19,8 @@ import dk.utd.fordel.utils.UnitOfWork;
 import dk.utd.fordel.view.utils.Field;
 import jakarta.servlet.http.HttpSession;
 
+import java.util.List;
+
 @Controller
 public class CreateUser {
 
@@ -83,7 +85,8 @@ public class CreateUser {
         if (isValid) {
             try (var uow = unitOfWork.begin()) {
                 logger.info("UnitOfWork started: {}", uow);
-                userManager.createUser(user, new User.Data(name));
+                User.Data newData = new User.Data(name, List.of(), null, null);
+                userManager.createUser(user, newData);
                 authenticator.register(user, password);
                 uow.commit();
             } catch (EmailAlreadyInUse e) {

@@ -1,5 +1,8 @@
 package dk.utd.fordel.view;
 
+import dk.utd.fordel.services.UserManager;
+import dk.utd.fordel.utils.Log;
+import dk.utd.fordel.utils.UnitOfWork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -11,6 +14,11 @@ import jakarta.servlet.http.HttpSession;
 public class TopController {
 
     private static final Logger logger = LoggerFactory.getLogger(TopController.class);
+    private final UserManager userManager;
+
+    public TopController(UserManager userManager) {
+        this.userManager = userManager;
+    }
 
     @GetMapping("/")
     public String getHome(Model model, HttpSession session) {
