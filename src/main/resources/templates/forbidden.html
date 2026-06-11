@@ -4,15 +4,27 @@
 <head th:replace="~{fragments/head :: head}"></head>
 
 <body>
-    <header th:replace="~{fragments/header :: header}"></header>
-    <main class="container">
-        <section>
-            <h1>Access Forbidden (403)</h1>
-            <p>You do not have access to this page.</p>
-            <p><a href="/" th:href="@{/}">Go back to the frontpage</a></p>
-        </section>
-    </main>
-    <footer th:replace="~{fragments/footer :: footer}"></footer>
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="container">
+    <section style="text-align: center; padding: 2rem 0;">
+
+        <img th:src="@{/images/403.png}"
+             alt="Forbidden"
+             style="max-width: 250px; width: 100%; margin-bottom: 1.5rem;" />
+
+        <h1>Access Forbidden (403)</h1>
+
+        <p>You do not have access to this page.</p>
+
+        <p>
+            <a href="/" th:href="@{/}">Go back to the frontpage</a>
+        </p>
+
+    </section>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 
 </html>
