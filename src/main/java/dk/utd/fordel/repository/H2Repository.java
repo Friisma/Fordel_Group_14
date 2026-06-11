@@ -6,15 +6,20 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.sql.DataSource;
 
-import dk.utd.fordel.domain.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.context.annotation.RequestScope;
 
+import dk.utd.fordel.domain.UserDoesNotExist;
+import dk.utd.fordel.domain.Email;
+import dk.utd.fordel.domain.EmailAlreadyInUse;
+import dk.utd.fordel.domain.User;
 import dk.utd.fordel.domain.User.Data;
 import dk.utd.fordel.services.Authenticator.PasswordEncoding;
 import dk.utd.fordel.services.Authenticator.PasswordRepository;
@@ -191,6 +196,25 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
             statement.executeUpdate();
         } catch (SQLException e) {
             throw Log.giveUp(logger, e, "Kunne ikke tildele rolle til brugeren");
+        }
+    }
+
+    @Override
+    public List<UserInfo> getAllUsers() {
+        var users = new ArrayList<UserInfo>();
+        var stmt = "SELECT id, email, name FROM users";
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            var resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                users.add(new UserInfo(
+                        resultSet.getString("id"),
+                        resultSet.getString("email"),
+                        resultSet.getString("name")
+                ));
+            }
+            return users;
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to find all users");
         }
     }
 
