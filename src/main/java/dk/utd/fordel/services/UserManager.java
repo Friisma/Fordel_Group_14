@@ -1,5 +1,6 @@
 package dk.utd.fordel.services;
 
+import dk.utd.fordel.domain.Roles;
 import org.springframework.stereotype.Service;
 
 import dk.utd.fordel.domain.EmailAlreadyInUse;
@@ -14,6 +15,8 @@ public class UserManager {
         User.Data read(User user) throws UserDoesNotExist;
         void update(User user, User.Data data) throws UserDoesNotExist;
         void delete(User user) throws UserDoesNotExist;
+
+        public void grantRole(User user, Roles roleToGrant);
     }
 
     private final UserRepository userRepository;

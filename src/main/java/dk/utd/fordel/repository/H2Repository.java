@@ -182,6 +182,19 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     }
 
     @Override
+    public void grantRole(User user, Roles roleToGrant) {
+        var stmt = "INSERT INTO user_roles (user_email, role) VALUES (?, ?)";
+
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setString(1, user.getEmail().asString());
+            statement.setString(2, roleToGrant.name());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Kunne ikke tildele rolle til brugeren");
+        }
+    }
+
+    @Override
     public UnitOfWork begin() throws UnitOfWorkException {
         try {
             logger.info("Starting transaction for {}", this);
