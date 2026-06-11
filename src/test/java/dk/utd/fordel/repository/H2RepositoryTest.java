@@ -18,6 +18,8 @@ import dk.utd.fordel.services.Authenticator.DefaultPasswordEncoder;
 import dk.utd.fordel.services.Authenticator.PasswordEncoding;
 import dk.utd.fordel.utils.UnitOfWork.UnitOfWorkException;
 
+import java.util.List;
+
 public class H2RepositoryTest {
 
     static H2Repository h2Repository;
@@ -50,7 +52,7 @@ public class H2RepositoryTest {
             throws InvalidEmail, UserDoesNotExist, EmailAlreadyInUse, UnitOfWorkException {
         var user = User.of("known@user.dk");
         try (var ignored = h2Repository.begin()) {
-            h2Repository.create(user, new User.Data("Peter"));
+            h2Repository.create(user, new User.Data("Peter", List.of(), null, null));
             var encoding = new DefaultPasswordEncoder().encode("password");
             h2Repository.setPassword(user, encoding);
             assertEquals(encoding, h2Repository.getPassword(user));
@@ -63,20 +65,20 @@ public class H2RepositoryTest {
             throws InvalidEmail, UserDoesNotExist, EmailAlreadyInUse, UnitOfWorkException {
         var user = User.of("known@user.dk");
         try (var uow = h2Repository.begin()) {
-            h2Repository.create(user, new User.Data("Peter"));
-            assertThrows(EmailAlreadyInUse.class, () -> h2Repository.create(user, new User.Data("Peter")));
+            h2Repository.create(user, new User.Data("Peter", List.of(), null, null));
+            assertThrows(EmailAlreadyInUse.class, () -> h2Repository.create(user, new User.Data("Peter", List.of(), null, null)));
         }
 
         // This is okay because the previous transaction was not committed.
         try (var uow = h2Repository.begin()) {
-            assertDoesNotThrow(() -> h2Repository.create(user, new User.Data("Peter")));
+            assertDoesNotThrow(() -> h2Repository.create(user, new User.Data("Peter", List.of(), null, null)));
             uow.commit();
         }
 
         // Since the transaction was commited, trying to create the same user again
         // fails
         try (var uow = h2Repository.begin()) {
-            assertThrows(EmailAlreadyInUse.class, () -> h2Repository.create(user, new User.Data("Peter")));
+            assertThrows(EmailAlreadyInUse.class, () -> h2Repository.create(user, new User.Data("Peter", List.of(), null, null)));
         }
 
         // But now we need to cleanup the database

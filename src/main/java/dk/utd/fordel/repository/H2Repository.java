@@ -3,20 +3,18 @@ package dk.utd.fordel.repository;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import javax.sql.DataSource;
 
+import dk.utd.fordel.domain.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.context.annotation.RequestScope;
 
-import dk.utd.fordel.domain.UserDoesNotExist;
-import dk.utd.fordel.domain.Email;
-import dk.utd.fordel.domain.EmailAlreadyInUse;
-import dk.utd.fordel.domain.User;
 import dk.utd.fordel.domain.User.Data;
 import dk.utd.fordel.services.Authenticator.PasswordEncoding;
 import dk.utd.fordel.services.Authenticator.PasswordRepository;
@@ -109,21 +107,51 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
 
     @Override
     public User.Data read(User user) throws UserDoesNotExist {
+        String name = null;
+        LocalDate studyStart = null;
+        int userId = -1;
+
         var stmt1 = "SELECT name, study_start_date FROM users WHERE email = ?";
-        var stmt2 = "";
         try (var statement = getConnection().prepareStatement(stmt1)) {
             statement.setString(1, user.getEmail().asString());
             var resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                return new User.Data(resultSet.getString("name"),
-                        List.of(),
-                        "study line",
-                        resultSet.getObject("study_start_date", LocalDate.class));
+                userId = resultSet.getInt("id");
+                name = resultSet.getString("name");
+                studyStart = resultSet.getObject("study_start_date", LocalDate.class);
+            } else {
+                throw new UserDoesNotExist(user, "User not found");
             }
         } catch (SQLException e) {
             Log.giveUp(logger, e, "Failed to read user: " + user);
         }
-        throw new UserDoesNotExist(user, "User not found");
+
+        List<Roles> roles = new ArrayList<>();
+        var stmt2 = "SELECT r.name FROM roles r JOIN user_roles ur ON r.id = ur.role_id WHERE ur.user_id = ?";
+        try (var statement = getConnection().prepareStatement(stmt2)) {
+            statement.setInt(1, userId);
+            var resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                String roleName = resultSet.getString("name");
+                roles.add(Roles.valueOf(roleName.toUpperCase().replace(" ", "_")));
+            }
+        } catch (SQLException e) {
+            Log.giveUp(logger, e, "Failed to read user: " + user);
+        }
+
+        String studyLine = "";
+        var stmt3 = "SELECT sl.name FROM study_lines sl JOIN study_line_students sls ON sl.id = sls.study_line_id WHERE sls.user_id = ?";
+        try (var statement = getConnection().prepareStatement(stmt3)) {
+            statement.setInt(1, userId);
+            var resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                studyLine = resultSet.getString("name");
+            }
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to read study line for user: " + user);
+        }
+
+        return new User.Data(name, roles, studyLine, studyStart);
     }
 
     @Override
