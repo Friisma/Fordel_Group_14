@@ -21,4 +21,10 @@ public record User(Email id) {
   public record Data(String name) {
   }
 
+  public String toString(){
+    return "name Placeholder";
+  }
+
+
+
 }

@@ -5,26 +5,26 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import dk.utd.fordel.domain.*;
+import dk.utd.fordel.services.ProjectManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.context.annotation.RequestScope;
 
-import dk.utd.fordel.domain.UserDoesNotExist;
-import dk.utd.fordel.domain.Email;
-import dk.utd.fordel.domain.EmailAlreadyInUse;
-import dk.utd.fordel.domain.User;
 import dk.utd.fordel.domain.User.Data;
 import dk.utd.fordel.services.Authenticator.PasswordEncoding;
 import dk.utd.fordel.services.Authenticator.PasswordRepository;
 import dk.utd.fordel.services.UserManager.UserRepository;
+import dk.utd.fordel.services.ProjectManager.ProjectRepository;
+
 import dk.utd.fordel.utils.Assert;
 import dk.utd.fordel.utils.Log;
 import dk.utd.fordel.utils.UnitOfWork;
 
 @Repository
 @RequestScope
-public class H2Repository implements PasswordRepository, UnitOfWork, UserRepository {
+public class H2Repository implements PasswordRepository, UnitOfWork, UserRepository, ProjectRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(H2Repository.class);
     private final DataSource dataSource;
@@ -145,6 +145,29 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
             throw Log.giveUp(logger, e, "Failed to update user: " + user);
         }
     }
+
+    //TODO Write proper repository methods to update the database.
+
+    @Override
+    public void update(Project project){}
+
+    @Override
+    public void delete(Project project){}
+
+    @Override
+    public void create(Project project){}
+
+    @Override
+
+    public Project read(Project project) {
+        try {
+            return new Project(0, "t","");
+        } catch (Project.InvalidProject e) {
+
+        }
+        return null;
+    }
+
 
     @Override
     public UnitOfWork begin() throws UnitOfWorkException {

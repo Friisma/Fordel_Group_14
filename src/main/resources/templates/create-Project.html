@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="da">
+
+<head th:replace="~{fragments/head ::head}"></head>
+
+<body>
+    <header th:replace="~{fragments/header ::header}"></header>
+    <main class="container">
+        <section id="create-new-project">
+            <h1>Opret nyt projekt</h1>
+            <form action="/create-Project" method="post">
+                <label th:replace="~{fragments/field :: field(${project_name})}"></label>
+                <label th:replace="~{fragments/field :: field(${description})}"></label>
+                <button type="submit">Opret projekt</button>
+            </form>
+        </section>
+    </main>
+
+    <footer th:replace="~{fragments/footer ::footer}"></footer>
+</body>
+</html>
