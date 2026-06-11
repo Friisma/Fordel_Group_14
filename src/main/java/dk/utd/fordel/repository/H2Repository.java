@@ -11,15 +11,12 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import dk.utd.fordel.domain.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.context.annotation.RequestScope;
 
-import dk.utd.fordel.domain.UserDoesNotExist;
-import dk.utd.fordel.domain.Email;
-import dk.utd.fordel.domain.EmailAlreadyInUse;
-import dk.utd.fordel.domain.User;
 import dk.utd.fordel.domain.User.Data;
 import dk.utd.fordel.services.Authenticator.PasswordEncoding;
 import dk.utd.fordel.services.Authenticator.PasswordRepository;
@@ -188,14 +185,20 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
 
     @Override
     public void grantRole(User user, Roles roleToGrant) {
-        var stmt = "INSERT INTO user_roles (user_email, role) VALUES (?, ?)";
+        var stmt = """
+        INSERT INTO user_roles (user_id, role_id)
+        VALUES (
+            (SELECT id FROM users WHERE email = ?),
+            (SELECT id FROM roles WHERE name = ?)
+        )
+        """;
 
         try (var statement = getConnection().prepareStatement(stmt)) {
             statement.setString(1, user.getEmail().asString());
-            statement.setString(2, roleToGrant.name());
+            statement.setString(2, roleToGrant.name().toLowerCase());
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw Log.giveUp(logger, e, "Kunne ikke tildele rolle til brugeren");
+            throw Log.giveUp(logger, e, "Could not add role to user");
         }
     }
 

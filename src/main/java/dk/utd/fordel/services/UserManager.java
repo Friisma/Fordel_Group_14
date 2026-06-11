@@ -38,6 +38,10 @@ public class UserManager {
         return userRepository.read(user);
     }
 
+    public void grantRole(User user, Roles roleToGrant) {
+        userRepository.grantRole(user, roleToGrant);
+    }
+
     public List<UserRepository.UserInfo> getAllUsers() {
         return userRepository.getAllUsers();
     }

@@ -15,6 +15,7 @@
             <th scope="col">Id</th>
             <th scope="col">Navn</th>
             <th scope="col">E-mail</th>
+            <th scope="col">Actions</th>
           </tr>
           </thead>
           <tbody>
@@ -22,6 +23,27 @@
             <th th:text="${user.id()}">1</th>
             <td th:text="${user.name()}">Admin</td>
             <td th:text="${user.email()}">admin@utd.dk</td>
+            <td><nav>
+              <ul>
+                <li>
+                  <details class="dropdown">
+                    <summary role="button" class="secondary">Theme</summary>
+                    <ul>
+                      <li><form action="/adminpage/grant-role" method="post" style="margin: 0; padding: 0;">
+                        <input type="hidden" name="email" th:value="${user.email()}" />
+                        <input type="hidden" name="role" value="STUDENT" />
+
+                        <button type="submit">
+                          Tildel Student-rolle
+                        </button>
+                      </form></li>
+                      <li><a href="#">Light</a></li>
+                      <li><a href="#">Dark</a></li>
+                    </ul>
+                  </details>
+                </li>
+              </ul>
+            </nav></td>
           </tr>
           </tbody>
         </table>
