@@ -1,25 +1,17 @@
 package dk.utd.fordel.domain;
 
 public class Project {
-    private final int projectID;
+    private int projectID = 0;
     private String projectName;
     private String description;
 
-    /**
-     * Represents the 
-     *
-     * @param projectID
-     * @param projectName
-     * @param description
-     * @throws InvalidProject
-     */
-    public Project(int projectID, String projectName, String description) throws InvalidProject {
+    public Project(String projectName, String description) throws InvalidProject {
 
         if (projectName.isEmpty()){
             throw new InvalidProject("Cant have an empty project name");
         }
 
-        this.projectID = projectID;
+        this.projectID = 0;
         this.projectName = projectName;
         this.description = description;
     }

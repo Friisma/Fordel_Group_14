@@ -1,0 +1,1 @@
+ALTER TABLE projects ALTER COLUMN study_line_id INT;

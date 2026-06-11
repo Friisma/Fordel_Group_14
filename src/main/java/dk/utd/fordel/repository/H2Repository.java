@@ -155,13 +155,27 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     public void delete(Project project){}
 
     @Override
-    public void create(Project project){}
+    public void create(Project project){
+        var stmt = "INSERT INTO projects (title, description) VALUES (?, ?)";
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setString(1, project.getProjectName());
+            statement.setString(2, project.getDescription());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            logger.error("SQL error code: {}, SQL state: {}, message: {}",
+                    e.getErrorCode(), e.getSQLState(), e.getMessage());
+            if (23505 == e.getErrorCode()) { // Unique constraint violation
+                throw new ProjectTitleAlreadyInUse("Project name already being used: " + project.getProjectName());
+            }
+            throw Log.giveUp(logger, e, "Failed to create project: " + project);
+        }
+    }
 
     @Override
 
     public Project read(Project project) {
         try {
-            return new Project(0, "t","");
+            return new Project( "t","");
         } catch (Project.InvalidProject e) {
 
         }

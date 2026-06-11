@@ -1,5 +1,6 @@
 package dk.utd.fordel.view;
 
+import dk.utd.fordel.domain.Project;
 import dk.utd.fordel.services.ProjectManager;
 import dk.utd.fordel.utils.Log;
 import dk.utd.fordel.utils.UnitOfWork;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class CreateProject {
@@ -22,17 +24,72 @@ public class CreateProject {
         this.projectManager = projectManager;
     }
 
-    @GetMapping("/create-Project")
+    @GetMapping("/create-project")
     public String getCreateProject(Model model){
         model.addAttribute("title", "Opret projekt");
         model.addAttribute("project_name", new Field(
-                "text", "name", "Navn på projekt",
+                "text", "project_name", "Navn på projekt",
                 null, null));
-        model.addAttribute("description", new Field(
-                "text", "description", "Din beskrivelse",
+        model.addAttribute("project_description", new Field(
+                "text", "project_description", "Din beskrivelse",
                 null, null));
+        return "create-project";
+    }
 
-        return "create-Project";
+    @PostMapping("/create-project")
+    public String postCreateProject(Model model,
+        @RequestParam("project_name") String projectName,
+        @RequestParam("project_description") String projectDescription){
+        model.addAttribute("title", "Opret projekt");
+
+        boolean isValid = true;
+
+        String projectNameMessage = null;
+        if (projectName.isEmpty()){
+            projectNameMessage = "Project needs a name";
+            isValid = false;
+        }
+
+        String projectDescriptionMessage = null;
+        if (projectDescription.isEmpty()){
+            projectDescriptionMessage = "Project needs a description";
+            isValid = false;
+        }
+            Project project = null;
+        try {
+             project = new Project(projectName, projectDescription);
+        } catch (Project.InvalidProject e) {
+            isValid = false;
+            projectNameMessage = "Cant create project";
+        }
+
+        if (isValid){
+            try (var uow = unitOfWork.begin()){
+                logger.info("UnitOfWork started: {}", uow);
+                projectManager.createProject(project);
+                uow.commit();
+
+            } catch (Project.InvalidProject e) {
+                throw new RuntimeException(e);
+            } catch (UnitOfWork.UnitOfWorkException e) {
+                throw Log.giveUp(logger, e, "Failed to create Project");
+            }
+        }
+
+        if(!isValid){
+            model.addAttribute("title", "Opret projekt");
+            model.addAttribute("project_name", new Field(
+                    "text", "project_name", "Navn på projekt",
+                    "", projectNameMessage));
+            model.addAttribute("project_description", new Field(
+                    "text", "project_description", "Din beskrivelse",
+                    "", projectDescriptionMessage));
+
+            return "create-project";
+        } else {
+            logger.info("project {} created", project);
+            return "redirect:/";
+        }
     }
 
 }

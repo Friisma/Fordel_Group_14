@@ -7,11 +7,11 @@
     <header th:replace="~{fragments/header ::header}"></header>
     <main class="container">
         <section id="create-new-project">
-            <h1>Opret nyt projekt</h1>
-            <form action="/create-Project" method="post">
+            <h1>Create new project</h1>
+            <form action="/create-project" method="post">
                 <label th:replace="~{fragments/field :: field(${project_name})}"></label>
-                <label th:replace="~{fragments/field :: field(${description})}"></label>
-                <button type="submit">Opret projekt</button>
+                <label th:replace="~{fragments/field :: field(${project_description})}"></label>
+                <button type="submit">Create project</button>
             </form>
         </section>
     </main>
