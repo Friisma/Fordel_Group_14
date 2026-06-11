@@ -2,7 +2,9 @@ package dk.utd.fordel.repository;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 
 import javax.sql.DataSource;
 
@@ -107,15 +109,16 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
 
     @Override
     public User.Data read(User user) throws UserDoesNotExist {
-        var stmt = "SELECT name, study_start_date FROM users WHERE email = ?";
-        try (var statement = getConnection().prepareStatement(stmt)) {
+        var stmt1 = "SELECT name, study_start_date FROM users WHERE email = ?";
+        var stmt2 = "";
+        try (var statement = getConnection().prepareStatement(stmt1)) {
             statement.setString(1, user.getEmail().asString());
             var resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 return new User.Data(resultSet.getString("name"),
                         List.of(),
-                        resultSet.getString("study_start_date"),
-                        );
+                        "study line",
+                        resultSet.getObject("study_start_date", LocalDate.class));
             }
         } catch (SQLException e) {
             Log.giveUp(logger, e, "Failed to read user: " + user);
