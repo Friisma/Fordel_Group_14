@@ -6,6 +6,8 @@ import dk.utd.fordel.domain.EmailAlreadyInUse;
 import dk.utd.fordel.domain.User;
 import dk.utd.fordel.domain.UserDoesNotExist;
 
+import java.util.List;
+
 @Service
 public class UserManager {
 
@@ -14,6 +16,9 @@ public class UserManager {
         User.Data read(User user) throws UserDoesNotExist;
         void update(User user, User.Data data) throws UserDoesNotExist;
         void delete(User user) throws UserDoesNotExist;
+
+        public record UserInfo(String id, String email, String name) {}
+        List<UserInfo> getAllUsers();
     }
 
     private final UserRepository userRepository;
@@ -30,4 +35,7 @@ public class UserManager {
         return userRepository.read(user);
     }
 
+    public List<UserRepository.UserInfo> getAllUsers() {
+        return userRepository.getAllUsers();
+    }
 }

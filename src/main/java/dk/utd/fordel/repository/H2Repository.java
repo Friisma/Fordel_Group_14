@@ -2,6 +2,8 @@ package dk.utd.fordel.repository;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -143,6 +145,25 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
             }
         } catch (SQLException e) {
             throw Log.giveUp(logger, e, "Failed to update user: " + user);
+        }
+    }
+
+    @Override
+    public List<UserInfo> getAllUsers() {
+        var users = new ArrayList<UserInfo>();
+        var stmt = "SELECT id, email, name FROM users";
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            var resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                users.add(new UserInfo(
+                        resultSet.getString("id"),
+                        resultSet.getString("email"),
+                        resultSet.getString("name")
+                ));
+            }
+            return users;
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to find all users");
         }
     }
 
