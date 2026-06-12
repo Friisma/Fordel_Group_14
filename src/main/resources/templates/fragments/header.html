@@ -35,13 +35,33 @@
         <button aria-label="Close" rel="prev" data-target="modal-user-settings" onclick="toggleModal(event)"></button>
         <h3>User Settings</h3>
       </header>
+      <section id="theme-switcher">
+        <details open="">
+          <summary>Theme</summary>
+          <nav style="margin-top: -1rem; margin-bottom: -1rem;">
+            <ul>
+              <li>
+                <details class="dropdown">
+                  <summary role="button" class="secondary">Auto</summary>
+                  <ul>
+                    <li><a href="#" data-theme-switcher="auto">Auto</a></li>
+                    <li><a href="#" data-theme-switcher="light">Light</a></li>
+                    <li><a href="#" data-theme-switcher="dark">Dark</a></li>
+                  </ul>
+                </details>
+              </li>
+            </ul>
+          </nav>
+        </details>
+      </section>
+      <hr>
       <section id="change-username">
         <details open="">
           <summary>Change Username</summary>
           <form action="/user/update-username" method="post">
             <div style="display: flex; gap: 1rem;">
               <input type="text" name="name" placeholder="Username" aria-label="Username"
-                     th:value="${userData != null ? userData.name : ''}" required="">
+                th:value="${userData != null ? userData.name : ''}" required="">
               <button type="submit" style="width: auto;">
                 Change
               </button>
@@ -53,4 +73,5 @@
   </dialog>
 
   <script th:src="@{/js/modal.js}" defer></script>
+  <script th:src="@{/js/theme-switcher.js}" defer></script>
 </header>
