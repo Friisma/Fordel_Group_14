@@ -82,7 +82,7 @@ class FordelApplicationTests {
 				.andExpect(status().isOk())
 				.andReturn();
 
-		assertTrue(res.getResponse().getContentAsString().contains("Email er allerede i brug"));
+		assertTrue(res.getResponse().getContentAsString().contains("Email already in use"));
 	}
 
 }
