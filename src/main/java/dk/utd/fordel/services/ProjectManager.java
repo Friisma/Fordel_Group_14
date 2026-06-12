@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 public class ProjectManager {
 
     public static interface ProjectRepository {
-        void create(Project project, User user) throws Project.InvalidProject;
+        void create(Project project, User user, int userId) throws Project.InvalidProject;
         Project read(Project project) throws ProjectDoesNotExist;
         void update(Project project) throws ProjectDoesNotExist;
         void delete(Project project) throws ProjectDoesNotExist;
@@ -17,8 +17,8 @@ public class ProjectManager {
 
     public ProjectManager(ProjectRepository projectRepository){this.projectRepository = projectRepository;}
 
-    public void createProject(Project project, User user) throws Project.InvalidProject{
-        projectRepository.create(project, user);
+    public void createProject(Project project, User user, int userId) throws Project.InvalidProject{
+        projectRepository.create(project, user, userId);
     }
 
 }

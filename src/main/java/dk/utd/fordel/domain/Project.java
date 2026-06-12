@@ -28,6 +28,9 @@ public class Project {
         return description;
     }
 
+    public void setProjectID(int projectID) {
+        this.projectID = projectID;
+    }
 
     public static class InvalidProject extends Exception {
         public InvalidProject(String msg) {

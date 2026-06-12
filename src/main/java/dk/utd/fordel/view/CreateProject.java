@@ -4,6 +4,7 @@ import dk.utd.fordel.domain.Project;
 import dk.utd.fordel.domain.User;
 import dk.utd.fordel.services.Authenticator;
 import dk.utd.fordel.services.ProjectManager;
+import dk.utd.fordel.services.UserManager;
 import dk.utd.fordel.utils.Log;
 import dk.utd.fordel.utils.UnitOfWork;
 import dk.utd.fordel.view.utils.Field;
@@ -22,11 +23,13 @@ public class CreateProject {
     private final UnitOfWork unitOfWork;
     private final ProjectManager projectManager;
     private final Authenticator authenticator;
+    private final UserManager userManager;
 
-    public CreateProject(UnitOfWork unitOfWork, ProjectManager projectManager, Authenticator authenticator){
+    public CreateProject(UnitOfWork unitOfWork, ProjectManager projectManager, Authenticator authenticator, UserManager userManager){
         this.unitOfWork = unitOfWork;
         this.projectManager = projectManager;
         this.authenticator = authenticator;
+        this.userManager = userManager;
     }
 
     @GetMapping("/create-project")
@@ -74,7 +77,8 @@ public class CreateProject {
                 logger.info("UnitOfWork started: {}", uow);
                 Authenticator.Auth auth = (Authenticator.Auth)session.getAttribute("auth");
                 User user = auth.user();
-                projectManager.createProject(project, user);
+                int userId = userManager.getUserIdByEmail(user.getEmail());
+                projectManager.createProject(project, user, userId);
                 uow.commit();
 
             } catch (Project.InvalidProject e) {

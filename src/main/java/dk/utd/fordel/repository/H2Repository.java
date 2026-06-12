@@ -2,6 +2,7 @@ package dk.utd.fordel.repository;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import javax.sql.DataSource;
 
@@ -146,7 +147,32 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
-    //TODO Write proper repository methods to update the database.
+    //TODO temporary fix for getting id from user table. this should maybe be changed when the domain is more complete
+
+    public int getUserIdByEmail(Email email) {
+        String stmt = "SELECT id FROM users WHERE email = ?";
+
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setString(1, email.asString());
+
+            try (var rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("id");
+                }
+            }
+            throw new UserDoesNotExist(
+                    User.of(email.toString()), "User does not exist");
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (UserDoesNotExist e){
+            throw Log.giveUp(logger, e, "User does not exist");
+        } catch (Email.InvalidEmail e){
+            throw Log.giveUp(logger, e, "Invalid email");
+        }
+    }
+
+    //TODO Write more proper repository methods to update the database.
 
     @Override
     public void update(Project project){}
@@ -155,13 +181,23 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     public void delete(Project project){}
 
     @Override
-    public void create(Project project, User currUser){
+    public void create(Project project, User currUser, int userId){
         var stmt = "INSERT INTO projects (title, description) VALUES (?, ?)";
 
-        try (var statement = getConnection().prepareStatement(stmt)) {
+        try (var statement = getConnection().prepareStatement(stmt,
+                Statement.RETURN_GENERATED_KEYS)) { //Henter den key der er genereret
             statement.setString(1, project.getProjectName());
             statement.setString(2, project.getDescription());
+
             statement.executeUpdate();
+            try (var keys = statement.getGeneratedKeys()) {
+
+                if (!keys.next()) {
+                    throw new RuntimeException("No project ID generated");
+                }
+
+                project.setProjectID(keys.getInt(1)); //sætter den rigtige key på domain.
+            }
         } catch (SQLException e) {
             logger.error("SQL error code: {}, SQL state: {}, message: {}",
                     e.getErrorCode(), e.getSQLState(), e.getMessage());
@@ -171,15 +207,13 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
             throw Log.giveUp(logger, e, "Failed to create project: " + project);
         }
         var stmt2 = "INSERT INTO project_students (user_id, project_id) VALUES (?,?)";
-
         try (var statement2 = getConnection().prepareStatement(stmt2)){
-            statement2.setString(1, currUser.getEmail().asString());
-            statement2.setInt(1, project.getProjectID());
+            statement2.setInt(1, userId);
+            statement2.setInt(2, project.getProjectID());
             statement2.executeUpdate();
         } catch (SQLException e) {
             logger.error("SQL error code: {}, SQL state: {}, message: {}",
                     e.getErrorCode(), e.getSQLState(), e.getMessage());
-
             throw Log.giveUp(logger, e, "Failed to create project: " + project);
         }
 
