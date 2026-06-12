@@ -14,13 +14,18 @@ public class UserManager {
 
     public static interface UserRepository {
         void create(User user, User.Data data) throws EmailAlreadyInUse;
+
         User.Data read(User user) throws UserDoesNotExist;
+
         void update(User user, User.Data data) throws UserDoesNotExist;
+
         void delete(User user) throws UserDoesNotExist;
 
         public void grantRole(User user, Roles roleToGrant);
 
-        public record UserInfo(String id, String email, String name) {}
+        public record UserInfo(String id, String email, String name) {
+        }
+
         List<UserInfo> getAllUsers();
     }
 
@@ -36,6 +41,10 @@ public class UserManager {
 
     public User.Data readUser(User user) throws UserDoesNotExist {
         return userRepository.read(user);
+    }
+
+    public void updateUser(User user, User.Data data) throws UserDoesNotExist {
+        userRepository.update(user, data);
     }
 
     public void grantRole(User user, Roles roleToGrant) {

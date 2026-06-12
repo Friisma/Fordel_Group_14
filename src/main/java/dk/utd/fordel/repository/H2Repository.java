@@ -5,9 +5,6 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -113,7 +110,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         LocalDate studyStart = null;
         int userId = -1;
 
-        var stmt1 = "SELECT name, study_start_date FROM users WHERE email = ?";
+        var stmt1 = "SELECT id, name, study_start_date FROM users WHERE email = ?";
         try (var statement = getConnection().prepareStatement(stmt1)) {
             statement.setString(1, user.getEmail().asString());
             var resultSet = statement.executeQuery();
@@ -186,12 +183,12 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     @Override
     public void grantRole(User user, Roles roleToGrant) {
         var stmt = """
-        INSERT INTO user_roles (user_id, role_id)
-        VALUES (
-            (SELECT id FROM users WHERE email = ?),
-            (SELECT id FROM roles WHERE name = ?)
-        )
-        """;
+                INSERT INTO user_roles (user_id, role_id)
+                VALUES (
+                    (SELECT id FROM users WHERE email = ?),
+                    (SELECT id FROM roles WHERE name = ?)
+                )
+                """;
 
         try (var statement = getConnection().prepareStatement(stmt)) {
             statement.setString(1, user.getEmail().asString());
@@ -212,8 +209,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
                 users.add(new UserInfo(
                         resultSet.getString("id"),
                         resultSet.getString("email"),
-                        resultSet.getString("name")
-                ));
+                        resultSet.getString("name")));
             }
             return users;
         } catch (SQLException e) {

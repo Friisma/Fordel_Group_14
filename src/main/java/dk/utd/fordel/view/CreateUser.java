@@ -82,10 +82,11 @@ public class CreateUser {
             isValid = false;
         }
 
+        User.Data newData = new User.Data(name, List.of(), null, null);
+
         if (isValid) {
             try (var uow = unitOfWork.begin()) {
                 logger.info("UnitOfWork started: {}", uow);
-                User.Data newData = new User.Data(name, List.of(), null, null);
                 userManager.createUser(user, newData);
                 authenticator.register(user, password);
                 uow.commit();
@@ -122,6 +123,7 @@ public class CreateUser {
             }
             logger.info("User {} created and authenticated", user);
             session.setAttribute("auth", auth);
+            session.setAttribute("userData", newData);
             return "redirect:/";
         }
     }
