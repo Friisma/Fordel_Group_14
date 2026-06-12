@@ -3,9 +3,16 @@ package dk.utd.fordel.repository;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.sql.DataSource;
 
+import dk.utd.fordel.domain.*;
 import dk.utd.fordel.domain.*;
 import dk.utd.fordel.services.ProjectManager;
 import org.slf4j.Logger;
@@ -107,17 +114,51 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
 
     @Override
     public User.Data read(User user) throws UserDoesNotExist {
-        var stmt = "SELECT name FROM users WHERE email = ?";
-        try (var statement = getConnection().prepareStatement(stmt)) {
+        String name = null;
+        LocalDate studyStart = null;
+        int userId = -1;
+
+        var stmt1 = "SELECT name, study_start_date FROM users WHERE email = ?";
+        try (var statement = getConnection().prepareStatement(stmt1)) {
             statement.setString(1, user.getEmail().asString());
             var resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                return new User.Data(resultSet.getString("name"));
+                userId = resultSet.getInt("id");
+                name = resultSet.getString("name");
+                studyStart = resultSet.getObject("study_start_date", LocalDate.class);
+            } else {
+                throw new UserDoesNotExist(user, "User not found");
             }
         } catch (SQLException e) {
             Log.giveUp(logger, e, "Failed to read user: " + user);
         }
-        throw new UserDoesNotExist(user, "User not found");
+
+        List<Roles> roles = new ArrayList<>();
+        var stmt2 = "SELECT r.name FROM roles r JOIN user_roles ur ON r.id = ur.role_id WHERE ur.user_id = ?";
+        try (var statement = getConnection().prepareStatement(stmt2)) {
+            statement.setInt(1, userId);
+            var resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                String roleName = resultSet.getString("name");
+                roles.add(Roles.valueOf(roleName.toUpperCase().replace(" ", "_")));
+            }
+        } catch (SQLException e) {
+            Log.giveUp(logger, e, "Failed to read user: " + user);
+        }
+
+        String studyLine = "";
+        var stmt3 = "SELECT sl.name FROM study_lines sl JOIN study_line_students sls ON sl.id = sls.study_line_id WHERE sls.user_id = ?";
+        try (var statement = getConnection().prepareStatement(stmt3)) {
+            statement.setInt(1, userId);
+            var resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                studyLine = resultSet.getString("name");
+            }
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to read study line for user: " + user);
+        }
+
+        return new User.Data(name, roles, studyLine, studyStart);
     }
 
     @Override
@@ -230,6 +271,44 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         return null;
     }
 
+
+    @Override
+    public void grantRole(User user, Roles roleToGrant) {
+        var stmt = """
+        INSERT INTO user_roles (user_id, role_id)
+        VALUES (
+            (SELECT id FROM users WHERE email = ?),
+            (SELECT id FROM roles WHERE name = ?)
+        )
+        """;
+
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setString(1, user.getEmail().asString());
+            statement.setString(2, roleToGrant.name().toLowerCase());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Could not add role to user");
+        }
+    }
+
+    @Override
+    public List<UserInfo> getAllUsers() {
+        var users = new ArrayList<UserInfo>();
+        var stmt = "SELECT id, email, name FROM users";
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            var resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                users.add(new UserInfo(
+                        resultSet.getString("id"),
+                        resultSet.getString("email"),
+                        resultSet.getString("name")
+                ));
+            }
+            return users;
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to find all users");
+        }
+    }
 
     @Override
     public UnitOfWork begin() throws UnitOfWorkException {

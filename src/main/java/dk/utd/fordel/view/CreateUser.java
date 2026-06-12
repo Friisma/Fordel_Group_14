@@ -19,6 +19,8 @@ import dk.utd.fordel.utils.UnitOfWork;
 import dk.utd.fordel.view.utils.Field;
 import jakarta.servlet.http.HttpSession;
 
+import java.util.List;
+
 @Controller
 public class CreateUser {
 
@@ -36,15 +38,15 @@ public class CreateUser {
 
     @GetMapping("/create-user")
     public String getCreateUser(Model model) {
-        model.addAttribute("title", "Opret bruger");
+        model.addAttribute("title", "Create User");
         model.addAttribute("name", new Field(
-                "text", "name", "Dit navn",
+                "text", "name", "Username",
                 null, null));
         model.addAttribute("email", new Field(
-                "email", "email", "Din email",
+                "email", "email", "Email",
                 null, null));
         model.addAttribute("password", new Field(
-                "password", "password", "Dit password",
+                "password", "password", "Password",
                 null, null));
         return "create-user";
     }
@@ -55,14 +57,14 @@ public class CreateUser {
             @RequestParam("name") String name,
             @RequestParam("email") String email,
             @RequestParam("password") String password) {
-        model.addAttribute("title", "Opret bruger");
+        model.addAttribute("title", "Create User");
 
         Boolean isValid = true;
 
         // Validate input
         String nameMessage = null;
         if (name.isEmpty()) {
-            nameMessage = "Navn er påkrævet";
+            nameMessage = "Username cannot be empty";
             isValid = false;
         }
 
@@ -83,11 +85,12 @@ public class CreateUser {
         if (isValid) {
             try (var uow = unitOfWork.begin()) {
                 logger.info("UnitOfWork started: {}", uow);
-                userManager.createUser(user, new User.Data(name));
+                User.Data newData = new User.Data(name, List.of(), null, null);
+                userManager.createUser(user, newData);
                 authenticator.register(user, password);
                 uow.commit();
             } catch (EmailAlreadyInUse e) {
-                emailMessage = "Email er allerede i brug";
+                emailMessage = "Email already in use";
                 isValid = false;
             } catch (UnitOfWork.UnitOfWorkException e) {
                 throw Log.giveUp(logger, e, "Failed to create user");
@@ -98,13 +101,13 @@ public class CreateUser {
 
         if (!isValid) {
             model.addAttribute("name", new Field(
-                    "text", "name", "Dit navn",
+                    "text", "name", "Username",
                     name, nameMessage));
             model.addAttribute("email", new Field(
-                    "email", "email", "Din email",
+                    "email", "email", "Email",
                     email, emailMessage));
             model.addAttribute("password", new Field(
-                    "password", "password", "Dit password",
+                    "password", "password", "Password",
                     "", passwordMessage));
             return "create-user";
         } else {
