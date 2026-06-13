@@ -8,7 +8,10 @@
 
   <main class="container">
     <section id="welcome">
-      <h1>Welcome, <span th:text="${userData != null ? userData.name : 'User'}">User</span></h1>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h1 style="margin:0;">Welcome, <span th:text="${userData != null ? userData.name : 'User'}">User</span></h1>
+        <span class="badge role">Role</span>
+      </div>
     </section>
 
     <hr>
