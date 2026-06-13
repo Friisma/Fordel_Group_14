@@ -5,6 +5,8 @@ import dk.utd.fordel.domain.Roles;
 import dk.utd.fordel.domain.User;
 import dk.utd.fordel.domain.UserDoesNotExist;
 import dk.utd.fordel.services.UserManager;
+import dk.utd.fordel.services.rights.RightsContext;
+import dk.utd.fordel.services.rights.RightsService;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,10 +24,12 @@ public class UserController {
     private static final Logger logger = Log.getLogger(UserController.class);
 
     private final UserManager userManager;
+    private final RightsService rightsService;
     private final UnitOfWork unitOfWork;
 
-    public UserController(UserManager userManager, UnitOfWork unitOfWork) {
+    public UserController(UserManager userManager, RightsService rightsService, UnitOfWork unitOfWork) {
         this.userManager = userManager;
+        this.rightsService = rightsService;
         this.unitOfWork = unitOfWork;
     }
 
@@ -33,6 +37,12 @@ public class UserController {
     public String getAllUsers(Model model, HttpSession session) {
         if (session.getAttribute("auth") == null) {
             return "redirect:/login";
+        }
+
+        Object userData = session.getAttribute("userData");
+        RightsContext rights = rightsService.from(userData instanceof User.Data data ? data : null);
+        if (!rightsService.canViewAdminPage(rights)) {
+            return "redirect:/forbidden";
         }
 
         try (var uow = unitOfWork.begin()) {
@@ -52,6 +62,12 @@ public class UserController {
             @RequestParam("role") String roleString) {
         if (session.getAttribute("auth") == null) {
             return "redirect:/login";
+        }
+
+        Object userData = session.getAttribute("userData");
+        RightsContext rights = rightsService.from(userData instanceof User.Data data ? data : null);
+        if (!rightsService.canGrantRoles(rights)) {
+            return "redirect:/forbidden";
         }
 
         try (var uow = unitOfWork.begin()) {
