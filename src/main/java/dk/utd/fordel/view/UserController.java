@@ -36,7 +36,7 @@ public class UserController {
 
         try (var uow = unitOfWork.begin()){
             var usersList = userManager.getAllUsers();
-            model.addAttribute("title", "Alle Brugere");
+            model.addAttribute("title", "Admin Dashboard");
             model.addAttribute("users", usersList);
             uow.commit();
         } catch (UnitOfWorkException e) {

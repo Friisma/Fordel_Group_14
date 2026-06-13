@@ -20,7 +20,7 @@ public class UserManager {
 
         public void grantRole(User user, Roles roleToGrant);
 
-        public record UserInfo(String id, String email, String name) {}
+        public record UserInfo(String id, String email, String name, List<Roles> roles, String studyLine) {}
         List<UserInfo> getAllUsers();
     }
 

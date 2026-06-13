@@ -7,14 +7,16 @@
   <header th:replace="~{fragments/header :: header}"></header>
     <main class="container">
       <section>
-        <h1>Alle Brugere i Systemet</h1>
+        <h1>List of all user</h1>
 
         <table>
           <thead>
           <tr>
             <th scope="col">Id</th>
-            <th scope="col">Navn</th>
+            <th scope="col">Name</th>
             <th scope="col">E-mail</th>
+            <th scope="col">Role</th>
+            <th scope="col">Study line</th>
             <th scope="col">Actions</th>
           </tr>
           </thead>
@@ -23,6 +25,8 @@
             <th th:text="${user.id()}">1</th>
             <td th:text="${user.name()}">Admin</td>
             <td th:text="${user.email()}">admin@utd.dk</td>
+            <td th:text="${#strings.listJoin(user.roles(), ', ')}">Role</td>
+            <td th:text="${user.studyLine()}">Study line</td>
             <td><nav>
               <ul>
                 <li>

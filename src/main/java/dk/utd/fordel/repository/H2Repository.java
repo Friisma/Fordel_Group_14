@@ -113,7 +113,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         LocalDate studyStart = null;
         int userId = -1;
 
-        var stmt1 = "SELECT name, study_start_date FROM users WHERE email = ?";
+        var stmt1 = "SELECT id, name, study_start_date FROM users WHERE email = ?";
         try (var statement = getConnection().prepareStatement(stmt1)) {
             statement.setString(1, user.getEmail().asString());
             var resultSet = statement.executeQuery();
@@ -209,15 +209,24 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         try (var statement = getConnection().prepareStatement(stmt)) {
             var resultSet = statement.executeQuery();
             while (resultSet.next()) {
+                var currUser = read(User.of(resultSet.getString("email")));
+
                 users.add(new UserInfo(
                         resultSet.getString("id"),
                         resultSet.getString("email"),
-                        resultSet.getString("name")
+                        resultSet.getString("name"),
+                        currUser.roles(),
+                        currUser.studyLine()
                 ));
+
             }
             return users;
         } catch (SQLException e) {
             throw Log.giveUp(logger, e, "Failed to find all users");
+        } catch (UserDoesNotExist e) {
+            throw new RuntimeException(e);
+        } catch (Email.InvalidEmail e) {
+            throw new RuntimeException(e);
         }
     }
 
