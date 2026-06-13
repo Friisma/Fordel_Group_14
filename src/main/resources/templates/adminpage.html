@@ -33,15 +33,16 @@
                   <details class="dropdown">
                     <summary role="button" class="secondary">Action</summary>
                     <ul>
-                      <li><form action="/adminpage/grant-role" method="post" style="margin: 0; padding: 0;">
-                        <input type="hidden" name="email" th:value="${user.email()}" />
-                        <input type="hidden" name="role" value="STUDENT" />
 
-                        <button type="submit">
+                      <li>
+                        <button class="contrast"
+                                data-target="modal-assign-role"
+                                th:data-email="${user.email()}"
+                                onclick="openRoleModal(event, this)">
                           Assign role
                         </button>
-                      </form></li>
-                      <li><a href="#">???????</a></li>
+                      </li>
+
                       <li><a href="#">???????</a></li>
                     </ul>
                   </details>
@@ -54,6 +55,50 @@
       </section>
     </main>
   <footer th:replace="~{fragments/footer :: footer}"></footer>
-</body>
 
+  <dialog id="modal-assign-role">
+    <article>
+      <header>
+        <button aria-label="Close" rel="prev" data-target="modal-assign-role" onclick="toggleModal(event)"></button>
+        <h3>Assign role</h3>
+      </header>
+
+      <form action="/adminpage/grant-role" method="post">
+        <input type="hidden" id="modal-email-input" name="email" value="" />
+
+        <div style="display: flex; gap: 1rem; align-items: flex-end;">
+          <div style="flex-grow: 1;">
+            <label for="role-select">Assign user a role</label>
+            <select id="role-select" name="role" required>
+              <option value="" disabled selected>Select role</option>
+              <option value="STUDENT">Student</option>
+              <option value="ADVISOR">Advisor</option>
+              <option value="TEACHER">Teacher</option>
+              <option value="STUDY_LEADER">Study leader</option>
+              <option value="ADMINISTRATOR">Administrator</option>
+            </select>
+          </div>
+
+          <button type="submit" style="width: auto;">
+            Assign role
+          </button>
+        </div>
+      </form>
+    </article>
+  </dialog>
+
+  <script th:src="@{/js/modal.js}" defer></script>
+  <script>
+    function openRoleModal(event, buttonElement) {
+      // 1. Hent e-mailen fra knappens data-attribut
+      const userEmail = buttonElement.getAttribute('data-email');
+
+      // 2. Find det skjulte input-felt i modalen og indsæt e-mailen
+      document.getElementById('modal-email-input').value = userEmail;
+
+      // 3. Kald din eksisterende toggleModal funktion for at åbne modalen
+      toggleModal(event);
+    }
+  </script>
+</body>
 </html>
