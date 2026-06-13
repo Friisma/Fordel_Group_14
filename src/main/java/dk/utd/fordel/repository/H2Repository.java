@@ -6,9 +6,6 @@ import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -222,7 +219,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     public void delete(Project project){}
 
     @Override
-    public void create(Project project, User currUser, int userId){
+    public void create(Project project, User currUser, int userId) throws ProjectTitleAlreadyInUse{
         var stmt = "INSERT INTO projects (title, description) VALUES (?, ?)";
 
         try (var statement = getConnection().prepareStatement(stmt,

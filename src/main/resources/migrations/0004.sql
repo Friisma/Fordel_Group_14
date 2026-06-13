@@ -1,1 +1,1 @@
-ALTER TABLE projects ALTER COLUMN study_line_id INT;
+ALTER TABLE projects ADD CONSTRAINT unique_project_title UNIQUE (title);

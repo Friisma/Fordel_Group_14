@@ -1,6 +1,7 @@
 package dk.utd.fordel.view;
 
 import dk.utd.fordel.domain.Project;
+import dk.utd.fordel.domain.ProjectTitleAlreadyInUse;
 import dk.utd.fordel.domain.User;
 import dk.utd.fordel.services.Authenticator;
 import dk.utd.fordel.services.ProjectManager;
@@ -81,10 +82,16 @@ public class CreateProject {
                 projectManager.createProject(project, user, userId);
                 uow.commit();
 
-            } catch (Project.InvalidProject e) {
-                throw new RuntimeException(e);
+            } catch (ProjectTitleAlreadyInUse e) {
+                isValid = false;
+                projectNameMessage = "Invalid project title, already in use";
+
+
             } catch (UnitOfWork.UnitOfWorkException e) {
-                throw Log.giveUp(logger, e, "Failed to create Project");
+                Log.giveUp(logger, e, "Failed to create Project");
+                isValid = false;
+                projectNameMessage = "Failed to create project";
+
             }
         }
 
