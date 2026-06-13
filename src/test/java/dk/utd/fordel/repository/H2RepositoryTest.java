@@ -5,19 +5,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import dk.utd.fordel.domain.*;
 import org.bouncycastle.asn1.x509.UserNotice;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 
 import dk.utd.fordel.domain.Email.InvalidEmail;
-import dk.utd.fordel.domain.EmailAlreadyInUse;
-import dk.utd.fordel.domain.User;
-import dk.utd.fordel.domain.UserDoesNotExist;
 import dk.utd.fordel.services.Authenticator.DefaultPasswordEncoder;
 import dk.utd.fordel.services.Authenticator.PasswordEncoding;
 import dk.utd.fordel.utils.UnitOfWork.UnitOfWorkException;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class H2RepositoryTest {
@@ -36,6 +36,29 @@ public class H2RepositoryTest {
                 .build();
 
         h2Repository = new H2Repository(dataSource);
+    }
+
+    @Test
+    void creating_a_project_with_an_existing_name_should_fail()
+            throws ProjectTitleAlreadyInUse, UnitOfWorkException, Project.InvalidProject, EmailAlreadyInUse {
+        Email email = new Email("test","test");
+        User user = new User(email);
+
+        User.Data data = new User.Data("name",new ArrayList<>(),"line", LocalDate.of(2001,1,1));
+        Project project = new Project("test","test");
+
+
+        try (var ignored = h2Repository.begin()){
+            h2Repository.create(user, data);
+
+            int userId = h2Repository.getUserIdByEmail(user.getEmail());
+
+            h2Repository.create(project,user,userId);
+            assertThrows(ProjectTitleAlreadyInUse.class,
+                    () -> h2Repository.create(project,user,userId));
+        }
+
+
     }
 
     @Test

@@ -20,6 +20,13 @@ public class Project {
     }
     public String getProjectIDAsString(){return String.valueOf(this.projectID);}
 
+    public void setProjectName(String projectName) throws InvalidProject {
+        if (projectName.isEmpty()){
+            throw new InvalidProject("Cant have an empty project name");
+        }
+        this.projectName = projectName;
+    }
+
     public String getProjectName() {
         return projectName;
     }
