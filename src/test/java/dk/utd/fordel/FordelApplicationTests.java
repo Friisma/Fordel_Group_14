@@ -85,4 +85,29 @@ class FordelApplicationTests {
 		assertTrue(res.getResponse().getContentAsString().contains("Email already in use"));
 	}
 
+
+	@Test
+	void we_can_open_create_study_line_page() throws Exception {
+		MvcResult res = mvc.perform(get("/create-study-line"))
+				.andExpect(status().isOk())
+				.andReturn();
+
+		assertTrue(res.getResponse().getContentAsString().contains("Create Study Line"));
+	}
+
+	@Test
+	void we_cannot_create_the_same_study_line_twice() throws Exception {
+		mvc.perform(post("/create-study-line")
+						.param("lineName", "Software Technology"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"));
+
+		MvcResult res = mvc.perform(post("/create-study-line")
+						.param("lineName", "Software Technology"))
+				.andExpect(status().isOk())
+				.andReturn();
+
+		assertTrue(res.getResponse().getContentAsString().contains("Study line already exists"));
+	}
+
 }
