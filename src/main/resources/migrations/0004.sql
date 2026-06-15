@@ -20,3 +20,5 @@ INSERT INTO user_roles (user_id, role_id) VALUES
     ((SELECT id FROM users WHERE email = 'allroles@test.dk'), (SELECT id FROM roles WHERE name = 'teacher')),
     ((SELECT id FROM users WHERE email = 'allroles@test.dk'), (SELECT id FROM roles WHERE name = 'study leader')),
     ((SELECT id FROM users WHERE email = 'allroles@test.dk'), (SELECT id FROM roles WHERE name = 'student'));
+
+ALTER TABLE projects ADD CONSTRAINT unique_project_title UNIQUE (title);

@@ -24,4 +24,5 @@ public record User(Email id) {
   public record Data(String name, List<Roles> roles, String studyLine, LocalDate studyStart) {
   }
 
+
 }

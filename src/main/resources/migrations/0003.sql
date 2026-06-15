@@ -45,7 +45,7 @@ CREATE TABLE projects (
     description TEXT,
     created_at TIMESTAMP DEFAULT NOW(),
 
-    study_line_id INT NOT NULL,
+    study_line_id INT,
 
     FOREIGN KEY (study_line_id)
         REFERENCES study_lines(id)
