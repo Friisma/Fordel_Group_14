@@ -19,7 +19,7 @@
                     th:aria-invalid="${error_password != null}">
                 <small class="error" id="password-helper" th:if="${error_password != null}" th:text="${error_password}">
                 </small>
-                <button type="submit">Log in</button>
+                <button type="submit" aria-busy="false" onclick="this.setAttribute('aria-busy', 'true')">Log in</button>
                 <label class="center">or <a href="/create-user">create new user</a></label>
             </form>
         </section>

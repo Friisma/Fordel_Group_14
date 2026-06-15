@@ -13,7 +13,9 @@
                 <label th:replace="~{fragments/field :: field(${name})}"></label>
                 <label th:replace="~{fragments/field :: field(${email})}"></label>
                 <label th:replace="~{fragments/field :: field(${password})}"></label>
-                <button type="submit">Create user</button>
+                <button type="submit" aria-busy="false" onclick="this.setAttribute('aria-busy', 'true')">Create
+                    user</button>
+            </form>
         </section>
     </main>
 
