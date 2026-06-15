@@ -57,12 +57,18 @@ public class UserController {
         return "adminpage";
     }
 
-    @DeleteMapping("/adminpage/remove-role")
+    @PostMapping("/adminpage/remove-role")
     public String removeRole(HttpSession session,
                             @RequestParam("email") String email,
                             @RequestParam("role") String roleString) {
         if (session.getAttribute("auth") == null) {
             return "redirect:/login";
+        }
+
+        Object userData = session.getAttribute("userData");
+        RightsContext rights = rightsService.from(userData instanceof User.Data data ? data : null);
+        if (!rightsService.canViewAdminPage(rights)) {
+            return "redirect:/forbidden";
         }
 
         try (var uow = unitOfWork.begin()) {
