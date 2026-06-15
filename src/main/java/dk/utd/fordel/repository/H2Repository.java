@@ -137,18 +137,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
             Log.giveUp(logger, e, "Failed to read user: " + user);
         }
 
-        List<Roles> roles = new ArrayList<>();
-        var stmt2 = "SELECT r.name FROM roles r JOIN user_roles ur ON r.id = ur.role_id WHERE ur.user_id = ?";
-        try (var statement = getConnection().prepareStatement(stmt2)) {
-            statement.setInt(1, userId);
-            var resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                String roleName = resultSet.getString("name");
-                roles.add(Roles.valueOf(roleName.toUpperCase().replace(" ", "_")));
-            }
-        } catch (SQLException e) {
-            Log.giveUp(logger, e, "Failed to read user: " + user);
-        }
+        List<Roles> roles = getUserRoles(user);
 
         String studyLine = "";
         var stmt3 = "SELECT sl.name FROM study_lines sl JOIN study_line_students sls ON sl.id = sls.study_line_id WHERE sls.user_id = ?";
@@ -300,6 +289,13 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     }
 
 
+    /**
+     * Grants a chosen user a specified role.
+     * This method insert a user_id and role_id into database so the user becomes
+     * a member of the specified role.
+     *
+     * @return a {@link List} of {@link UserInfo} objects representing all users.
+     */
     @Override
     public void grantRole(User user, Roles roleToGrant) {
         var stmt = """
@@ -312,13 +308,71 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
 
         try (var statement = getConnection().prepareStatement(stmt)) {
             statement.setString(1, user.getEmail().asString());
-            statement.setString(2, roleToGrant.name().toLowerCase());
+            statement.setString(2, roleToGrant.name().toLowerCase().replace("_", " "));
             statement.executeUpdate();
         } catch (SQLException e) {
             throw Log.giveUp(logger, e, "Could not add role to user");
         }
     }
 
+    /**
+     * Remove a role from a user.
+     * This method delete a user_id and role_id from the database
+     * so the user long is a member of the specified role.
+     *
+     */
+    @Override
+    public void removeRole(User user, Roles roleToRemove) {
+        var stmt = """
+        DELETE FROM user_roles
+               WHERE USER_ID = (SELECT id FROM users WHERE email = ?)
+                 and ROLE_ID = (SELECT id FROM roles WHERE name = ?)
+        """;
+
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setString(1, user.getEmail().asString());
+            statement.setString(2, roleToRemove.name().toLowerCase().replace("_", " "));
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Could not add role to user");
+        }
+    }
+
+    /**
+     * Gets a {@link List} of {@link Roles} for the specified user.
+     * This method looks up all assigned roles for a specified user in the database.
+     *
+     *
+     * @return a {@link List} of {@link Roles} objects representing a user roles.
+     */
+    @Override
+    public List<Roles> getUserRoles(User user) {
+        List<Roles> roles = new ArrayList<>();
+        var stmt2 = """
+            SELECT r.name FROM roles r
+                JOIN user_roles ur ON r.id = ur.role_id
+                          WHERE ur.user_id = (SELECT id FROM users WHERE email = ?)
+        """;
+        try (var statement = getConnection().prepareStatement(stmt2)) {
+            statement.setString(1, user.getEmail().asString());
+            var resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                String roleName = resultSet.getString("name");
+                roles.add(Roles.valueOf(roleName.toUpperCase().replace(" ", "_")));
+            }
+        } catch (SQLException e) {
+            Log.giveUp(logger, e, "Failed to read user: " + user);
+        }
+        return roles;
+    }
+
+    /**
+     * Retrieves a list of all users currently in the system.
+     * This method ask the database for all relevant user information which includes
+     * ID, email, name, assigned roles and study line.
+     *
+     * @return a {@link List} of {@link UserInfo} objects representing all users.
+     */
     @Override
     public List<UserInfo> getAllUsers() {
         var users = new ArrayList<UserInfo>();
@@ -326,15 +380,24 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         try (var statement = getConnection().prepareStatement(stmt)) {
             var resultSet = statement.executeQuery();
             while (resultSet.next()) {
+                var currUser = read(User.of(resultSet.getString("email")));
+
                 users.add(new UserInfo(
                         resultSet.getString("id"),
                         resultSet.getString("email"),
-                        resultSet.getString("name")
+                        resultSet.getString("name"),
+                        currUser.roles(),
+                        currUser.studyLine()
                 ));
+
             }
             return users;
         } catch (SQLException e) {
             throw Log.giveUp(logger, e, "Failed to find all users");
+        } catch (UserDoesNotExist e) {
+            throw new RuntimeException(e);
+        } catch (Email.InvalidEmail e) {
+            throw new RuntimeException(e);
         }
     }
 
