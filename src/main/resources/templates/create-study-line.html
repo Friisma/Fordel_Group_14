@@ -1,0 +1,22 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="da">
+
+<head th:replace="~{fragments/head ::head}"></head>
+
+<body>
+<header th:replace="~{fragments/header ::header}"></header>
+
+<main class="container">
+    <section id="create-study-line">
+        <h1>Create Study Line</h1>
+        <form action="/create-study-line" method="post">
+            <label th:replace="~{fragments/field :: field(${lineName})}"></label>
+            <button type="submit">Create study line</button>
+        </form>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/footer ::footer}"></footer>
+</body>
+
+</html>
