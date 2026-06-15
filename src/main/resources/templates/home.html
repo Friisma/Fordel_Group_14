@@ -19,6 +19,11 @@
     <section id="projects" th:if="${sectionVisibility.projectsVisible}">
       <details open="">
         <summary>Projects</summary>
+        <div>
+        <a th:href="@{/create-project}" role="button">
+          Create Project
+        </a>
+        </div>
         <div class="grid">
           <article th:each="project : ${projects}" th:id="${project.id}">
             <h2 th:text="${project.title}">Title</h2>
@@ -54,8 +59,6 @@
         <span th:text="${advisorsMessage}">Advisors Section (not done)</span>
       </details>
     </section>
-
-
   </main>
 
   <footer th:replace="~{fragments/footer ::footer}"></footer>

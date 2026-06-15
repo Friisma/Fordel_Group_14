@@ -1,5 +1,6 @@
 package dk.utd.fordel.services;
 
+import dk.utd.fordel.domain.Email;
 import dk.utd.fordel.domain.Roles;
 import org.springframework.stereotype.Service;
 
@@ -14,12 +15,10 @@ public class UserManager {
 
     public static interface UserRepository {
         void create(User user, User.Data data) throws EmailAlreadyInUse;
-
         User.Data read(User user) throws UserDoesNotExist;
-
         void update(User user, User.Data data) throws UserDoesNotExist;
-
         void delete(User user) throws UserDoesNotExist;
+        int getUserIdByEmail(Email email);
 
         public void grantRole(User user, Roles roleToGrant);
 
@@ -45,6 +44,11 @@ public class UserManager {
 
     public void updateUser(User user, User.Data data) throws UserDoesNotExist {
         userRepository.update(user, data);
+    }
+
+    //TODO Maybe find a better solution, once the domain is complete
+    public int getUserIdByEmail(Email email){
+        return userRepository.getUserIdByEmail(email);
     }
 
     public void grantRole(User user, Roles roleToGrant) {
