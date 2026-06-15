@@ -20,9 +20,9 @@
       <details open="">
         <summary>Projects</summary>
         <div>
-        <a th:href="@{/create-project}" role="button">
-          Create Project
-        </a>
+          <a th:href="@{/create-project}" role="button">
+            Create Project
+          </a>
         </div>
         <div class="grid">
           <article th:each="project : ${projects}" th:id="${project.id}">

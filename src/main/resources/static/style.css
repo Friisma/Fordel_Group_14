@@ -38,3 +38,22 @@
 .font-normal {
   font-weight: normal;
 }
+
+#cookies-popup {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--pico-card-background-color);
+    padding: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    display: block;
+}
+
+.popup-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0.5rem 1rem 0.5rem 1rem;
+    gap: 1rem;
+}
