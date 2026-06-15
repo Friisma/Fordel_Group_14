@@ -8,32 +8,22 @@
 
   <main class="container">
     <section id="welcome">
-      <h1>Welcome, <span th:text="${session.auth.user()}">User</span></h1>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h1 style="margin:0;">Welcome, <span th:text="${userData != null ? userData.name : 'User'}">User</span></h1>
+        <span class="badge role" th:text="${roleBadge != null ? roleBadge : 'No role'}">Role</span>
+      </div>
     </section>
 
     <hr>
 
-    <section id="projects">
+    <section id="projects" th:if="${sectionVisibility.projectsVisible}">
       <details open="">
         <summary>Projects</summary>
         <div class="grid">
-          <article id="project1">
-            <h2>Project 1</h2>
-            <p>
-              Nullam dui arcu, malesuada et sodales eu, efficitur vitae dolor. Sed ultricies dolor non
-              ante vulputate hendrerit. Vivamus sit amet suscipit sapien. Nulla iaculis eros a elit
-              pharetra egestas. Nunc placerat facilisis cursus. Sed vestibulum metus eget dolor pharetra
-              rutrum.
-            </p>
-          </article>
-
-          <article id="article2">
-            <h2>Project 2</h2>
-            <p>
-              Nullam dui arcu, malesuada et sodales eu, efficitur vitae dolor. Sed ultricies dolor non
-              ante vulputate hendrerit. Vivamus sit amet suscipit sapien. Nulla iaculis eros a elit
-              pharetra egestas. Nunc placerat facilisis cursus. Sed vestibulum metus eget dolor pharetra
-              rutrum.
+          <article th:each="project : ${projects}" th:id="${project.id}">
+            <h2 th:text="${project.title}">Title</h2>
+            <p th:text="${project.description}">
+              Description
             </p>
           </article>
         </div>
@@ -43,33 +33,14 @@
 
     <hr>
 
-    <section id="invitations">
+    <section id="invitations" th:if="${sectionVisibility.invitationsVisible}">
       <details open="">
         <summary>Invitations</summary>
-        <article>
+        <article th:each="invitation : ${invitations}">
           <div class="invitation-header">
-            <h3 class="font-normal">
-              Peter Sterner
-            </h3>
-            <span class="badge pending">Pending</span>
-          </div>
-        </article>
-
-        <article>
-          <div class="invitation-header">
-            <h3 class="font-normal">
-              Hans Henrik
-            </h3>
-            <span class="badge accepted">Accepted</span>
-          </div>
-        </article>
-
-        <article>
-          <div class="invitation-header">
-            <h3 class="font-normal">
-              Mišo Kovač
-            </h3>
-            <span class="badge declined">Declined</span>
+            <h3 class="font-normal" th:text="${invitation.name}">Name</h3>
+            <span class="badge" th:classappend="' ' + ${invitation.statusClass}"
+              th:text="${invitation.status}">Status</span>
           </div>
         </article>
       </details>
@@ -77,10 +48,10 @@
 
     <hr>
 
-    <section id="advisors">
+    <section id="advisors" th:if="${sectionVisibility.advisorsVisible}">
       <details open="">
         <summary>Advisors</summary>
-        Advisors Section (not done)
+        <span th:text="${advisorsMessage}">Advisors Section (not done)</span>
       </details>
     </section>
 

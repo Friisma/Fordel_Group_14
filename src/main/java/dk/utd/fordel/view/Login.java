@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import dk.utd.fordel.domain.Email;
 import dk.utd.fordel.domain.User;
+import dk.utd.fordel.domain.UserDoesNotExist;
 import dk.utd.fordel.services.Authenticator;
 import dk.utd.fordel.services.Authenticator.Auth;
 import dk.utd.fordel.services.Authenticator.BadCredentials;
+import dk.utd.fordel.services.UserManager;
 import dk.utd.fordel.utils.Log;
 import dk.utd.fordel.utils.UnitOfWork;
 import dk.utd.fordel.utils.UnitOfWork.UnitOfWorkException;
@@ -22,9 +24,11 @@ public class Login {
 
     private static final Logger logger = Log.getLogger(Login.class);
     private final UnitOfWork unitOfWork;
+    private final UserManager userManager;
 
-    public Login(UnitOfWork unitOfWork, Authenticator authenticator) {
+    public Login(UnitOfWork unitOfWork, UserManager userManager, Authenticator authenticator) {
         this.unitOfWork = unitOfWork;
+        this.userManager = userManager;
         this.authenticator = authenticator;
     }
 
@@ -55,18 +59,23 @@ public class Login {
         }
 
         Auth auth;
+        User.Data userData;
         try (var uow = unitOfWork.begin()) {
             auth = authenticator.authenticate(user, password);
+            userData = userManager.readUser(user);
             uow.commit();
         } catch (BadCredentials e) {
             model.addAttribute("error_password", "Du har indtastet forkert password eller email");
             logger.atWarn().setCause(e).log("Bad credentials");
             return "home";
+        } catch (UserDoesNotExist e) {
+            throw Log.giveUp(logger, e, "Authenticated user could not be loaded");
         } catch (UnitOfWorkException e) {
             throw Log.giveUp(logger, e);
         }
 
         session.setAttribute("auth", auth);
+        session.setAttribute("userData", userData);
 
         return "redirect:/";
 
