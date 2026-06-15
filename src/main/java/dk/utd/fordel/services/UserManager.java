@@ -19,6 +19,7 @@ public class UserManager {
         void delete(User user) throws UserDoesNotExist;
 
         public void grantRole(User user, Roles roleToGrant);
+        public void removeRole(User user, Roles roleToRemove);
 
         public record UserInfo(String id, String email, String name, List<Roles> roles, String studyLine) {}
         List<UserInfo> getAllUsers();

@@ -183,6 +183,13 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
+    /**
+     * Grants a chosen user a specified role.
+     * This method insert a user_id and role_id into database so the user becomes
+     * a member of the specified role.
+     *
+     * @return a {@link List} of {@link UserInfo} objects representing all users.
+     */
     @Override
     public void grantRole(User user, Roles roleToGrant) {
         var stmt = """
@@ -195,13 +202,37 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
 
         try (var statement = getConnection().prepareStatement(stmt)) {
             statement.setString(1, user.getEmail().asString());
-            statement.setString(2, roleToGrant.name().toLowerCase());
+            statement.setString(2, roleToGrant.name().toLowerCase().replace("_", " "));
             statement.executeUpdate();
         } catch (SQLException e) {
             throw Log.giveUp(logger, e, "Could not add role to user");
         }
     }
 
+    @Override
+    public void removeRole(User user, Roles roleToRemove) {
+        var stmt = """
+        DELETE FROM user_roles
+               WHERE USER_ID = (SELECT id FROM users WHERE email = ?) 
+                 and ROLE_ID = (SELECT id FROM roles WHERE name = ?)
+        """;
+
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setString(1, user.getEmail().asString());
+            statement.setString(2, roleToRemove.name().toLowerCase().replace("_", " "));
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Could not add role to user");
+        }
+    }
+
+    /**
+     * Retrieves a list of all users currently in the system.
+     * This method ask the database for all relevant user information which includes
+     * ID, email, name, assigned roles and study line.
+     *
+     * @return a {@link List} of {@link UserInfo} objects representing all users.
+     */
     @Override
     public List<UserInfo> getAllUsers() {
         var users = new ArrayList<UserInfo>();
