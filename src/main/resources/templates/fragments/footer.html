@@ -1,5 +1,11 @@
-<footer class="container">
-  <hr />
+<th:block th:fragment="footer">
+  <footer class="container">
+    <hr />
 
-  <section>This project created by group 14.</section>
-</footer>
+    <section>This project created by group 14.</section>
+  </footer>
+
+  <div th:replace="~{fragments/cookie-popup ::cookiePopup}"></div>
+
+  <script th:src="@{/js/cookie-popup.js}" defer></script>
+</th:block>
