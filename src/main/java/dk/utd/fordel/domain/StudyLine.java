@@ -1,17 +1,24 @@
 package dk.utd.fordel.domain;
 
 /**
- * this class represents a studyLine which can be created.
+ * This class represents a study line which can be created.
  */
 public class StudyLine {
 
-    private String lineName;
+    private final String lineName;
 
-    StudyLine(String lineName) {
+    public StudyLine(String lineName) {
+        if (lineName == null || lineName.isBlank()) {
+            throw new InvalidStudyLine("Study line name cannot be empty");
+        }
         this.lineName = lineName;
     }
-    public String getLineName() {return lineName;}
-    public void setLineName(String lineName) {this.lineName = lineName;}
-
-
+    public String getLineName() {
+        return lineName;
+    }
+    public static class InvalidStudyLine extends RuntimeException {
+        public InvalidStudyLine(String message) {
+            super(message);
+        }
+    }
 }

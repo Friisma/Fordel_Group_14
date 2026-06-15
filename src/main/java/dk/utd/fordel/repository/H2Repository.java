@@ -6,6 +6,9 @@ import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -22,6 +25,7 @@ import dk.utd.fordel.domain.User.Data;
 import dk.utd.fordel.services.Authenticator.PasswordEncoding;
 import dk.utd.fordel.services.Authenticator.PasswordRepository;
 import dk.utd.fordel.services.UserManager.UserRepository;
+import dk.utd.fordel.services.StudyLineManager.StudyLineRepository;
 import dk.utd.fordel.services.ProjectManager.ProjectRepository;
 import dk.utd.fordel.services.InvitationManager.InvitationRepository;
 
@@ -31,7 +35,8 @@ import dk.utd.fordel.utils.UnitOfWork;
 
 @Repository
 @RequestScope
-public class H2Repository implements PasswordRepository, UnitOfWork, UserRepository, ProjectRepository, InvitationRepository {
+public class H2Repository implements PasswordRepository, UnitOfWork, UserRepository, ProjectRepository, InvitationRepository, StudyLineRepository {
+
 
     private static final Logger logger = LoggerFactory.getLogger(H2Repository.class);
     private final DataSource dataSource;
@@ -324,7 +329,8 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
                 users.add(new UserInfo(
                         resultSet.getString("id"),
                         resultSet.getString("email"),
-                        resultSet.getString("name")));
+                        resultSet.getString("name")
+                ));
             }
             return users;
         } catch (SQLException e) {
@@ -403,6 +409,20 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     }
 
     @Override
+    public void create(StudyLine studyLine) throws StudyLineAlreadyExists {
+        var stmt = "INSERT INTO study_lines (name) VALUES (?)";
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setString(1, studyLine.getLineName());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            if (23505 == e.getErrorCode()) { // Unique constraint violation
+                throw new StudyLineAlreadyExists(studyLine);
+            }
+            throw Log.giveUp(logger, e, "Failed to create study line: " + studyLine);
+        }
+    }
+
+    @Override
     public UnitOfWork begin() throws UnitOfWorkException {
         try {
             logger.info("Starting transaction for {}", this);
@@ -443,5 +463,4 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
             throw new UnitOfWorkException("Failed to close connection", e);
         }
     }
-
 }
