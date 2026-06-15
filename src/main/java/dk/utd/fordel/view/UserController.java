@@ -7,6 +7,7 @@ import dk.utd.fordel.services.UserManager;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import dk.utd.fordel.utils.Log;
@@ -43,6 +44,32 @@ public class UserController {
             throw Log.giveUp(logger, e);
         }
         return "adminpage";
+    }
+
+    @DeleteMapping("/adminpage/remove-role")
+    public String removeRole(HttpSession session,
+                            @RequestParam("email") String email,
+                            @RequestParam("role") String roleString) {
+        if (session.getAttribute("auth") == null) {
+            return "redirect:/login";
+        }
+
+        try (var uow = unitOfWork.begin()) {
+
+            User user = User.of(email);
+            Roles roleToGrant = Roles.valueOf(roleString);
+
+            userManager.removeRole(user, roleToGrant);
+
+            uow.commit();
+
+        } catch (Email.InvalidEmail e) {
+            throw Log.giveUp(logger, e, "Invalid user");
+        } catch (UnitOfWorkException e) {
+            throw Log.giveUp(logger, e, "Could not grant user role");
+        }
+
+        return "redirect:/adminpage";
     }
 
     @PostMapping("/adminpage/grant-role")

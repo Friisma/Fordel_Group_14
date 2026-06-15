@@ -12,6 +12,7 @@
         <table>
           <thead>
           <tr>
+            <!--Each col in the tabel-->
             <th scope="col">Id</th>
             <th scope="col">Name</th>
             <th scope="col">E-mail</th>
@@ -21,6 +22,7 @@
           </tr>
           </thead>
           <tbody>
+          <!--Each row in the tabel-->
           <tr th:each="user : ${users}">
             <th th:text="${user.id()}">1</th>
             <td th:text="${user.name()}">Admin</td>
@@ -33,17 +35,22 @@
                   <details class="dropdown">
                     <summary role="button" class="secondary">Action</summary>
                     <ul>
-
+                      <!--Assign role button-->
                       <li>
-                        <button class="contrast"
-                                data-target="modal-assign-role"
+                        <button data-target="modal-assign-role"
                                 th:data-email="${user.email()}"
                                 onclick="openRoleModal(event, this)">
                           Assign role
                         </button>
                       </li>
 
-                      <li><a href="#">???????</a></li>
+                      <li>
+                        <button data-target="modal-remove-role"
+                                th:data-roles="${user.roles()}"
+                                onclick="openRoleModal(event, this)">
+                          Remove role
+                        </button>
+                      </li>
                     </ul>
                   </details>
                 </li>
@@ -56,6 +63,7 @@
     </main>
   <footer th:replace="~{fragments/footer :: footer}"></footer>
 
+  <!--Modal for assign role to a user-->
   <dialog id="modal-assign-role">
     <article>
       <header>
@@ -87,12 +95,47 @@
     </article>
   </dialog>
 
+  <!--Modal for remove a role from a user-->
+  <dialog id="modal-remove-role">
+    <article>
+      <header>
+        <button aria-label="Close" rel="prev" data-target="modal-assign-role" onclick="toggleModal(event)"></button>
+        <h3>Assign role</h3>
+      </header>
+
+      <form action="/adminpage/remove-role" method="post">
+        <input type="hidden" id="modal-role-input" name="role" value="" />
+        <table>
+          <thead>
+          <tr>
+            <!--Each col in the tabel-->
+            <th scope="col">Role</th>
+            <th scope="col">Action</th>
+          </tr>
+          </thead>
+
+          <tr th:each="role : ${roles}">
+            <td th:text="role.name()"></td>
+          </tr>
+        </table>
+      </form>
+    </article>
+  </dialog>
+
   <script th:src="@{/js/modal.js}" defer></script>
   <script>
     function openRoleModal(event, buttonElement) {
       const userEmail = buttonElement.getAttribute('data-email');
 
       document.getElementById('modal-email-input').value = userEmail;
+
+      toggleModal(event);
+    }
+
+    function openRemoveRoleModal(event, buttonElement) {
+      const userRoles = buttonElement.getAttribute('data-roles');
+
+      document.getElementById('modal-role-input').value = userRoles;
 
       toggleModal(event);
     }
