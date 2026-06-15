@@ -20,6 +20,7 @@ public class UserManager {
 
         public void grantRole(User user, Roles roleToGrant);
         public void removeRole(User user, Roles roleToRemove);
+        public List<Roles> getUserRoles(User user);
 
         public record UserInfo(String id, String email, String name, List<Roles> roles, String studyLine) {}
         List<UserInfo> getAllUsers();
@@ -41,6 +42,14 @@ public class UserManager {
 
     public void grantRole(User user, Roles roleToGrant) {
         userRepository.grantRole(user, roleToGrant);
+    }
+
+    public void removeRole(User user, Roles roleToRemove) {
+        userRepository.removeRole(user, roleToRemove);
+    }
+
+    public List<Roles> getUserRoles(User user) {
+        return userRepository.getUserRoles(user);
     }
 
     public List<UserRepository.UserInfo> getAllUsers() {

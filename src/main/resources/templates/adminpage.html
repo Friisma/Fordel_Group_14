@@ -90,13 +90,10 @@
   <script th:src="@{/js/modal.js}" defer></script>
   <script>
     function openRoleModal(event, buttonElement) {
-      // 1. Hent e-mailen fra knappens data-attribut
       const userEmail = buttonElement.getAttribute('data-email');
 
-      // 2. Find det skjulte input-felt i modalen og indsæt e-mailen
       document.getElementById('modal-email-input').value = userEmail;
 
-      // 3. Kald din eksisterende toggleModal funktion for at åbne modalen
       toggleModal(event);
     }
   </script>
