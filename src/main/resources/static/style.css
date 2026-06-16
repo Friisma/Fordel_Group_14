@@ -65,6 +65,20 @@
     opacity: 0.8;
 }
 
+/* Project page specific styles */
+.project-card {
+    padding: 1rem;
+    background-color: var(--pico-card-background-color);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    margin-top: 0.5rem;
+}
+
+.project-section,
+.invitations-section {
+    margin-bottom: 1.5rem;
+}
+
 .font-normal {
     font-weight: normal;
 }

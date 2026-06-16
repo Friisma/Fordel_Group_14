@@ -7,9 +7,31 @@
     <header th:replace="~{fragments/header ::header}"></header>
 
     <main class="container">
-        <section>
-            <h1 th:text="${title}"></h1>
-            <p>Project id: <span th:text="${projectId}"></span></p>
+        <section id="project" class="project-section">
+            <details open>
+                <summary>Project</summary>
+                <div class="project-card">
+                    <div class="project-header" style="justify-content:space-between;align-items:center;">
+                        <h1 th:text="${title}">Project</h1>
+                        <span class="badge role">#<span th:text="${projectId}">0</span></span>
+                    </div>
+
+                    <p class="study-line" th:if="${project != null}">
+                        <strong>Study line:</strong>
+                        <span th:text="${project.studyLine}">Software Technology</span>
+                    </p>
+
+                    <p th:if="${project != null}" th:text="${project.description}">Project description</p>
+                    <p th:if="${project == null}">No project details available.</p>
+                </div>
+            </details>
+        </section>
+
+        <section id="invitations" class="invitations-section">
+            <details open>
+                <summary>Invitations</summary>
+                <!-- TODO -->
+            </details>
         </section>
     </main>
 

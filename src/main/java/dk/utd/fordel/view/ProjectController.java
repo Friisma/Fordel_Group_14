@@ -1,6 +1,7 @@
 package dk.utd.fordel.view;
 
 import dk.utd.fordel.domain.User;
+import dk.utd.fordel.domain.Project;
 import dk.utd.fordel.services.Authenticator.Auth;
 import dk.utd.fordel.services.ProjectManager;
 import dk.utd.fordel.services.rights.RightsContext;
@@ -39,16 +40,34 @@ public class ProjectController {
             return "redirect:/forbidden";
         }
 
+        Project project = null;
         try (var uow = unitOfWork.begin()) {
             if (!projectManager.canViewProject(auth.user(), id)) {
                 return "redirect:/forbidden";
             }
+            // load project details for the view
+            try {
+                var projects = projectManager.getAllProjectsRelatedToUser(auth.user());
+                for (var p : projects) {
+                    if (p.getProjectID() == id) {
+                        project = p;
+                        break;
+                    }
+                }
+            } catch (Project.InvalidProject e) {
+                // ignore and leave project null
+            }
+            model.addAttribute("project", project);
             uow.commit();
         } catch (UnitOfWork.UnitOfWorkException e) {
             throw new RuntimeException("Could not open project access transaction", e);
         }
 
-        model.addAttribute("title", "Project " + id);
+        if (project != null) {
+            model.addAttribute("title", project.getProjectName());
+        } else {
+            model.addAttribute("title", "Project " + id);
+        }
         model.addAttribute("projectId", id);
         return "project";
     }
