@@ -1,6 +1,8 @@
 <article th:fragment="projectCard(project)" th:id="${project.id}">
     <div class="project-header">
-        <h2 th:text="${project.title}">Title</h2>
+        <a th:href="@{/project/{id}(id=${project.id})}" class="project-link">
+            <h2 th:text="${project.title}">Title</h2>
+        </a>
 
         <span class="badge role">
             #<span th:text="${project.id}">1</span>

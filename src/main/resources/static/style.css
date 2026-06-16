@@ -46,6 +46,18 @@
     margin-bottom: 0;
 }
 
+.project-link {
+    color: inherit;
+    text-decoration: none;
+    display: block;
+}
+
+.project-link:hover,
+.project-link:focus {
+    color: inherit;
+    text-decoration: none;
+}
+
 .study-line {
     margin-top: 0.25rem;
     margin-bottom: 1rem;
@@ -54,7 +66,7 @@
 }
 
 .font-normal {
-  font-weight: normal;
+    font-weight: normal;
 }
 
 #cookies-popup {
