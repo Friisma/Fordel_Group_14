@@ -35,6 +35,24 @@
     color: #fff;
 }
 
+.project-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.project-header h2 {
+    margin-bottom: 0;
+}
+
+.study-line {
+    margin-top: 0.25rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
 .font-normal {
   font-weight: normal;
 }

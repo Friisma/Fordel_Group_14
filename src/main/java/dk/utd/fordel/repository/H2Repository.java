@@ -310,9 +310,10 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         List<Project> projects = new ArrayList<>();
         int userId = getUserIdByEmail(user.getEmail());
         var stmt = """
-                SELECT p.id, p.title, p.description
+                SELECT p.id, p.title, p.description, sl.name AS study_line_name
                 FROM projects p
                 JOIN project_students ps ON p.id = ps.project_id
+                LEFT JOIN study_lines sl ON p.study_line_id = sl.id
                 WHERE ps.user_id = ?
                 """;
         try (var statement = getConnection().prepareStatement(stmt)) {
@@ -323,6 +324,10 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
                             resultSet.getString("title"),
                             resultSet.getString("description"));
                     project.setProjectID(resultSet.getInt("id"));
+                    String studyLineName = resultSet.getString("study_line_name");
+                    if (studyLineName != null) {
+                        project.setStudyLine(studyLineName);
+                    }
                     projects.add(project);
                 }
             }

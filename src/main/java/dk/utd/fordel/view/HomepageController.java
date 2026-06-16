@@ -56,13 +56,15 @@ public class HomepageController {
     private List<ProjectCard> placeholderProjects() {
         return List.of(
                 new ProjectCard(
-                        "project-1",
+                        "1",
                         "Project 1",
-                        "Placeholder project description."),
+                        "Placeholder project description.",
+                        "Software Technology"),
                 new ProjectCard(
-                        "project-2",
+                        "2",
                         "Project 2",
-                        "Placeholder project description."));
+                        "Placeholder project description.",
+                        "Software Technology"));
     }
 
     private List<InvitationCard> placeholderInvitations() {
@@ -101,7 +103,7 @@ public class HomepageController {
         };
     }
 
-    public record ProjectCard(String id, String title, String description) {
+    public record ProjectCard(String id, String title, String description, String studyLine) {
     }
 
     public record InvitationCard(String name, String status, String statusClass) {

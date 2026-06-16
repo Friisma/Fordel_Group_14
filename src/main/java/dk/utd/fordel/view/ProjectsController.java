@@ -58,9 +58,10 @@ public class ProjectsController {
         return new ProjectCard(
                 String.valueOf(project.getProjectID()),
                 project.getProjectName(),
-                project.getDescription() != null ? project.getDescription() : "");
+                project.getDescription() != null ? project.getDescription() : "",
+                project.getStudyLine() != null ? project.getStudyLine() : "");
     }
 
-    public record ProjectCard(String id, String title, String description) {
+    public record ProjectCard(String id, String title, String description, String studyLine) {
     }
 }
