@@ -40,7 +40,8 @@
                     <summary>Invitations (Student)</summary>
                     <div class="card">
                         <p>Student invitations will appear here.</p>
-                        <button type="button" class="primary">Invite Advisor to Project</button>
+                        <button data-target="modal-invite-advisor" data-project-id="${projectId}" type="button"
+                            class="primary" onclick="openInviteModal(event, this)">Invite Advisor to Project</button>
                     </div>
                 </details>
             </th:block>
@@ -57,6 +58,9 @@
     </main>
 
     <footer th:replace="~{fragments/footer ::footer}"></footer>
+    <!-- Include invite advisor modal fragment -->
+    <div th:replace="~{fragments/invite-advisor-modal :: inviteAdvisorModal(availableAdvisors=${availableAdvisors})}">
+    </div>
 </body>
 
 </html>

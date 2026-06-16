@@ -4,6 +4,8 @@ import dk.utd.fordel.domain.User;
 import dk.utd.fordel.domain.Project;
 import dk.utd.fordel.services.Authenticator.Auth;
 import dk.utd.fordel.services.ProjectManager;
+import dk.utd.fordel.services.UserManager;
+import dk.utd.fordel.domain.Roles;
 import dk.utd.fordel.services.rights.RightsContext;
 import dk.utd.fordel.services.rights.RightsService;
 import dk.utd.fordel.utils.UnitOfWork;
@@ -19,12 +21,15 @@ public class ProjectController {
 
     private final RightsService rightsService;
     private final ProjectManager projectManager;
+    private final UserManager userManager;
     private final UnitOfWork unitOfWork;
 
-    public ProjectController(RightsService rightsService, ProjectManager projectManager, UnitOfWork unitOfWork) {
+    public ProjectController(RightsService rightsService, ProjectManager projectManager, UnitOfWork unitOfWork,
+            UserManager userManager) {
         this.rightsService = rightsService;
         this.projectManager = projectManager;
         this.unitOfWork = unitOfWork;
+        this.userManager = userManager;
     }
 
     @GetMapping("/project/{id}")
@@ -58,6 +63,18 @@ public class ProjectController {
                 // ignore and leave project null
             }
             model.addAttribute("project", project);
+            // populate available advisors for the invite modal
+            try {
+                var allUsers = userManager.getAllUsers();
+                String currentEmail = auth.user().getEmail().asString();
+                var advisors = allUsers.stream()
+                        .filter(u -> u.roles().contains(Roles.ADVISOR))
+                        .filter(u -> !currentEmail.equalsIgnoreCase(u.email()))
+                        .toList();
+                model.addAttribute("availableAdvisors", advisors);
+            } catch (Exception e) {
+                model.addAttribute("availableAdvisors", java.util.List.of());
+            }
             uow.commit();
         } catch (UnitOfWork.UnitOfWorkException e) {
             throw new RuntimeException("Could not open project access transaction", e);
