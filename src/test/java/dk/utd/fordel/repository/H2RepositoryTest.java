@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import dk.utd.fordel.domain.*;
-import org.bouncycastle.asn1.x509.UserNotice;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.jdbc.DataSourceBuilder;
@@ -19,6 +18,7 @@ import dk.utd.fordel.utils.UnitOfWork.UnitOfWorkException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class H2RepositoryTest {
 
@@ -41,23 +41,21 @@ public class H2RepositoryTest {
     @Test
     void creating_a_project_with_an_existing_name_should_fail()
             throws ProjectTitleAlreadyInUse, UnitOfWorkException, Project.InvalidProject, EmailAlreadyInUse {
-        Email email = new Email("test","test");
+        Email email = new Email("test", "test");
         User user = new User(email);
 
-        User.Data data = new User.Data("name",new ArrayList<>(),"line", LocalDate.of(2001,1,1));
-        Project project = new Project("test","test");
+        User.Data data = new User.Data("name", new ArrayList<>(), "line", LocalDate.of(2001, 1, 1));
+        Project project = new Project("test", "test");
 
-
-        try (var ignored = h2Repository.begin()){
+        try (var ignored = h2Repository.begin()) {
             h2Repository.create(user, data);
 
             int userId = h2Repository.getUserIdByEmail(user.getEmail());
 
-            h2Repository.create(project,user,userId);
+            h2Repository.create(project, user, userId);
             assertThrows(ProjectTitleAlreadyInUse.class,
-                    () -> h2Repository.create(project,user,userId));
+                    () -> h2Repository.create(project, user, userId));
         }
-
 
     }
 
@@ -84,12 +82,32 @@ public class H2RepositoryTest {
     }
 
     @Test
+    void only_users_linked_to_a_project_can_view_it() throws Exception {
+        String suffix = UUID.randomUUID().toString();
+        User member = User.of("member-" + suffix + "@test.dk");
+        User outsider = User.of("outsider-" + suffix + "@test.dk");
+        Project project = new Project("Project " + suffix, "desc");
+
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(member, new User.Data("Member", List.of(), null, null));
+            h2Repository.create(outsider, new User.Data("Outsider", List.of(), null, null));
+
+            int memberId = h2Repository.getUserIdByEmail(member.getEmail());
+            h2Repository.create(project, member, memberId);
+
+            assertTrue(h2Repository.canViewProject(member, project.getProjectID()));
+            assertTrue(!h2Repository.canViewProject(outsider, project.getProjectID()));
+        }
+    }
+
+    @Test
     void creating_the_same_user_twice_should_fail()
             throws InvalidEmail, UserDoesNotExist, EmailAlreadyInUse, UnitOfWorkException {
         var user = User.of("known@user.dk");
         try (var uow = h2Repository.begin()) {
             h2Repository.create(user, new User.Data("Peter", List.of(), null, null));
-            assertThrows(EmailAlreadyInUse.class, () -> h2Repository.create(user, new User.Data("Peter", List.of(), null, null)));
+            assertThrows(EmailAlreadyInUse.class,
+                    () -> h2Repository.create(user, new User.Data("Peter", List.of(), null, null)));
         }
 
         // This is okay because the previous transaction was not committed.
@@ -101,7 +119,8 @@ public class H2RepositoryTest {
         // Since the transaction was commited, trying to create the same user again
         // fails
         try (var uow = h2Repository.begin()) {
-            assertThrows(EmailAlreadyInUse.class, () -> h2Repository.create(user, new User.Data("Peter", List.of(), null, null)));
+            assertThrows(EmailAlreadyInUse.class,
+                    () -> h2Repository.create(user, new User.Data("Peter", List.of(), null, null)));
         }
 
         // But now we need to cleanup the database
