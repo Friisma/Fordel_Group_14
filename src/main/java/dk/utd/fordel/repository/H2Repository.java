@@ -213,12 +213,26 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
 
     @Override
     public void create(Project project, User currUser, int userId) throws ProjectTitleAlreadyInUse {
-        var stmt = "INSERT INTO projects (title, description) VALUES (?, ?)";
+        int studyLineId = getStudyLineIdByUser(currUser);
+        createProjectWithStudyLine(project, userId, studyLineId);
+    }
+
+    @Override
+    public void create(Project project, User currUser, String studyLineName, int userId)
+            throws ProjectTitleAlreadyInUse {
+        int studyLineId = getStudyLineIdByName(studyLineName);
+        createProjectWithStudyLine(project, userId, studyLineId);
+    }
+
+    private void createProjectWithStudyLine(Project project, int userId, int studyLineId)
+            throws ProjectTitleAlreadyInUse {
+        var stmt = "INSERT INTO projects (title, description, study_line_id) VALUES (?, ?, ?)";
 
         try (var statement = getConnection().prepareStatement(stmt,
                 Statement.RETURN_GENERATED_KEYS)) { // Henter den key der er genereret
             statement.setString(1, project.getProjectName());
             statement.setString(2, project.getDescription());
+            statement.setInt(3, studyLineId);
 
             statement.executeUpdate();
             try (var keys = statement.getGeneratedKeys()) {
@@ -247,7 +261,48 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
                     e.getErrorCode(), e.getSQLState(), e.getMessage());
             throw Log.giveUp(logger, e, "Failed to create project: " + project);
         }
+    }
 
+    private int getStudyLineIdByUser(User user) {
+        var stmt = """
+                SELECT sl.id
+                FROM study_lines sl
+                JOIN study_line_students sls ON sl.id = sls.study_line_id
+                WHERE sls.user_id = (SELECT id FROM users WHERE email = ?)
+                """;
+
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setString(1, user.getEmail().asString());
+            try (var resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt("id");
+                }
+            }
+
+            throw new RuntimeException("User is not admitted to a study line");
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to look up study line for user: " + user);
+        }
+    }
+
+    private int getStudyLineIdByName(String studyLineName) {
+        if (studyLineName == null || studyLineName.isBlank()) {
+            throw new RuntimeException("User is not admitted to a study line");
+        }
+
+        var stmt = "SELECT id FROM study_lines WHERE name = ?";
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setString(1, studyLineName);
+            try (var resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt("id");
+                }
+            }
+
+            throw new RuntimeException("Study line does not exist: " + studyLineName);
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to look up study line: " + studyLineName);
+        }
     }
 
     @Override

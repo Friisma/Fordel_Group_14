@@ -11,6 +11,8 @@ public class ProjectManager {
     public static interface ProjectRepository {
         void create(Project project, User user, int userId) throws ProjectTitleAlreadyInUse;
 
+        void create(Project project, User user, String studyLineName, int userId) throws ProjectTitleAlreadyInUse;
+
         Project read(Project project) throws ProjectDoesNotExist;
 
         List<Project> getAllProjectsRelatedToUser(User user) throws Project.InvalidProject;
@@ -28,8 +30,9 @@ public class ProjectManager {
         this.projectRepository = projectRepository;
     }
 
-    public void createProject(Project project, User user, int userId) throws ProjectTitleAlreadyInUse {
-        projectRepository.create(project, user, userId);
+    public void createProject(Project project, User user, String studyLineName, int userId)
+            throws ProjectTitleAlreadyInUse {
+        projectRepository.create(project, user, studyLineName, userId);
     }
 
     public boolean canViewProject(User user, int projectId) {

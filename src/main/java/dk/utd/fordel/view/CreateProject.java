@@ -26,7 +26,8 @@ public class CreateProject {
     private final Authenticator authenticator;
     private final UserManager userManager;
 
-    public CreateProject(UnitOfWork unitOfWork, ProjectManager projectManager, Authenticator authenticator, UserManager userManager){
+    public CreateProject(UnitOfWork unitOfWork, ProjectManager projectManager, Authenticator authenticator,
+            UserManager userManager) {
         this.unitOfWork = unitOfWork;
         this.projectManager = projectManager;
         this.authenticator = authenticator;
@@ -34,7 +35,7 @@ public class CreateProject {
     }
 
     @GetMapping("/create-project")
-    public String getCreateProject(Model model){
+    public String getCreateProject(Model model) {
         model.addAttribute("title", "Opret projekt");
         model.addAttribute("project_name", new Field(
                 "text", "project_name", "Navn på projekt",
@@ -47,45 +48,56 @@ public class CreateProject {
 
     @PostMapping("/create-project")
     public String postCreateProject(Model model,
-                                    @RequestParam("project_name") String projectName,
-                                    @RequestParam("project_description") String projectDescription,
-                                    HttpSession session){
+            @RequestParam("project_name") String projectName,
+            @RequestParam("project_description") String projectDescription,
+            HttpSession session) {
         model.addAttribute("title", "Opret projekt");
 
         boolean isValid = true;
 
         String projectNameMessage = null;
-        if (projectName.isEmpty()){
+        if (projectName.isEmpty()) {
             projectNameMessage = "Project needs a name";
             isValid = false;
         }
 
         String projectDescriptionMessage = null;
-        if (projectDescription.isEmpty()){
+        if (projectDescription.isEmpty()) {
             projectDescriptionMessage = "Project needs a description";
             isValid = false;
         }
-            Project project = null;
+
+        Object userDataObject = session.getAttribute("userData");
+        User.Data userData = userDataObject instanceof User.Data data ? data : null;
+        String studyLineName = null;
+        if (userData != null) {
+            studyLineName = userData.studyLine();
+        }
+        if (studyLineName == null || studyLineName.isBlank()) {
+            projectNameMessage = "You must belong to a study line before creating a project";
+            isValid = false;
+        }
+
+        Project project = null;
         try {
-             project = new Project(projectName, projectDescription);
+            project = new Project(projectName, projectDescription);
         } catch (Project.InvalidProject e) {
             isValid = false;
             projectNameMessage = "Cant create project";
         }
 
-        if (isValid){
-            try (var uow = unitOfWork.begin()){
+        if (isValid) {
+            try (var uow = unitOfWork.begin()) {
                 logger.info("UnitOfWork started: {}", uow);
-                Authenticator.Auth auth = (Authenticator.Auth)session.getAttribute("auth");
+                Authenticator.Auth auth = (Authenticator.Auth) session.getAttribute("auth");
                 User user = auth.user();
                 int userId = userManager.getUserIdByEmail(user.getEmail());
-                projectManager.createProject(project, user, userId);
+                projectManager.createProject(project, user, studyLineName, userId);
                 uow.commit();
 
             } catch (ProjectTitleAlreadyInUse e) {
                 isValid = false;
                 projectNameMessage = "Invalid project title, already in use";
-
 
             } catch (UnitOfWork.UnitOfWorkException e) {
                 Log.giveUp(logger, e, "Failed to create Project");
@@ -95,7 +107,7 @@ public class CreateProject {
             }
         }
 
-        if(!isValid){
+        if (!isValid) {
             model.addAttribute("title", "Opret projekt");
             model.addAttribute("project_name", new Field(
                     "text", "project_name", "Navn på projekt",

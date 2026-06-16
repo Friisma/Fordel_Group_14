@@ -84,12 +84,11 @@ public class H2RepositoryTest {
     @Test
     void only_users_linked_to_a_project_can_view_it() throws Exception {
         String suffix = UUID.randomUUID().toString();
-        User member = User.of("member-" + suffix + "@test.dk");
+        User member = User.of("student@test.dk");
         User outsider = User.of("outsider-" + suffix + "@test.dk");
         Project project = new Project("Project " + suffix, "desc");
 
         try (var ignored = h2Repository.begin()) {
-            h2Repository.create(member, new User.Data("Member", List.of(), null, null));
             h2Repository.create(outsider, new User.Data("Outsider", List.of(), null, null));
 
             int memberId = h2Repository.getUserIdByEmail(member.getEmail());
