@@ -27,11 +27,32 @@
             </details>
         </section>
 
-        <section id="invitations" class="invitations-section">
+        <section id="members" class="members-section">
             <details open>
-                <summary>Invitations</summary>
+                <summary>Members</summary>
                 <!-- TODO -->
             </details>
+        </section>
+
+        <section id="invitations" class="invitations-section">
+            <th:block th:if="${rights.isStudent()}">
+                <details open>
+                    <summary>Invitations (Student)</summary>
+                    <div class="card">
+                        <p>Student invitations will appear here.</p>
+                        <button type="button" class="primary">Invite Advisor to Project</button>
+                    </div>
+                </details>
+            </th:block>
+
+            <th:block th:if="${rights.isAdvisor()}">
+                <details open>
+                    <summary>Invitations (Advisor)</summary>
+                    <div class="card">
+                        <p>Advisor invitations will appear here.</p>
+                    </div>
+                </details>
+            </th:block>
         </section>
     </main>
 
