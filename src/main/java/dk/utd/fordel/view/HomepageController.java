@@ -55,7 +55,6 @@ public class HomepageController {
         model.addAttribute("roleBadge", buildRoleBadge(rights));
         model.addAttribute("sectionVisibility", new SectionVisibility(
                 rightsService.canViewProject(rights),
-                canShowInvitations(rights),
                 rights != null && rights.isAdvisor()));
         // load actual projects for this user
         Object authObject = session.getAttribute("auth");
@@ -77,7 +76,6 @@ public class HomepageController {
         } else {
             model.addAttribute("projects", placeholderProjects());
         }
-        model.addAttribute("invitations", placeholderInvitations());
         model.addAttribute("advisorsMessage", "Advisors Section (not done)");
         // load advisor invitations for advisors
         if (rights != null && rights.isAdvisor()) {
@@ -215,14 +213,6 @@ public class HomepageController {
                 .collect(Collectors.joining(", "));
     }
 
-    private boolean canShowInvitations(RightsContext rights) {
-        return rights != null && (rights.isStudent()
-                || rights.isAdvisor()
-                || rights.isTeacher()
-                || rights.isStudyLeader()
-                || rights.isAdministrator());
-    }
-
     private static String displayName(Roles role) {
         return switch (role) {
             case STUDENT -> "Student";
@@ -239,6 +229,6 @@ public class HomepageController {
     public record InvitationCard(String name, String status, String statusClass, String projectId, String inviterName) {
     }
 
-    public record SectionVisibility(boolean projectsVisible, boolean invitationsVisible, boolean advisorsVisible) {
+    public record SectionVisibility(boolean projectsVisible, boolean advisorsVisible) {
     }
 }

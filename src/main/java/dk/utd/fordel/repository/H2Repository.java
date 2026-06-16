@@ -317,16 +317,11 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
                     SELECT project_id FROM project_students WHERE user_id = ?
                     UNION
                     SELECT project_id FROM project_advisors WHERE user_id = ?
-                    UNION
-                    SELECT project_id FROM advisor_invitations
-                    WHERE advisor_id = ?
-                      AND status IN ('pending', 'accepted')
                 )
                 """;
         try (var statement = getConnection().prepareStatement(stmt)) {
             statement.setInt(1, userId);
             statement.setInt(2, userId);
-            statement.setInt(3, userId);
             try (var resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
                     Project project = new Project(
@@ -350,27 +345,20 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     public boolean canViewProject(User user, int projectId) {
         int userId = getUserIdByEmail(user.getEmail());
         var stmt = """
-                    SELECT 1
-                    FROM project_students
-                    WHERE user_id = ? AND project_id = ?
-                    UNION
-                    SELECT 1
-                    FROM project_advisors
-                    WHERE user_id = ? AND project_id = ?
+                SELECT 1
+                FROM project_students
+                WHERE user_id = ? AND project_id = ?
                 UNION
                 SELECT 1
-                FROM advisor_invitations
-                WHERE advisor_id = ? AND project_id = ?
-                  AND status IN ('pending', 'accepted')
-                    """;
+                FROM project_advisors
+                WHERE user_id = ? AND project_id = ?
+                """;
 
         try (var statement = getConnection().prepareStatement(stmt)) {
             statement.setInt(1, userId);
             statement.setInt(2, projectId);
             statement.setInt(3, userId);
             statement.setInt(4, projectId);
-            statement.setInt(5, userId);
-            statement.setInt(6, projectId);
 
             try (var resultSet = statement.executeQuery()) {
                 return resultSet.next();

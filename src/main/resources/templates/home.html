@@ -14,7 +14,7 @@
       </div>
     </section>
 
-    <hr>
+    <hr th:if="${sectionVisibility.projectsVisible or sectionVisibility.advisorsVisible}">
 
     <section id="projects" th:if="${sectionVisibility.projectsVisible}">
       <details open="">
@@ -33,18 +33,7 @@
 
     </section>
 
-    <hr>
-
-    <section id="invitations" th:if="${sectionVisibility.invitationsVisible}">
-      <details open="">
-        <summary>Invitations</summary>
-        <th:block th:each="invitation : ${invitations}">
-          <article th:replace="~{fragments/invitation-card :: invitationCard(invitation=${invitation})}"></article>
-        </th:block>
-      </details>
-    </section>
-
-    <hr>
+    <hr th:if="${sectionVisibility.projectsVisible and sectionVisibility.advisorsVisible}">
 
     <section id="advisors" th:if="${sectionVisibility.advisorsVisible}">
       <details open="">
