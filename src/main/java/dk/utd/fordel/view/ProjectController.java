@@ -159,6 +159,15 @@ public class ProjectController {
 
             try {
                 var invited = User.of(advisorEmail);
+                // prevent duplicate invites even before hitting DB unique constraint
+                var existingInvites = invitationManager.getInvitesForProject(id);
+                boolean alreadyInvited = existingInvites.stream()
+                        .anyMatch(iv -> iv.email() != null && iv.email().equalsIgnoreCase(advisorEmail));
+                if (alreadyInvited) {
+                    uow.rollback();
+                    redirectAttributes.addFlashAttribute("error", "Advisor already invited");
+                    return "redirect:/project/" + id;
+                }
                 try {
                     invitationManager.createInvitaion(invited, project);
                     uow.commit();

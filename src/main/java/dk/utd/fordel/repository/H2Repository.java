@@ -312,12 +312,21 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         var stmt = """
                 SELECT p.id, p.title, p.description, sl.name AS study_line_name
                 FROM projects p
-                JOIN project_students ps ON p.id = ps.project_id
                 LEFT JOIN study_lines sl ON p.study_line_id = sl.id
-                WHERE ps.user_id = ?
+                WHERE p.id IN (
+                    SELECT project_id FROM project_students WHERE user_id = ?
+                    UNION
+                    SELECT project_id FROM project_advisors WHERE user_id = ?
+                    UNION
+                    SELECT project_id FROM advisor_invitations
+                    WHERE advisor_id = ?
+                      AND status IN ('pending', 'accepted')
+                )
                 """;
         try (var statement = getConnection().prepareStatement(stmt)) {
             statement.setInt(1, userId);
+            statement.setInt(2, userId);
+            statement.setInt(3, userId);
             try (var resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
                     Project project = new Project(
@@ -341,20 +350,27 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     public boolean canViewProject(User user, int projectId) {
         int userId = getUserIdByEmail(user.getEmail());
         var stmt = """
-                SELECT 1
-                FROM project_students
-                WHERE user_id = ? AND project_id = ?
+                    SELECT 1
+                    FROM project_students
+                    WHERE user_id = ? AND project_id = ?
+                    UNION
+                    SELECT 1
+                    FROM project_advisors
+                    WHERE user_id = ? AND project_id = ?
                 UNION
                 SELECT 1
-                FROM project_advisors
-                WHERE user_id = ? AND project_id = ?
-                """;
+                FROM advisor_invitations
+                WHERE advisor_id = ? AND project_id = ?
+                  AND status IN ('pending', 'accepted')
+                    """;
 
         try (var statement = getConnection().prepareStatement(stmt)) {
             statement.setInt(1, userId);
             statement.setInt(2, projectId);
             statement.setInt(3, userId);
             statement.setInt(4, projectId);
+            statement.setInt(5, userId);
+            statement.setInt(6, projectId);
 
             try (var resultSet = statement.executeQuery()) {
                 return resultSet.next();
@@ -610,6 +626,28 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
             statement.setInt(2, advisor_id);
             statement.setInt(3, project_id);
             statement.executeUpdate();
+
+            // Keep project_advisors in sync with invitation decision
+            if ("accepted".equals(status)) {
+                var advisorStmt = "INSERT INTO project_advisors (user_id, project_id) VALUES (?, ?)";
+                try (var advisorInsert = getConnection().prepareStatement(advisorStmt)) {
+                    advisorInsert.setInt(1, advisor_id);
+                    advisorInsert.setInt(2, project_id);
+                    advisorInsert.executeUpdate();
+                } catch (SQLException e) {
+                    // Ignore duplicate key if advisor already linked
+                    if (e.getErrorCode() != 23505) {
+                        throw e;
+                    }
+                }
+            } else if ("declined".equals(status)) {
+                var removeStmt = "DELETE FROM project_advisors WHERE user_id = ? AND project_id = ?";
+                try (var remove = getConnection().prepareStatement(removeStmt)) {
+                    remove.setInt(1, advisor_id);
+                    remove.setInt(2, project_id);
+                    remove.executeUpdate();
+                }
+            }
         } catch (SQLException e) {
             throw Log.giveUp(logger, e, "Failed to update advisor invitations table");
         }

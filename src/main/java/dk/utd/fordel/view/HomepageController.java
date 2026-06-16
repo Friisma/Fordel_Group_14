@@ -3,6 +3,7 @@ package dk.utd.fordel.view;
 import dk.utd.fordel.domain.Roles;
 import dk.utd.fordel.domain.User;
 import dk.utd.fordel.domain.Project;
+import dk.utd.fordel.domain.AdvisorInvitation;
 import dk.utd.fordel.services.ProjectManager;
 import dk.utd.fordel.services.InvitationManager;
 import dk.utd.fordel.services.UserManager;
@@ -14,6 +15,9 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Comparator;
 import java.util.List;
@@ -101,6 +105,67 @@ public class HomepageController {
             }
         }
         return "home";
+    }
+
+    @PostMapping("/invitations/{projectId}/accept")
+    public String acceptInvitation(@PathVariable int projectId, HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        return handleInvitationDecision(projectId, session, redirectAttributes, true);
+    }
+
+    @PostMapping("/invitations/{projectId}/decline")
+    public String declineInvitation(@PathVariable int projectId, HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        return handleInvitationDecision(projectId, session, redirectAttributes, false);
+    }
+
+    private String handleInvitationDecision(int projectId, HttpSession session, RedirectAttributes redirectAttributes,
+            boolean accept) {
+        Object authObject = session.getAttribute("auth");
+        if (!(authObject instanceof Auth auth)) {
+            return "redirect:/login";
+        }
+
+        Object userData = session.getAttribute("userData");
+        RightsContext rights = rightsService.from(userData instanceof User.Data data ? data : null);
+        if (rights == null || !rights.isAdvisor()) {
+            return "redirect:/forbidden";
+        }
+
+        try (var uow = unitOfWork.begin()) {
+            var invites = invitationManager.getAllInvitesReceived(auth.user());
+            AdvisorInvitation target = null;
+            for (var inv : invites) {
+                if (inv.getProjectId() == projectId) {
+                    target = inv;
+                    break;
+                }
+            }
+
+            if (target == null) {
+                redirectAttributes.addFlashAttribute("error", "Invitation not found");
+                return "redirect:/";
+            }
+
+            try {
+                if (accept) {
+                    target.accept();
+                    redirectAttributes.addFlashAttribute("message", "Invitation accepted");
+                } else {
+                    target.decline();
+                    redirectAttributes.addFlashAttribute("message", "Invitation declined");
+                }
+                invitationManager.updateInvitation(target);
+                uow.commit();
+            } catch (RuntimeException e) {
+                uow.rollback();
+                redirectAttributes.addFlashAttribute("error", "Invitation already handled");
+            }
+        } catch (UnitOfWork.UnitOfWorkException e) {
+            throw new RuntimeException("Could not update invitation status", e);
+        }
+
+        return "redirect:/";
     }
 
     private static String capitalize(String s) {
