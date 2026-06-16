@@ -11,6 +11,7 @@
     <tr>
         <!--Each col in the tabel-->
         <th scope="col">name</th>
+        <th scope="col">ID</th>
         <th scope="col">description</th>
         <th scope="col">study line</th>
     </tr>
@@ -19,10 +20,16 @@
     <!--Each row in the tabel-->
     <tr th:each="project : ${projects}">
         <th th:text="${project.getProjectName()}">1</th>
+        <td th:text="${project.getProjectIDAsString()}">Admin</td>
         <td th:text="${project.getDescription()}">Admin</td>
-        <td><nav>
-
-        </nav></td>
+        <td>
+            <form th:action="@{/advisor-projects-view/assignAdvisor}" method="post">
+                <input type="hidden" name="project_name" th:value="${project.getProjectName()}"/>
+                <input type="hidden" name="project_description" th:value="${project.getDescription()}"/>
+                <input type="hidden" name="project_id" th:value="${project.getProjectID()}"/>
+                <button type="submit">Advise</button>
+            </form>
+        </td>
     </tr>
     </tbody>
 </table>

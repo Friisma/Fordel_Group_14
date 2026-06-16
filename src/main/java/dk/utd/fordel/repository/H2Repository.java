@@ -258,7 +258,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         List<Project> projects = new ArrayList<>();
         int userId = getUserIdByEmail(user.getEmail());
         var stmt = """
-        SELECT p.title, p.description
+        SELECT p.title, p.description, p.id
         FROM projects p
         JOIN projects_student ps ON p.id = ps.project_id
         WHERE ps.student_id = ?
@@ -269,7 +269,8 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
             while (resultSet.next()) {
                 projects.add(new Project(
                         resultSet.getString("title"),
-                        resultSet.getString("description")
+                        resultSet.getString("description"),
+                        resultSet.getInt("id")
                 ));
             }
         } catch (SQLException e) {
@@ -282,7 +283,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     public List<Project> getAllProjects() throws Project.InvalidProject {
         List<Project> projects = new ArrayList<>();
         var stmt = """
-        SELECT p.title, p.description
+        SELECT p.title, p.description, p.id
         FROM projects p
         """;
         try (var statement = getConnection().prepareStatement(stmt);
@@ -290,7 +291,8 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
             while (resultSet.next()) {
                 projects.add(new Project(
                         resultSet.getString("title"),
-                        resultSet.getString("description")
+                        resultSet.getString("description"),
+                        resultSet.getInt("id")
                 ));
             }
         } catch (SQLException e) {
@@ -302,7 +304,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     @Override
     public Project read(Project project) {
         try {
-            return new Project( "t","");
+            return new Project( "t","",0);
         } catch (Project.InvalidProject e) {
 
         }
@@ -439,6 +441,24 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
             throw Log.giveUp(logger, e, "Failed to create invitation");
         }
     }
+
+    @Override
+    public void assignAdvisor(User advisor, Project project){
+        int userId = getUserIdByEmail(advisor.getEmail());
+        int projectId = project.getProjectID();
+        var stmt = "INSERT INTO project_advisors (user_id, project_id) VALUES (?,?)";
+        try (var statement = getConnection().prepareStatement(stmt)){
+            statement.setInt(1, userId);
+            statement.setInt(2, projectId);
+            statement.executeUpdate();
+        } catch (SQLException e){
+            if (e.getErrorCode() == 23505){
+                throw new AdvisorAlreadyInvited("Advisor already assigned");
+            }
+            throw Log.giveUp(logger, e, "Failed to assign advisor");
+        }
+    }
+
 
     @Override
     public List<AdvisorInvitation> getAllInvitesReceived(User invited){

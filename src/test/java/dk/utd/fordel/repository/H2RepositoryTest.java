@@ -45,7 +45,7 @@ public class H2RepositoryTest {
         User user = new User(email);
 
         User.Data data = new User.Data("name",new ArrayList<>(),"line", LocalDate.of(2001,1,1));
-        Project project = new Project("test","test");
+        Project project = new Project("test","test",0);
 
 
         try (var ignored = h2Repository.begin()){

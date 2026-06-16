@@ -15,6 +15,7 @@ public class ProjectManager {
         void update(Project project) throws ProjectDoesNotExist;
         void delete(Project project) throws ProjectDoesNotExist;
         List<Project> getAllProjects() throws Project.InvalidProject;
+        void assignAdvisor(User advisor,Project project);
     }
 
     private final ProjectRepository projectRepository;
@@ -23,6 +24,10 @@ public class ProjectManager {
 
     public void createProject(Project project, User user, int userId) throws ProjectTitleAlreadyInUse{
         projectRepository.create(project, user, userId);
+    }
+
+    public void assignAdvisor(Project project, User user){
+        projectRepository.assignAdvisor(user,project);
     }
 
     public List<Project> getAllProjects() throws Project.InvalidProject {
