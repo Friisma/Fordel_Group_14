@@ -1,0 +1,23 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="da">
+
+<head th:replace="~{fragments/head ::head}"></head>
+
+<body>
+    <header th:replace="~{fragments/header ::header}"></header>
+
+    <main class="container">
+        <section>
+            <h1 th:text="${title}">Projects</h1>
+            <div class="grid">
+                <th:block th:each="project : ${projects}">
+                    <article th:replace="~{fragments/project-card :: projectCard(project=${project})}"></article>
+                </th:block>
+            </div>
+        </section>
+    </main>
+
+    <footer th:replace="~{fragments/footer ::footer}"></footer>
+</body>
+
+</html>

@@ -1,0 +1,8 @@
+<article th:fragment="invitationCard(invitation)">
+    <div class="invitation-header">
+        <h3 class="font-normal" th:text="${invitation.name}">Name</h3>
+        <span class="badge" th:classappend="' ' + ${invitation.statusClass}" th:text="${invitation.status}">
+            Status
+        </span>
+    </div>
+</article>

@@ -14,16 +14,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Controller
-public class HomeController {
+public class HomepageController {
 
     private final RightsService rightsService;
 
-    public HomeController(RightsService rightsService) {
+    public HomepageController(RightsService rightsService) {
         this.rightsService = rightsService;
     }
 
     @GetMapping("/")
-    public String getHome(Model model, HttpSession session) {
+    public String getHomepage(Model model, HttpSession session) {
         if (session.getAttribute("auth") == null) {
             return "redirect:/login";
         }
@@ -31,12 +31,16 @@ public class HomeController {
         User.Data userData = sessionUserData(session);
         RightsContext rights = rightsService.from(userData);
 
+        model.addAttribute("userData", userData);
         model.addAttribute("title", "Fordel");
         model.addAttribute("roleBadge", buildRoleBadge(rights));
-        model.addAttribute("sectionVisibility", buildSectionVisibility(rights));
-        model.addAttribute("projects", buildProjects());
-        model.addAttribute("invitations", buildInvitations());
-        model.addAttribute("advisorsMessage", buildAdvisorsMessage());
+        model.addAttribute("sectionVisibility", new SectionVisibility(
+                rightsService.canViewProject(rights),
+                canShowInvitations(rights),
+                false));
+        model.addAttribute("projects", placeholderProjects());
+        model.addAttribute("invitations", placeholderInvitations());
+        model.addAttribute("advisorsMessage", "Advisors Section (not done)");
         return "home";
     }
 
@@ -49,6 +53,25 @@ public class HomeController {
         return null;
     }
 
+    private List<ProjectCard> placeholderProjects() {
+        return List.of(
+                new ProjectCard(
+                        "project-1",
+                        "Project 1",
+                        "Placeholder project description."),
+                new ProjectCard(
+                        "project-2",
+                        "Project 2",
+                        "Placeholder project description."));
+    }
+
+    private List<InvitationCard> placeholderInvitations() {
+        return List.of(
+                new InvitationCard("Peter Sterner", "Pending", "pending"),
+                new InvitationCard("Hans Henrik", "Accepted", "accepted"),
+                new InvitationCard("Mišo Kovač", "Declined", "declined"));
+    }
+
     private String buildRoleBadge(RightsContext rights) {
         if (rights == null || rights.roles().isEmpty()) {
             return "No role";
@@ -56,19 +79,8 @@ public class HomeController {
 
         return rights.roles().stream()
                 .sorted(Comparator.comparingInt(Roles::getClearanceLevel))
-                .map(HomeController::displayName)
+                .map(HomepageController::displayName)
                 .collect(Collectors.joining(", "));
-    }
-
-    private SectionVisibility buildSectionVisibility(RightsContext rights) {
-        return new SectionVisibility(
-                canShowProjects(rights),
-                canShowInvitations(rights),
-                canShowAdvisors(rights));
-    }
-
-    private boolean canShowProjects(RightsContext rights) {
-        return rightsService.canViewProject(rights);
     }
 
     private boolean canShowInvitations(RightsContext rights) {
@@ -77,33 +89,6 @@ public class HomeController {
                 || rights.isTeacher()
                 || rights.isStudyLeader()
                 || rights.isAdministrator());
-    }
-
-    private boolean canShowAdvisors(RightsContext rights) {
-        return false;
-    }
-
-    private List<ProjectCard> buildProjects() {
-        return List.of(
-                new ProjectCard(
-                        "project1",
-                        "Project 1",
-                        "Nullam dui arcu, malesuada et sodales eu, efficitur vitae dolor. Sed ultricies dolor non ante vulputate hendrerit. Vivamus sit amet suscipit sapien. Nulla iaculis eros a elit pharetra egestas. Nunc placerat facilisis cursus. Sed vestibulum metus eget dolor pharetra rutrum."),
-                new ProjectCard(
-                        "article2",
-                        "Project 2",
-                        "Nullam dui arcu, malesuada et sodales eu, efficitur vitae dolor. Sed ultricies dolor non ante vulputate hendrerit. Vivamus sit amet suscipit sapien. Nulla iaculis eros a elit pharetra egestas. Nunc placerat facilisis cursus. Sed vestibulum metus eget dolor pharetra rutrum."));
-    }
-
-    private List<InvitationCard> buildInvitations() {
-        return List.of(
-                new InvitationCard("Peter Sterner", "Pending", "pending"),
-                new InvitationCard("Hans Henrik", "Accepted", "accepted"),
-                new InvitationCard("Mišo Kovač", "Declined", "declined"));
-    }
-
-    private String buildAdvisorsMessage() {
-        return "Advisors Section (not done)";
     }
 
     private static String displayName(Roles role) {

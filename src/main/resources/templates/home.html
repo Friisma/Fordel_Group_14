@@ -25,12 +25,9 @@
           </a>
         </div>
         <div class="grid">
-          <article th:each="project : ${projects}" th:id="${project.id}">
-            <h2 th:text="${project.title}">Title</h2>
-            <p th:text="${project.description}">
-              Description
-            </p>
-          </article>
+          <th:block th:each="project : ${projects}">
+            <article th:replace="~{fragments/project-card :: projectCard(project=${project})}"></article>
+          </th:block>
         </div>
       </details>
 
@@ -41,13 +38,9 @@
     <section id="invitations" th:if="${sectionVisibility.invitationsVisible}">
       <details open="">
         <summary>Invitations</summary>
-        <article th:each="invitation : ${invitations}">
-          <div class="invitation-header">
-            <h3 class="font-normal" th:text="${invitation.name}">Name</h3>
-            <span class="badge" th:classappend="' ' + ${invitation.statusClass}"
-              th:text="${invitation.status}">Status</span>
-          </div>
-        </article>
+        <th:block th:each="invitation : ${invitations}">
+          <article th:replace="~{fragments/invitation-card :: invitationCard(invitation=${invitation})}"></article>
+        </th:block>
       </details>
     </section>
 
