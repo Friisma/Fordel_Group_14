@@ -7,6 +7,10 @@
     <header th:replace="~{fragments/header ::header}"></header>
 
     <main class="container">
+        <div class="flash-messages">
+            <div th:if="${message}" class="notice" th:text="${message}"></div>
+            <div th:if="${error}" class="error" th:text="${error}"></div>
+        </div>
         <section id="project" class="project-section">
             <details open>
                 <summary>Project</summary>
@@ -25,6 +29,9 @@
                     <p th:if="${project == null}">No project details available.</p>
                 </div>
             </details>
+            <th:block th:if="${rights.isAdvisor()}">
+                <!-- Advisor invitations section removed per request; advisors won't see an invitations panel here -->
+            </th:block>
         </section>
 
         <section id="members" class="members-section">
@@ -37,23 +44,21 @@
         <section id="invitations" class="invitations-section">
             <th:block th:if="${rights.isStudent()}">
                 <details open>
-                    <summary>Invitations (Student)</summary>
+                    <summary>Invitations</summary>
                     <div class="card">
                         <p>Student invitations will appear here.</p>
-                        <button data-target="modal-invite-advisor" data-project-id="${projectId}" type="button"
+                        <button data-target="modal-invite-advisor" th:attr="data-project-id=${projectId}" type="button"
                             class="primary" onclick="openInviteModal(event, this)">Invite Advisor to Project</button>
+                        <div class="project-invitations">
+                            <th:block th:each="inv : ${projectInvitations}">
+                                <article th:replace="~{fragments/invitation-card :: invitationCard(invitation=${inv})}">
+                                </article>
+                            </th:block>
+                        </div>
                     </div>
                 </details>
             </th:block>
 
-            <th:block th:if="${rights.isAdvisor()}">
-                <details open>
-                    <summary>Invitations (Advisor)</summary>
-                    <div class="card">
-                        <p>Advisor invitations will appear here.</p>
-                    </div>
-                </details>
-            </th:block>
         </section>
     </main>
 

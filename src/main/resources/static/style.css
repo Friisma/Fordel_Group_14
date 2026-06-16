@@ -74,6 +74,32 @@
     margin-top: 0.5rem;
 }
 
+/* Buttons for advisor invitation actions */
+.btn-accept {
+    background-color: #4aad52;
+    /* green */
+    color: #fff;
+    border: none;
+    padding: 0.4rem 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-decline {
+    background-color: #ff595e;
+    /* red */
+    color: #fff;
+    border: none;
+    padding: 0.4rem 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-accept:hover,
+.btn-decline:hover {
+    filter: brightness(0.95);
+}
+
 .project-section,
 .invitations-section {
     margin-bottom: 1.5rem;

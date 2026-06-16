@@ -4,6 +4,8 @@ import dk.utd.fordel.domain.Roles;
 import dk.utd.fordel.domain.User;
 import dk.utd.fordel.domain.Project;
 import dk.utd.fordel.services.ProjectManager;
+import dk.utd.fordel.services.InvitationManager;
+import dk.utd.fordel.services.UserManager;
 import dk.utd.fordel.utils.UnitOfWork;
 import dk.utd.fordel.services.Authenticator.Auth;
 import dk.utd.fordel.services.rights.RightsContext;
@@ -22,11 +24,16 @@ public class HomepageController {
 
     private final RightsService rightsService;
     private final ProjectManager projectManager;
+    private final InvitationManager invitationManager;
+    private final UserManager userManager;
     private final UnitOfWork unitOfWork;
 
-    public HomepageController(RightsService rightsService, ProjectManager projectManager, UnitOfWork unitOfWork) {
+    public HomepageController(RightsService rightsService, ProjectManager projectManager,
+            InvitationManager invitationManager, UserManager userManager, UnitOfWork unitOfWork) {
         this.rightsService = rightsService;
         this.projectManager = projectManager;
+        this.invitationManager = invitationManager;
+        this.userManager = userManager;
         this.unitOfWork = unitOfWork;
     }
 
@@ -45,7 +52,7 @@ public class HomepageController {
         model.addAttribute("sectionVisibility", new SectionVisibility(
                 rightsService.canViewProject(rights),
                 canShowInvitations(rights),
-                false));
+                rights != null && rights.isAdvisor()));
         // load actual projects for this user
         Object authObject = session.getAttribute("auth");
         if (authObject instanceof Auth auth) {
@@ -68,7 +75,38 @@ public class HomepageController {
         }
         model.addAttribute("invitations", placeholderInvitations());
         model.addAttribute("advisorsMessage", "Advisors Section (not done)");
+        // load advisor invitations for advisors
+        if (rights != null && rights.isAdvisor()) {
+            if (authObject instanceof Auth auth) {
+                try (var uow = unitOfWork.begin()) {
+                    try {
+                        int advisorId = userManager.getUserIdByEmail(auth.user().getEmail());
+                        var inviteViews = invitationManager.getInvitesReceivedForAdvisor(advisorId);
+                        var inviteCards = inviteViews.stream().map(iv -> new InvitationCard(
+                                iv.projectTitle(),
+                                iv.status(),
+                                iv.statusClass(),
+                                String.valueOf(iv.projectId()),
+                                iv.inviterName())).toList();
+                        model.addAttribute("advisorInvitations", inviteCards);
+                    } catch (Exception e) {
+                        model.addAttribute("advisorInvitations", java.util.List.of());
+                    }
+                    uow.commit();
+                } catch (UnitOfWork.UnitOfWorkException e) {
+                    model.addAttribute("advisorInvitations", java.util.List.of());
+                }
+            } else {
+                model.addAttribute("advisorInvitations", java.util.List.of());
+            }
+        }
         return "home";
+    }
+
+    private static String capitalize(String s) {
+        if (s == null || s.isEmpty())
+            return s;
+        return Character.toUpperCase(s.charAt(0)) + s.substring(1);
     }
 
     private User.Data sessionUserData(HttpSession session) {
@@ -96,9 +134,9 @@ public class HomepageController {
 
     private List<InvitationCard> placeholderInvitations() {
         return List.of(
-                new InvitationCard("Peter Sterner", "Pending", "pending"),
-                new InvitationCard("Hans Henrik", "Accepted", "accepted"),
-                new InvitationCard("Mišo Kovač", "Declined", "declined"));
+                new InvitationCard("Peter Sterner", "Pending", "pending", "", ""),
+                new InvitationCard("Hans Henrik", "Accepted", "accepted", "", ""),
+                new InvitationCard("Mišo Kovač", "Declined", "declined", "", ""));
     }
 
     private String buildRoleBadge(RightsContext rights) {
@@ -133,7 +171,7 @@ public class HomepageController {
     public record ProjectCard(String id, String title, String description, String studyLine) {
     }
 
-    public record InvitationCard(String name, String status, String statusClass) {
+    public record InvitationCard(String name, String status, String statusClass, String projectId, String inviterName) {
     }
 
     public record SectionVisibility(boolean projectsVisible, boolean invitationsVisible, boolean advisorsVisible) {

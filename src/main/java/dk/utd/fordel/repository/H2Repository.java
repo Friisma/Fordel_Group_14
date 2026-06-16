@@ -534,6 +534,68 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     }
 
     @Override
+    public List<dk.utd.fordel.services.InvitationManager.AdvisorInviteView> getInvitesReceivedForAdvisor(
+            int advisorId) {
+        List<dk.utd.fordel.services.InvitationManager.AdvisorInviteView> views = new ArrayList<>();
+        var stmt = """
+                SELECT p.id AS project_id, p.title AS project_title,
+                    (SELECT u.name FROM users u JOIN project_students ps ON ps.user_id = u.id WHERE ps.project_id = p.id LIMIT 1) AS inviter_name,
+                    ai.status
+                FROM advisor_invitations ai
+                JOIN projects p ON ai.project_id = p.id
+                WHERE ai.advisor_id = ?
+                """;
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, advisorId);
+            try (var rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    int projectId = rs.getInt("project_id");
+                    String projectTitle = rs.getString("project_title");
+                    String inviterName = rs.getString("inviter_name");
+                    String status = rs.getString("status");
+                    String statusClass = status != null ? status.toLowerCase() : "pending";
+                    String displayStatus = status != null && !status.isBlank()
+                            ? (Character.toUpperCase(status.charAt(0)) + status.substring(1))
+                            : "Pending";
+                    views.add(new dk.utd.fordel.services.InvitationManager.AdvisorInviteView(
+                            projectTitle != null ? projectTitle : "Project " + projectId,
+                            inviterName != null ? inviterName : "", displayStatus, statusClass, projectId));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return views;
+    }
+
+    @Override
+    public List<dk.utd.fordel.services.InvitationManager.InviteView> getInvitesForProject(int projectId) {
+        List<dk.utd.fordel.services.InvitationManager.InviteView> views = new ArrayList<>();
+        var stmt = """
+                SELECT u.email, u.name, ai.status
+                FROM advisor_invitations ai
+                JOIN users u ON ai.advisor_id = u.id
+                WHERE ai.project_id = ?
+                """;
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, projectId);
+            try (var resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    String email = resultSet.getString("email");
+                    String name = resultSet.getString("name");
+                    String status = resultSet.getString("status");
+                    String statusClass = status != null ? status : "pending";
+                    views.add(new dk.utd.fordel.services.InvitationManager.InviteView(name, email,
+                            status != null ? status : "pending", statusClass));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return views;
+    }
+
+    @Override
     public void update(AdvisorInvitation advisorInvitation) throws AdvisorAlreadyInvited {
         String status = advisorInvitation.getStatusAsString();
         int advisor_id = advisorInvitation.getAdvisorId();

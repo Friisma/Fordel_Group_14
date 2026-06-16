@@ -48,8 +48,23 @@
 
     <section id="advisors" th:if="${sectionVisibility.advisorsVisible}">
       <details open="">
-        <summary>Advisors</summary>
-        <span th:text="${advisorsMessage}">Advisors Section (not done)</span>
+        <summary>Invitations to Projects</summary>
+        <div th:if="${rights.isAdvisor()}">
+          <div class="card">
+            <div th:if="${advisorInvitations != null and #lists.isEmpty(advisorInvitations) == false}">
+              <th:block th:each="inv : ${advisorInvitations}">
+                <article th:replace="~{fragments/advisor-invitation-card :: advisorInvitation(invitation=${inv})}">
+                </article>
+              </th:block>
+            </div>
+            <div th:if="${advisorInvitations == null or #lists.isEmpty(advisorInvitations)}">
+              <p>No invitations</p>
+            </div>
+          </div>
+        </div>
+        <div th:if="${!rights.isAdvisor()}">
+          <span th:text="${advisorsMessage}">Advisors Section (not done)</span>
+        </div>
       </details>
     </section>
   </main>

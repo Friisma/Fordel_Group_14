@@ -8,8 +8,11 @@
         </header>
 
         <!-- This form is a frontend-only placeholder for now -->
-        <form action="#" method="post">
+        <form id="invite-advisor-form" action="#" method="post"
+            th:onsubmit="|document.getElementById('invite-advisor-form').action = document.getElementById('invite-advisor-form').action|">
             <input type="hidden" id="modal-project-id-input" name="projectId" value="" />
+            <!-- CSRF token for Spring Security -->
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
             <div style="display:flex;gap:1rem;align-items:flex-end;">
                 <div style="flex-grow:1;">
@@ -17,7 +20,7 @@
                     <select id="advisor-select" name="advisorEmail" required>
                         <option value="" disabled selected>Select advisor</option>
                         <option th:each="adv : ${availableAdvisors}" th:value="${adv.email()}"
-                               th:text="|${adv.name()} (${adv.email()})|">Advisor</option>
+                            th:text="|${adv.name()} (${adv.email()})|">Advisor</option>
                     </select>
                 </div>
 
@@ -30,6 +33,11 @@
         function openInviteModal(event, buttonElement) {
             const projectId = buttonElement.getAttribute('data-project-id');
             document.getElementById('modal-project-id-input').value = projectId;
+            // set form action to post to the project's invite endpoint
+            const form = document.getElementById('invite-advisor-form');
+            if (form) {
+                form.action = '/project/' + encodeURIComponent(projectId) + '/invite-advisor';
+            }
             toggleModal(event);
         }
     </script>
