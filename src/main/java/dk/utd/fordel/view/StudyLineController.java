@@ -1,5 +1,6 @@
 package dk.utd.fordel.view;
 
+import dk.utd.fordel.domain.Email;
 import dk.utd.fordel.domain.StudyLine;
 import dk.utd.fordel.domain.User;
 import dk.utd.fordel.services.Authenticator;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class StudyLineController {
@@ -49,11 +52,74 @@ public class StudyLineController {
 
             var studyLineUsers = userManager.getAllUsersRelatedToStudyLine(id);
             model.addAttribute("studyLineUsers", studyLineUsers);
+            model.addAttribute("studyLineId", id);
             uow.commit();
 
         } catch (UnitOfWork.UnitOfWorkException e) {
             throw new RuntimeException(e);
         }
         return "manage-study-line";
+    }
+
+    @PostMapping("/studyline/{id}/manage/remove-user")
+    public String removeUser(@PathVariable int id, @RequestParam("emailToRemove") String emailToRemove, HttpSession session, Model model) {
+        Object authObject = session.getAttribute("auth");
+        if (!(authObject instanceof Authenticator.Auth auth)) {
+            return "redirect:/login";
+        }
+
+        Object userData = session.getAttribute("userData");
+        RightsContext rights = rightsService.from(userData instanceof User.Data data ? data : null);
+        if (!rightsService.canManageStudyLine(rights)) {
+            return "redirect:/forbidden";
+        }
+
+        try (var uow = unitOfWork.begin()){
+            if (!studyLineManager.canManageStudyLine(auth.user(), id)) {
+                return "redirect:/forbidden";
+            }
+
+            var userToAdd = User.of(emailToRemove);
+            studyLineManager.removeUser(userToAdd, id);
+
+            uow.commit();
+
+        } catch (UnitOfWork.UnitOfWorkException e) {
+            throw new RuntimeException(e);
+        } catch (Email.InvalidEmail e) {
+            throw new RuntimeException(e);
+        }
+        return "redirect:/studyline/" + id + "/manage";
+    }
+
+    @PostMapping("/studyline/{id}/manage/add-student")
+    public String addStudent(@PathVariable int id, @RequestParam String emailToAdd, HttpSession session, Model model) {
+        Object authObject = session.getAttribute("auth");
+        if (!(authObject instanceof Authenticator.Auth auth)) {
+            return "redirect:/login";
+        }
+
+        Object userData = session.getAttribute("userData");
+        RightsContext rights = rightsService.from(userData instanceof User.Data data ? data : null);
+        if (!rightsService.canManageStudyLine(rights)) {
+            return "redirect:/forbidden";
+        }
+
+        try (var uow = unitOfWork.begin()){
+            if (!studyLineManager.canManageStudyLine(auth.user(), id)) {
+                return "redirect:/forbidden";
+            }
+
+            var userToAdd = User.of(emailToAdd);
+            studyLineManager.addStudent(userToAdd, id);
+
+            uow.commit();
+
+        } catch (UnitOfWork.UnitOfWorkException e) {
+            throw new RuntimeException(e);
+        } catch (Email.InvalidEmail e) {
+            throw new RuntimeException(e);
+        }
+        return "redirect:/studyline/" + id + "/manage";
     }
 }

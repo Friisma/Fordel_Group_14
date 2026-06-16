@@ -570,6 +570,75 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     }
 
     @Override
+    public void addStudent(User user, int studyLineId) {
+        var stmt = """
+                INSERT INTO study_line_students (user_id, role_id)
+                VALUES (
+                    (SELECT id FROM users WHERE email = ?),
+                    (?)
+                )
+                """;
+
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setString(1, user.getEmail().asString());
+            statement.setInt(2, studyLineId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Could not add user to study line");
+        }
+    }
+
+    @Override
+    public void addStudyLeader(User user, int studyLineId) {
+        var stmt = """
+                INSERT INTO study_line_leaders (user_id, role_id)
+                VALUES (
+                    (SELECT id FROM users WHERE email = ?),
+                    (?)
+                )
+                """;
+
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setString(1, user.getEmail().asString());
+            statement.setInt(2, studyLineId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Could not add user to study line");
+        }
+    }
+
+    @Override
+    public void removeUser(User user, int studyLineId) {
+        var stmt1 = """
+        DELETE FROM study_line_students
+               WHERE user_id = ?
+               AND study_line_id = ?
+        """;
+
+        try (var statement = getConnection().prepareStatement(stmt1)) {
+            statement.setInt(1, getUserIdByEmail(user.getEmail()));
+            statement.setInt(2, studyLineId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Could not add role to user");
+        }
+
+        var stmt2 = """
+        DELETE FROM study_line_leaders
+               WHERE user_id = ?
+               AND study_line_id = ?
+        """;
+
+        try (var statement = getConnection().prepareStatement(stmt2)) {
+            statement.setInt(1, getUserIdByEmail(user.getEmail()));
+            statement.setInt(2, studyLineId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Could not add role to user");
+        }
+    }
+
+    @Override
     public UnitOfWork begin() throws UnitOfWorkException {
         try {
             logger.info("Starting transaction for {}", this);

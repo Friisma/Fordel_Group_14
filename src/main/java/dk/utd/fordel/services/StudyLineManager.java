@@ -14,6 +14,10 @@ public class StudyLineManager {
         void create(StudyLine studyLine) throws StudyLineAlreadyExists;
 
         boolean canManageStudyLine(User user, int studyLineId);
+
+        void addStudent(User user, int studyLineId);
+        void addStudyLeader(User user, int studyLineId);
+        void removeUser(User user, int studyLineId);
     }
 
     private final StudyLineRepository studyLineRepository;
@@ -28,5 +32,17 @@ public class StudyLineManager {
 
     public boolean canManageStudyLine(User user, int studyLineId) {
         return studyLineRepository.canManageStudyLine(user, studyLineId);
+    }
+
+    public void addStudent(User user, int studyLineId) {
+        studyLineRepository.addStudent(user, studyLineId);
+    }
+
+    public void addStudyLeader(User user, int studyLineId) {
+        studyLineRepository.addStudyLeader(user, studyLineId);
+    }
+
+    public void removeUser(User user, int studyLineId) {
+        studyLineRepository.removeUser(user, studyLineId);
     }
 }

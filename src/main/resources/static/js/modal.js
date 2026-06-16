@@ -117,5 +117,9 @@ function openRemoveRoleModal(event, buttonElement) {
 }
 
 function openConfirmRemoveStudyLineModal (event, buttonElement) {
+  const userEmail = buttonElement.getAttribute('data-email');
+
+  document.getElementById('confirm-remove-user-email').value = userEmail;
+
   toggleModal(event);
 }

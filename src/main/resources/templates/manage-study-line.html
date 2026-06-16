@@ -8,6 +8,7 @@
 <main class="container">
     <section id="manage-study-line">
         <h1>List of user on study line</h1>
+        <button></button>
         <table>
             <thead>
                 <tr>
@@ -41,7 +42,7 @@
                                             <!--Remove from study line button -->
                                             <li>
                                                 <button data-target="modal-confirm-remove-user-from-study-line"
-                                                        th:data-userId="${user.id()}"
+                                                        th:data-email="${user.email()}"
                                                         onclick="openConfirmRemoveStudyLineModal(event, this)">
                                                     Remove
                                                 </button>
@@ -68,8 +69,8 @@
             <h3 style="text-align: center; width: 100%; margin: 0;">Remove user</h3>
         </header>
 
-        <form action="???????" method="post">
-            <input type="hidden" id="??????" name="?????" value="" />
+        <form th:action="@{/studyline/{id}/manage/remove-user(id=${studyLineId})}" method="post">
+            <input type="hidden" id="confirm-remove-user-email" name="emailToRemove" value="" />
 
             <p style="text-align: center;">Are you sure you want to remove this user from the study line?</p>
 
