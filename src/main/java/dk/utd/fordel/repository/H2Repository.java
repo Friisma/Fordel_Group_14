@@ -279,6 +279,27 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     }
 
     @Override
+    public List<Project> getAllProjects() throws Project.InvalidProject {
+        List<Project> projects = new ArrayList<>();
+        var stmt = """
+        SELECT p.title, p.description
+        FROM projects p
+        """;
+        try (var statement = getConnection().prepareStatement(stmt);
+             var resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                projects.add(new Project(
+                        resultSet.getString("title"),
+                        resultSet.getString("description")
+                ));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return projects;
+    }
+
+    @Override
     public Project read(Project project) {
         try {
             return new Project( "t","");
