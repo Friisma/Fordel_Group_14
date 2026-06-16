@@ -22,6 +22,10 @@ public class RightsService {
         permissions.add(Permission.VIEW_HOME);
         permissions.add(Permission.EDIT_OWN_PROFILE);
 
+        if (!roles.isEmpty()) {
+            permissions.add(Permission.VIEW_PROJECT);
+        }
+
         if (roles.contains(Roles.ADMINISTRATOR)) {
             permissions.add(Permission.VIEW_ADMIN_PAGE);
             permissions.add(Permission.GRANT_ROLES);
@@ -40,6 +44,10 @@ public class RightsService {
 
     public boolean canEditOwnProfile(RightsContext rights) {
         return rights != null && rights.hasPermission(Permission.EDIT_OWN_PROFILE);
+    }
+
+    public boolean canViewProject(RightsContext rights) {
+        return rights != null && rights.hasPermission(Permission.VIEW_PROJECT);
     }
 
     private static <E extends Enum<E>> Set<E> toEnumSet(Iterable<E> values, Class<E> enumType) {

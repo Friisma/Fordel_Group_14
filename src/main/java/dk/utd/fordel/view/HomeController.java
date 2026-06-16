@@ -68,11 +68,7 @@ public class HomeController {
     }
 
     private boolean canShowProjects(RightsContext rights) {
-        return rights != null && (rights.isStudent()
-                || rights.isAdvisor()
-                || rights.isTeacher()
-                || rights.isStudyLeader()
-                || rights.isAdministrator());
+        return rightsService.canViewProject(rights);
     }
 
     private boolean canShowInvitations(RightsContext rights) {
