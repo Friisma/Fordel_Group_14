@@ -19,6 +19,10 @@ public class ProjectManager {
 
         boolean canViewProject(User user, int projectId);
 
+        String getProjectCreatorEmail(int projectId);
+
+        void kickMemberFromProject(int projectId, User member);
+
         void update(Project project) throws ProjectDoesNotExist;
 
         void delete(Project project) throws ProjectDoesNotExist;
@@ -41,6 +45,14 @@ public class ProjectManager {
 
     public boolean canViewProject(User user, int projectId) {
         return projectRepository.canViewProject(user, projectId);
+    }
+
+    public String getProjectCreatorEmail(int projectId) {
+        return projectRepository.getProjectCreatorEmail(projectId);
+    }
+
+    public void kickMemberFromProject(int projectId, User member) {
+        projectRepository.kickMemberFromProject(projectId, member);
     }
 
 }

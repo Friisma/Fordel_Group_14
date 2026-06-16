@@ -74,10 +74,8 @@
     margin-top: 0.5rem;
 }
 
-/* Buttons for advisor invitation actions */
 .btn-accept {
     background-color: #4aad52;
-    /* green */
     color: #fff;
     border: none;
     padding: 0.4rem 0.75rem;
@@ -87,7 +85,6 @@
 
 .btn-decline {
     background-color: #ff595e;
-    /* red */
     color: #fff;
     border: none;
     padding: 0.4rem 0.75rem;
@@ -98,6 +95,70 @@
 .btn-accept:hover,
 .btn-decline:hover {
     filter: brightness(0.95);
+}
+
+.member-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.member-card-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.member-card-message {
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+}
+
+.member-card-kick-form {
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.kick-modal-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.kick-modal-actions>button {
+    width: auto;
+    flex: 0 0 auto;
+    margin: 0;
+    align-self: center;
+}
+
+.kick-button {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    width: auto;
+    flex: 0 0 auto;
+    background-color: #ff595e;
+    color: #fff;
+    border: none;
+}
+
+.kick-button:hover {
+    background-color: #b71c1c;
+    filter: brightness(0.95);
+}
+
+.kick-button:visited,
+.kick-button:active,
+.kick-button:focus {
+    color: #fff;
 }
 
 .project-section,
@@ -138,4 +199,58 @@
     align-items: center;
     margin: 0.5rem 1rem 0.5rem 1rem;
     gap: 1rem;
+}
+
+.flash-popup {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 1000;
+    min-width: 260px;
+    max-width: min(420px, calc(100vw - 2rem));
+    padding: 0.85rem 1rem;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    animation: flash-popup-in 180ms ease-out;
+}
+
+.flash-popup p {
+    margin: 0;
+}
+
+.flash-popup.success {
+    background-color: #2e7d32;
+    color: #fff;
+}
+
+.flash-popup.error {
+    background-color: #c62828;
+    color: #fff;
+}
+
+.flash-popup.is-hiding {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 200ms ease, transform 200ms ease;
+}
+
+@keyframes flash-popup-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 720px) {
+    .flash-popup {
+        left: 1rem;
+        right: 1rem;
+        min-width: auto;
+        max-width: none;
+    }
 }

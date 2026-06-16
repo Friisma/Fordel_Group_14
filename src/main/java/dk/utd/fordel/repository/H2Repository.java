@@ -382,6 +382,57 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     }
 
     @Override
+    public String getProjectCreatorEmail(int projectId) {
+        var stmt = """
+                SELECT u.email
+                FROM project_students ps
+                JOIN users u ON u.id = ps.user_id
+                WHERE ps.project_id = ?
+                ORDER BY ps.user_id ASC
+                LIMIT 1
+                """;
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, projectId);
+            try (var rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("email");
+                }
+            }
+            return null;
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to read creator for project: " + projectId);
+        }
+    }
+
+    @Override
+    public void kickMemberFromProject(int projectId, User member) {
+        int userId = getUserIdByEmail(member.getEmail());
+
+        var deleteStudent = "DELETE FROM project_students WHERE project_id = ? AND user_id = ?";
+        var deleteAdvisor = "DELETE FROM project_advisors WHERE project_id = ? AND user_id = ?";
+        var deleteInvitation = "DELETE FROM advisor_invitations WHERE project_id = ? AND advisor_id = ?";
+
+        try (var psDelete = getConnection().prepareStatement(deleteStudent);
+                var paDelete = getConnection().prepareStatement(deleteAdvisor);
+                var aiDelete = getConnection().prepareStatement(deleteInvitation)) {
+            psDelete.setInt(1, projectId);
+            psDelete.setInt(2, userId);
+            psDelete.executeUpdate();
+
+            paDelete.setInt(1, projectId);
+            paDelete.setInt(2, userId);
+            paDelete.executeUpdate();
+
+            aiDelete.setInt(1, projectId);
+            aiDelete.setInt(2, userId);
+            aiDelete.executeUpdate();
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e,
+                    "Failed to kick member from project: " + projectId + ", member: " + member.getEmail().asString());
+        }
+    }
+
+    @Override
     public Project read(Project project) {
         try {
             return new Project("t", "");

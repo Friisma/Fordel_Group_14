@@ -7,10 +7,6 @@
     <header th:replace="~{fragments/header ::header}"></header>
 
     <main class="container">
-        <div class="flash-messages">
-            <div th:if="${message}" class="notice" th:text="${message}"></div>
-            <div th:if="${error}" class="error" th:text="${error}"></div>
-        </div>
         <section id="project" class="project-section">
             <details open>
                 <summary>Project</summary>
@@ -37,7 +33,18 @@
         <section id="members" class="members-section">
             <details open>
                 <summary>Members</summary>
-                <!-- TODO -->
+                <div class="project-members">
+                    <th:block th:if="${members != null and #lists.isEmpty(members) == false}">
+                        <th:block th:each="member : ${members}">
+                            <article
+                                th:replace="~{fragments/member-card :: memberCard(member=${member}, projectId=${projectId})}">
+                            </article>
+                        </th:block>
+                    </th:block>
+                    <th:block th:if="${members == null or #lists.isEmpty(members)}">
+                        <p>No members found.</p>
+                    </th:block>
+                </div>
             </details>
         </section>
 

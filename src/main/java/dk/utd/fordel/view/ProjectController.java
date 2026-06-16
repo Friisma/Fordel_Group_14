@@ -19,8 +19,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
-import dk.utd.fordel.domain.User;
 import dk.utd.fordel.domain.AdvisorAlreadyInvited;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class ProjectController {
@@ -71,6 +73,32 @@ public class ProjectController {
                 // ignore and leave project null
             }
             model.addAttribute("project", project);
+
+            // load members that currently have access to this project
+            try {
+                String creatorEmail = projectManager.getProjectCreatorEmail(id);
+                model.addAttribute("projectCreatorEmail", creatorEmail);
+                var allUsers = userManager.getAllUsers();
+                var members = allUsers.stream()
+                        .filter(u -> {
+                            try {
+                                return projectManager.canViewProject(User.of(u.email()), id);
+                            } catch (dk.utd.fordel.domain.Email.InvalidEmail e) {
+                                return false;
+                            }
+                        })
+                        .map(u -> new MemberCard(
+                                u.name(),
+                                u.roles(),
+                                u.email(),
+                                creatorEmail != null && creatorEmail.equalsIgnoreCase(u.email())))
+                        .toList();
+                model.addAttribute("members", members);
+            } catch (Exception e) {
+                model.addAttribute("members", java.util.List.of());
+                model.addAttribute("projectCreatorEmail", null);
+            }
+
             // populate available advisors for the invite modal
             try {
                 var allUsers = userManager.getAllUsers();
@@ -114,6 +142,89 @@ public class ProjectController {
         }
         model.addAttribute("projectId", id);
         return "project";
+    }
+
+    private static String formatRoles(List<Roles> roles) {
+        if (roles == null || roles.isEmpty()) {
+            return "No role";
+        }
+        return roles.stream()
+                .map(r -> switch (r) {
+                    case STUDENT -> "Student";
+                    case ADVISOR -> "Advisor";
+                    case TEACHER -> "Teacher";
+                    case STUDY_LEADER -> "Study Leader";
+                    case ADMINISTRATOR -> "Administrator";
+                })
+                .collect(Collectors.joining(", "));
+    }
+
+    public record MemberCard(String name, List<Roles> roles, String email, boolean creator) {
+        public String rolesDisplay() {
+            return formatRoles(roles);
+        }
+
+        public boolean kickable() {
+            return !creator;
+        }
+    }
+
+    @PostMapping("/project/{id}/members/kick")
+    public String kickMember(@PathVariable int id,
+            @RequestParam("memberEmail") String memberEmail,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        Object authObject = session.getAttribute("auth");
+        if (!(authObject instanceof Auth auth)) {
+            return "redirect:/login";
+        }
+
+        Object userData = session.getAttribute("userData");
+        RightsContext rights = rightsService.from(userData instanceof User.Data data ? data : null);
+        if (!rightsService.canViewProject(rights)) {
+            return "redirect:/forbidden";
+        }
+
+        try (var uow = unitOfWork.begin()) {
+            if (!projectManager.canViewProject(auth.user(), id)) {
+                return "redirect:/forbidden";
+            }
+
+            String creatorEmail = projectManager.getProjectCreatorEmail(id);
+            String actorEmail = auth.user().getEmail().asString();
+
+            // only project creator can kick, and creator cannot be kicked
+            if (creatorEmail == null || !creatorEmail.equalsIgnoreCase(actorEmail)) {
+                redirectAttributes.addFlashAttribute("error", "Only the project creator can kick members");
+                uow.rollback();
+                return "redirect:/project/" + id;
+            }
+
+            if (creatorEmail.equalsIgnoreCase(memberEmail)) {
+                redirectAttributes.addFlashAttribute("error", "The project creator cannot be kicked");
+                uow.rollback();
+                return "redirect:/project/" + id;
+            }
+
+            try {
+                var member = User.of(memberEmail);
+                if (!projectManager.canViewProject(member, id)) {
+                    redirectAttributes.addFlashAttribute("error", "Member does not have access to this project");
+                    uow.rollback();
+                    return "redirect:/project/" + id;
+                }
+                projectManager.kickMemberFromProject(id, member);
+                uow.commit();
+                redirectAttributes.addFlashAttribute("message", "Member was kicked from the project");
+            } catch (dk.utd.fordel.domain.Email.InvalidEmail invalidEmail) {
+                uow.rollback();
+                redirectAttributes.addFlashAttribute("error", "Invalid member email");
+            }
+        } catch (UnitOfWork.UnitOfWorkException e) {
+            throw new RuntimeException("Could not open project member-kick transaction", e);
+        }
+
+        return "redirect:/project/" + id;
     }
 
     @PostMapping("/project/{id}/invite-advisor")
