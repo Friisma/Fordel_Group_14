@@ -1,0 +1,36 @@
+<!-- Invite Advisor Modal Fragment -->
+<dialog id="modal-invite-advisor" th:fragment="inviteAdvisorModal(availableAdvisors)">
+    <article>
+        <header>
+            <button aria-label="Close" rel="prev" data-target="modal-invite-advisor"
+                onclick="toggleModal(event)"></button>
+            <h3>Invite advisor to project</h3>
+        </header>
+
+        <!-- This form is a frontend-only placeholder for now -->
+        <form action="#" method="post">
+            <input type="hidden" id="modal-project-id-input" name="projectId" value="" />
+
+            <div style="display:flex;gap:1rem;align-items:flex-end;">
+                <div style="flex-grow:1;">
+                    <label for="advisor-select">Select advisor</label>
+                    <select id="advisor-select" name="advisorEmail" required>
+                        <option value="" disabled selected>Select advisor</option>
+                        <option th:each="adv : ${availableAdvisors}" th:value="${adv.email()}"
+                               th:text="|${adv.name()} (${adv.email()})|">Advisor</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="primary" style="width:auto;">Send invitation</button>
+            </div>
+        </form>
+    </article>
+
+    <script>
+        function openInviteModal(event, buttonElement) {
+            const projectId = buttonElement.getAttribute('data-project-id');
+            document.getElementById('modal-project-id-input').value = projectId;
+            toggleModal(event);
+        }
+    </script>
+</dialog>
