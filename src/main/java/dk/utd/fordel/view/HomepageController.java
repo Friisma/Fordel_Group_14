@@ -2,6 +2,10 @@ package dk.utd.fordel.view;
 
 import dk.utd.fordel.domain.Roles;
 import dk.utd.fordel.domain.User;
+import dk.utd.fordel.domain.Project;
+import dk.utd.fordel.services.ProjectManager;
+import dk.utd.fordel.utils.UnitOfWork;
+import dk.utd.fordel.services.Authenticator.Auth;
 import dk.utd.fordel.services.rights.RightsContext;
 import dk.utd.fordel.services.rights.RightsService;
 import jakarta.servlet.http.HttpSession;
@@ -17,9 +21,13 @@ import java.util.stream.Collectors;
 public class HomepageController {
 
     private final RightsService rightsService;
+    private final ProjectManager projectManager;
+    private final UnitOfWork unitOfWork;
 
-    public HomepageController(RightsService rightsService) {
+    public HomepageController(RightsService rightsService, ProjectManager projectManager, UnitOfWork unitOfWork) {
         this.rightsService = rightsService;
+        this.projectManager = projectManager;
+        this.unitOfWork = unitOfWork;
     }
 
     @GetMapping("/")
@@ -38,7 +46,26 @@ public class HomepageController {
                 rightsService.canViewProject(rights),
                 canShowInvitations(rights),
                 false));
-        model.addAttribute("projects", placeholderProjects());
+        // load actual projects for this user
+        Object authObject = session.getAttribute("auth");
+        if (authObject instanceof Auth auth) {
+            try (var uow = unitOfWork.begin()) {
+                var projects = projectManager.getAllProjectsRelatedToUser(auth.user());
+                var projectCards = projects.stream().map(p -> new ProjectCard(
+                        String.valueOf(p.getProjectID()),
+                        p.getProjectName(),
+                        p.getDescription() != null ? p.getDescription() : "",
+                        p.getStudyLine() != null ? p.getStudyLine() : "")).toList();
+                model.addAttribute("projects", projectCards);
+                uow.commit();
+            } catch (Project.InvalidProject e) {
+                model.addAttribute("projects", placeholderProjects());
+            } catch (UnitOfWork.UnitOfWorkException e) {
+                model.addAttribute("projects", placeholderProjects());
+            }
+        } else {
+            model.addAttribute("projects", placeholderProjects());
+        }
         model.addAttribute("invitations", placeholderInvitations());
         model.addAttribute("advisorsMessage", "Advisors Section (not done)");
         return "home";

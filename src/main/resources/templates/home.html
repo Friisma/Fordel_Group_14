@@ -18,13 +18,13 @@
 
     <section id="projects" th:if="${sectionVisibility.projectsVisible}">
       <details open="">
-        <summary>Projects</summary>
+        <summary><a href="/projects" class="project-link">Projects</a></summary>
         <div>
           <a th:href="@{/create-project}" role="button">
             Create Project
           </a>
         </div>
-        <div class="grid">
+        <div class="project-grid">
           <th:block th:each="project : ${projects}">
             <article th:replace="~{fragments/project-card :: projectCard(project=${project})}"></article>
           </th:block>

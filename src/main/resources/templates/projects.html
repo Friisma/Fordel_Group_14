@@ -9,7 +9,7 @@
     <main class="container">
         <section>
             <h1 th:text="${title}">Projects</h1>
-            <div class="grid">
+            <div class="project-grid">
                 <th:block th:each="project : ${projects}">
                     <article th:replace="~{fragments/project-card :: projectCard(project=${project})}"></article>
                 </th:block>
