@@ -310,7 +310,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         List<Project> projects = new ArrayList<>();
         int userId = getUserIdByEmail(user.getEmail());
         var stmt = """
-                SELECT p.title, p.description
+                SELECT p.id, p.title, p.description
                 FROM projects p
                 JOIN project_students ps ON p.id = ps.project_id
                 WHERE ps.user_id = ?
@@ -319,9 +319,11 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
             statement.setInt(1, userId);
             try (var resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
-                    projects.add(new Project(
+                    Project project = new Project(
                             resultSet.getString("title"),
-                            resultSet.getString("description")));
+                            resultSet.getString("description"));
+                    project.setProjectID(resultSet.getInt("id"));
+                    projects.add(project);
                 }
             }
         } catch (SQLException e) {

@@ -15,8 +15,6 @@ import dk.utd.fordel.services.Authenticator.DefaultPasswordEncoder;
 import dk.utd.fordel.services.Authenticator.PasswordEncoding;
 import dk.utd.fordel.utils.UnitOfWork.UnitOfWorkException;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,16 +38,12 @@ public class H2RepositoryTest {
 
     @Test
     void creating_a_project_with_an_existing_name_should_fail()
-            throws ProjectTitleAlreadyInUse, UnitOfWorkException, Project.InvalidProject, EmailAlreadyInUse {
-        Email email = new Email("test", "test");
-        User user = new User(email);
-
-        User.Data data = new User.Data("name", new ArrayList<>(), "line", LocalDate.of(2001, 1, 1));
+            throws ProjectTitleAlreadyInUse, UnitOfWorkException, Project.InvalidProject, EmailAlreadyInUse,
+            InvalidEmail {
+        User user = User.of("student@test.dk");
         Project project = new Project("test", "test");
 
         try (var ignored = h2Repository.begin()) {
-            h2Repository.create(user, data);
-
             int userId = h2Repository.getUserIdByEmail(user.getEmail());
 
             h2Repository.create(project, user, userId);

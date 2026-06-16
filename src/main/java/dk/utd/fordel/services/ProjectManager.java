@@ -35,6 +35,10 @@ public class ProjectManager {
         projectRepository.create(project, user, studyLineName, userId);
     }
 
+    public List<Project> getAllProjectsRelatedToUser(User user) throws Project.InvalidProject {
+        return projectRepository.getAllProjectsRelatedToUser(user);
+    }
+
     public boolean canViewProject(User user, int projectId) {
         return projectRepository.canViewProject(user, projectId);
     }
