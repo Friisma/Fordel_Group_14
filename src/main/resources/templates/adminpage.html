@@ -123,46 +123,5 @@
   </dialog>
 
   <script th:src="@{/js/modal.js}" defer></script>
-  <script>
-    function openRoleModal(event, buttonElement) {
-      const userEmail = buttonElement.getAttribute('data-email');
-
-      document.getElementById('assignRole-modal-email').value = userEmail;
-
-      toggleModal(event);
-    }
-
-    function openRemoveRoleModal(event, buttonElement) {
-      const userEmail = buttonElement.getAttribute('data-email');
-      const userRoles = buttonElement.getAttribute('data-roles');
-
-      document.getElementById('removeRole-modal-email').value = userEmail;
-      const tbody = document.getElementById('remove-role-tbody');
-      tbody.innerHTML = '';
-
-      if (userRoles && userRoles.trim() !== '') {
-        const roles = userRoles.split(',');
-
-        roles.forEach(role => {
-          const cleanRole = role.trim();
-          const tr = document.createElement('tr');
-
-          tr.innerHTML = `
-            <td>${cleanRole}</td>
-            <td>
-              <button type="submit" name="role" value="${cleanRole}">
-                Remove
-              </button>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
-      } else {
-        tbody.innerHTML = '<tr><td colspan="2">No roles assigned.</td></tr>';
-      }
-
-      toggleModal(event);
-    }
-  </script>
 </body>
 </html>

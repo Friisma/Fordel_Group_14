@@ -73,3 +73,49 @@ const getScrollbarWidth = () => {
 const isScrollbarVisible = () => {
   return document.body.scrollHeight > screen.height;
 };
+
+// Used to open and know what role should be assigned to a specific user
+function openRoleModal(event, buttonElement) {
+  const userEmail = buttonElement.getAttribute('data-email');
+
+  document.getElementById('assignRole-modal-email').value = userEmail;
+
+  toggleModal(event);
+}
+
+// Used to open and know what role should be removed for a specific user
+function openRemoveRoleModal(event, buttonElement) {
+  const userEmail = buttonElement.getAttribute('data-email');
+  const userRoles = buttonElement.getAttribute('data-roles');
+
+  document.getElementById('removeRole-modal-email').value = userEmail;
+  const tbody = document.getElementById('remove-role-tbody');
+  tbody.innerHTML = '';
+
+  if (userRoles && userRoles.trim() !== '') {
+    const roles = userRoles.split(',');
+
+    roles.forEach(role => {
+      const cleanRole = role.trim();
+      const tr = document.createElement('tr');
+
+      tr.innerHTML = `
+            <td>${cleanRole}</td>
+            <td>
+              <button type="submit" name="role" value="${cleanRole}">
+                Remove
+              </button>
+            </td>
+          `;
+      tbody.appendChild(tr);
+    });
+  } else {
+    tbody.innerHTML = '<tr><td colspan="2">No roles assigned.</td></tr>';
+  }
+
+  toggleModal(event);
+}
+
+function openConfirmRemoveStudyLineModal (event, buttonElement) {
+  toggleModal(event);
+}

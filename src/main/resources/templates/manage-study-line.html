@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="da">
+
+<head th:replace="~{fragments/head ::head}"></head>
+
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main class="container">
+    <section id="manage-study-line">
+        <h1>List of user on study line</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Role</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr th:each="user : ${studyLineUsers}">
+                    <td th:text="${user.name()}">Name</td>
+                    <td th:text="${user.email()}">Email</td>
+                    <td th:text="${#strings.listJoin(user.roles(), ', ')}">Role</td>
+                    <td> <!--Action dropdown button-->
+                        <nav>
+                            <ul>
+                                <li>
+                                    <details class="dropdown">
+                                        <summary role="button" class="secondary">Action</summary>
+                                        <ul>
+                                            <!--Contact user -->
+                                            <li>
+                                                <!--SKAL ÆNDRES SÅ DEN TAGER USERS MAIL -->
+                                                <button onclick="window.location.href='mailto:test@utd.dk';">
+                                                    Contact
+                                                </button>
+                                            </li>
+
+                                            <!--Remove from study line button -->
+                                            <li>
+                                                <button data-target="modal-confirm-remove-user-from-study-line"
+                                                        th:data-userId="${user.id()}"
+                                                        onclick="openConfirmRemoveStudyLineModal(event, this)">
+                                                    Remove
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </details>
+                                </li>
+                            </ul>
+                        </nav>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/footer ::footer}"></footer>
+
+<!--Modal for confirming to remove user from a study line-->
+<dialog id="modal-confirm-remove-user-from-study-line">
+    <article>
+        <header>
+            <button aria-label="Close" rel="prev" data-target="modal-confirm-remove-user-from-study-line" onclick="toggleModal(event)"></button>
+            <h3 style="text-align: center; width: 100%; margin: 0;">Remove user</h3>
+        </header>
+
+        <form action="???????" method="post">
+            <input type="hidden" id="??????" name="?????" value="" />
+
+            <p style="text-align: center;">Are you sure you want to remove this user from the study line?</p>
+
+            <footer style="display: flex; gap: 10px;">
+                <button type="button" class="secondary" data-target="modal-confirm-remove-user-from-study-line" onclick="toggleModal(event)" style="flex: 1; margin: 0;">
+                    Cancel
+                </button>
+
+                <button type="submit" style="flex: 1; margin: 0;">
+                    Confirm
+                </button>
+            </footer>
+        </form>
+    </article>
+</dialog>
+
+<script th:src="@{/js/modal.js}" defer></script>
+
+</body>
+
+</html>
