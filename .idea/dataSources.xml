@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="fordel.h2" uuid="ecf71d11-a12d-4805-83a1-59e64bf11b9a">
+    <data-source source="LOCAL" name="fordel.h2" uuid="00880d5b-efcc-4938-b2ae-f8296e15e810">
       <driver-ref>h2.unified</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.h2.Driver</jdbc-driver>

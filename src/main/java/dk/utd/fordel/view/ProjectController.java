@@ -41,7 +41,7 @@ public class ProjectController {
 
         try (var uow = unitOfWork.begin()) {
             var projectList = projectManager.getAllProjects();
-            model.addAttribute("tilte","Projects");
+            model.addAttribute("title","Projects");
             model.addAttribute("projects", projectList);
         } catch (Project.InvalidProject e) {
             throw new RuntimeException(e);
