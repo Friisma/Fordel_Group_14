@@ -1,0 +1,19 @@
+<article th:fragment="advisorInvitation(invitation)">
+    <div class="invitation-header">
+        <h3 class="font-normal" th:text="${invitation.name}">Project</h3>
+        <span class="badge" th:classappend="' ' + ${invitation.statusClass}"
+            th:text="${invitation.status}">Status</span>
+    </div>
+
+    <p class="study-line" th:if="${invitation.inviterName != null and !#strings.isEmpty(invitation.inviterName)}">
+        <span class="font-normal">Invited by:</span>
+        <span th:text="${invitation.inviterName}">Student Name</span>
+    </p>
+
+    <div style="margin-top:0.5rem; display:flex; gap:0.5rem; justify-content:flex-end;">
+        <button type="button" class="btn-accept" th:attr="data-project-id=${invitation.projectId}"
+            onclick="acceptInvitation(event, this)">Accept</button>
+        <button type="button" class="btn-decline" th:attr="data-project-id=${invitation.projectId}"
+            onclick="declineInvitation(event, this)">Decline</button>
+    </div>
+</article>
