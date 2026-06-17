@@ -21,6 +21,7 @@ public class RightsService {
 
         permissions.add(Permission.VIEW_HOME);
         permissions.add(Permission.EDIT_OWN_PROFILE);
+        permissions.add(Permission.MANAGE_STUDY_LINE);
 
         if (roles.contains(Roles.ADMINISTRATOR)) {
             permissions.add(Permission.VIEW_ADMIN_PAGE);
@@ -49,6 +50,11 @@ public class RightsService {
     public boolean canViewAllProjects(RightsContext rights) {
         return rights != null && rights.hasPermission(Permission.VIEW_ALL_PROJECTS);
     }
+
+    public boolean canManageStudyLine(RightsContext rights) {
+        return rights != null && rights.hasPermission(Permission.MANAGE_STUDY_LINE);
+    }
+
 
     private static <E extends Enum<E>> Set<E> toEnumSet(Iterable<E> values, Class<E> enumType) {
         if (values == null) {

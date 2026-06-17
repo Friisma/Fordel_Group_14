@@ -1,12 +1,7 @@
 package dk.utd.fordel.services;
 
-import dk.utd.fordel.domain.Email;
-import dk.utd.fordel.domain.Roles;
+import dk.utd.fordel.domain.*;
 import org.springframework.stereotype.Service;
-
-import dk.utd.fordel.domain.EmailAlreadyInUse;
-import dk.utd.fordel.domain.User;
-import dk.utd.fordel.domain.UserDoesNotExist;
 
 import java.util.List;
 
@@ -27,6 +22,10 @@ public class UserManager {
 
         public record UserInfo(String id, String email, String name, List<Roles> roles, String studyLine) {}
         List<UserInfo> getAllUsers();
+
+        List<UserInfo> getAllUsersRelatedToStudyLine(int studyLineId);
+        List<UserInfo> getAllStudentsRelatedToStudyLine(int studyLineId);
+        List<UserInfo> getAllLeadersRelatedToStudyLine(int studyLineId);
     }
 
     private final UserRepository userRepository;
@@ -68,5 +67,16 @@ public class UserManager {
 
     public List<UserRepository.UserInfo> getAllUsers() {
         return userRepository.getAllUsers();
+    }
+
+    public List<UserRepository.UserInfo> getAllUsersRelatedToStudyLine(int studyLineId) {
+        return userRepository.getAllUsersRelatedToStudyLine(studyLineId);
+    }
+
+    public List<UserRepository.UserInfo> getAllStudentsRelatedToStudyLine(int studyLineId) {
+        return userRepository.getAllStudentsRelatedToStudyLine(studyLineId);
+    }
+    public List<UserRepository.UserInfo> getAllLeadersRelatedToStudyLine(int studyLineId) {
+        return userRepository.getAllLeadersRelatedToStudyLine(studyLineId);
     }
 }
