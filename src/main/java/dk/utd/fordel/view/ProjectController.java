@@ -390,4 +390,22 @@ public class ProjectController {
 
         return "redirect:/project/" + id;
     }
+    @GetMapping("/advisor-dashboard")
+    public String getAllAdviserProjects(Model model, HttpSession session){
+        if (session.getAttribute("auth") == null) {
+            return "redirect:/login";
+        }
+        Object userData = session.getAttribute("userData");
+        RightsContext rights = rightsService.from(userData instanceof User.Data data ? data : null);
+        if (!rightsService.canViewAdvisorDashboard(rights)) {
+            return "redirect:/forbidden";
+        }
+
+        try (var uow = unitOfWork.begin()){
+
+        } catch (UnitOfWork.UnitOfWorkException e){
+            throw Log.giveUp(logger, e);
+        }
+        return "";
+    }
 }

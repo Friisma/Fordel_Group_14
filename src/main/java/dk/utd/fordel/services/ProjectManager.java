@@ -23,6 +23,8 @@ public class ProjectManager {
 
         void kickMemberFromProject(int projectId, User member);
 
+        List<Project> getAllAdvisorProjects(User advisor);
+
         void update(Project project) throws ProjectDoesNotExist;
 
         void delete(Project project) throws ProjectDoesNotExist;
@@ -63,6 +65,10 @@ public class ProjectManager {
 
     public List<Project> getAllProjects() throws Project.InvalidProject {
         return projectRepository.getAllProjects();
+    }
+
+    public List<Project> getAllAdvisorProjects(User advisor) throws Project.InvalidProject {
+        return projectRepository.getAllAdvisorProjects(advisor);
     }
 
 }

@@ -1045,6 +1045,40 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     }
 
     @Override
+    public List<Project> getAllAdvisorProjects(User advisor){
+        List<Project> projects = new ArrayList<>();
+        int userId = getUserIdByEmail(advisor.getEmail());
+        var stmt = """
+                SELECT p.id, p.title, p.description
+                FROM projects p JOIN project_advisors pa ON p.id = pa.project_id
+                WHERE pa.user_id = ?
+                """;
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, userId);
+            try (var resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Project project = new Project(
+                            resultSet.getString("title"),
+                            resultSet.getString("description"));
+                    project.setProjectID(resultSet.getInt("id"));
+                    String studyLineName = resultSet.getString("study_line_name");
+                    if (studyLineName != null) {
+                        project.setStudyLine(studyLineName);
+                    }
+                    projects.add(project);
+
+                }
+            } catch (Project.InvalidProject e){
+                throw Log.giveUp(logger, e, "Failed to create projects from database. invalid project");
+            }
+        }catch (SQLException e){
+            throw Log.giveUp(logger, e, "Failed to fetch projects");
+        }
+
+        return projects;
+    }
+
+    @Override
     public UnitOfWork begin() throws UnitOfWorkException {
         try {
             logger.info("Starting transaction for {}", this);

@@ -23,6 +23,7 @@ public class RightsService {
         permissions.add(Permission.EDIT_OWN_PROFILE);
         permissions.add(Permission.MANAGE_STUDY_LINE);
 
+
         if (!roles.isEmpty()) {
             permissions.add(Permission.VIEW_PROJECT);
         }
@@ -33,6 +34,7 @@ public class RightsService {
         }
 
         if (roles.contains(Roles.ADVISOR)) {
+            permissions.add(Permission.ADVISOR_DASHBOARD);
             permissions.add(Permission.VIEW_ALL_PROJECTS);
         }
 
@@ -53,6 +55,10 @@ public class RightsService {
 
     public boolean canViewProject(RightsContext rights) {
         return rights != null && rights.hasPermission(Permission.VIEW_PROJECT);
+    }
+
+    public boolean canViewAdvisorDashboard(RightsContext rights) {
+        return rights != null && rights.hasPermission(Permission.ADVISOR_DASHBOARD);
     }
 
     public boolean canViewAllProjects(RightsContext rights) {

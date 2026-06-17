@@ -41,23 +41,32 @@ public class H2RepositoryTest {
 
     @Test
     void creating_a_project_with_an_existing_name_should_fail()
-            throws ProjectTitleAlreadyInUse, UnitOfWorkException, Project.InvalidProject, EmailAlreadyInUse {
+            throws ProjectTitleAlreadyInUse, UnitOfWorkException, Project.InvalidProject, EmailAlreadyInUse, StudyLineAlreadyExists {
         Email email = new Email("test","test");
         User user = new User(email);
+        StudyLine studyLine = new StudyLine("onlyForTest");
+
 
         User.Data data = new User.Data("name",new ArrayList<>(),"line", LocalDate.of(2001,1,1));
         Project project = new Project("test","test");
 
 
         try (var ignored = h2Repository.begin()){
+            h2Repository.create(studyLine);
             h2Repository.create(user, data);
-
+            h2Repository.assignStudyLine(user,"onlyForTest");
             int userId = h2Repository.getUserIdByEmail(user.getEmail());
 
             h2Repository.create(project,user,userId);
             assertThrows(ProjectTitleAlreadyInUse.class,
                     () -> h2Repository.create(project,user,userId));
         }
+    }
+    @Test
+    void creatingAProjectWithAStudyLine(){
+        StudyLine studyLine = new StudyLine("testing");
+        Email email = new Email("test","test");
+        User user = new User(email);
 
 
     }

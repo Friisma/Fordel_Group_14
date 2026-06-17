@@ -65,7 +65,8 @@ public class HomepageController {
                         String.valueOf(p.getProjectID()),
                         p.getProjectName(),
                         p.getDescription() != null ? p.getDescription() : "",
-                        p.getStudyLine() != null ? p.getStudyLine() : "")).toList();
+                        p.getStudyLine() != null ? p.getStudyLine() : "",
+                        p.getStatus().toString())).toList();
                 model.addAttribute("projects", projectCards);
                 uow.commit();
             } catch (Project.InvalidProject e) {
@@ -187,12 +188,14 @@ public class HomepageController {
                         "1",
                         "Project 1",
                         "Placeholder project description.",
-                        "Software Technology"),
+                        "Software Technology",
+                        "p.getStatus().toString()"),
                 new ProjectCard(
                         "2",
                         "Project 2",
                         "Placeholder project description.",
-                        "Software Technology"));
+                        "Software Technology",
+                        "p.getStatus().toString()))"));
     }
 
     private List<InvitationCard> placeholderInvitations() {
@@ -223,7 +226,7 @@ public class HomepageController {
         };
     }
 
-    public record ProjectCard(String id, String title, String description, String studyLine) {
+    public record ProjectCard(String id, String title, String description, String studyLine, String status) {
     }
 
     public record InvitationCard(String name, String status, String statusClass, String projectId, String inviterName) {
