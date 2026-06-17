@@ -22,6 +22,7 @@ public class UserManager {
 
         public void grantRole(User user, Roles roleToGrant);
         public void removeRole(User user, Roles roleToRemove);
+        void assignStudyLine(User user, String studyLineName);
         public List<Roles> getUserRoles(User user);
 
         public record UserInfo(String id, String email, String name, List<Roles> roles, String studyLine) {}
@@ -58,6 +59,8 @@ public class UserManager {
     public void removeRole(User user, Roles roleToRemove) {
         userRepository.removeRole(user, roleToRemove);
     }
+
+    public void assignStudyLine(User user, String studyLineName) { userRepository.assignStudyLine(user, studyLineName); }
 
     public List<Roles> getUserRoles(User user) {
         return userRepository.getUserRoles(user);

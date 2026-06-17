@@ -11,6 +11,7 @@ public class StudyLineManager {
 
     public interface StudyLineRepository {
         void create(StudyLine studyLine) throws StudyLineAlreadyExists;
+        List<String> getAllStudyLines();
         List<StudyLine> getAllStudyLines();
     }
 
@@ -22,5 +23,9 @@ public class StudyLineManager {
 
     public void create(StudyLine studyLine) throws StudyLineAlreadyExists {
         studyLineRepository.create(studyLine);
+    }
+
+    public List<String> getAllStudyLines() {
+        return studyLineRepository.getAllStudyLines();
     }
 }

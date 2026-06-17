@@ -553,6 +553,56 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     }
 
     @Override
+    public List<String> getAllStudyLines(){
+        List<String> studyLines = new ArrayList<>();
+
+        var stmt = "SELECT name FROM study_lines ORDER BY name";
+
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            var resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                studyLines.add(resultSet.getString("name"));
+            }
+
+            return studyLines;
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to get study lines");
+        }
+    }
+
+    @Override
+    public void assignStudyLine(User user, String studyLineName) {
+        var deleteStmt = """
+            DELETE FROM study_line_students
+            WHERE user_id = (SELECT id FROM users WHERE email = ?)
+            """;
+
+        try (var statement = getConnection().prepareStatement(deleteStmt)) {
+            statement.setString(1, user.getEmail().asString());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to remove old study line from user");
+        }
+
+        var insertStmt = """
+            INSERT INTO study_line_students (user_id, study_line_id)
+            VALUES (
+                (SELECT id FROM users WHERE email = ?),
+                (SELECT id FROM study_lines WHERE name = ?)
+            )
+            """;
+
+        try (var statement = getConnection().prepareStatement(insertStmt)) {
+            statement.setString(1, user.getEmail().asString());
+            statement.setString(2, studyLineName);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to assign study line to user");
+        }
+    }
+
+    @Override
     public UnitOfWork begin() throws UnitOfWorkException {
         try {
             logger.info("Starting transaction for {}", this);

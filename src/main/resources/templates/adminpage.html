@@ -51,6 +51,15 @@
                           Remove role
                         </button>
                       </li>
+
+                      <li>
+                        <button data-target="modal-assign-study-line"
+                                th:data-email="${user.email()}"
+                                onclick="openStudyLineModal(event, this)">
+                          Assign study line
+                        </button>
+                      </li>
+
                     </ul>
                   </details>
                 </li>
@@ -122,6 +131,38 @@
     </article>
   </dialog>
 
+  <!--Modal for assign study line to a user-->
+  <dialog id="modal-assign-study-line">
+    <article>
+      <header>
+        <button aria-label="Close" rel="prev" data-target="modal-assign-study-line" onclick="toggleModal(event)"></button>
+        <h3>Assign study line</h3>
+      </header>
+
+      <form action="/adminpage/assign-study-line" method="post">
+        <input type="hidden" id="study-line-modal-email-input" name="email" value="" />
+
+        <div style="display: flex; gap: 1rem; align-items: flex-end;">
+          <div style="flex-grow: 1;">
+            <label for="study-line-select">Assign user to study line</label>
+            <select id="study-line-select" name="studyLine" required>
+              <option value="" disabled selected>Select study line</option>
+              <option th:each="studyLine : ${studyLines}"
+                      th:value="${studyLine}"
+                      th:text="${studyLine}">
+                Study line
+              </option>
+            </select>
+          </div>
+
+          <button type="submit" style="width: auto;">
+            Assign study line
+          </button>
+        </div>
+      </form>
+    </article>
+  </dialog>
+
   <script th:src="@{/js/modal.js}" defer></script>
   <script>
     function openRoleModal(event, buttonElement) {
@@ -139,6 +180,14 @@
 
       toggleModal(event);
     }
+
+  function openStudyLineModal(event, buttonElement) {
+    const userEmail = buttonElement.getAttribute('data-email');
+
+    document.getElementById('study-line-modal-email-input').value = userEmail;
+
+    toggleModal(event);
+  }
   </script>
 </body>
 </html>
