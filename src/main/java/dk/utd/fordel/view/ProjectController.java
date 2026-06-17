@@ -107,7 +107,8 @@ public class ProjectController {
             Authenticator.Auth auth = (Authenticator.Auth)session.getAttribute("auth");
             User user = auth.user();
             int userId = userManager.getUserIdByEmail(user.getEmail());
-            Project project = new Project(projectName,projectDescription,projectId);
+            Project project = new Project(projectName,projectDescription);
+            project.setProjectID(projectId);
             projectManager.assignAdvisor(project,user);
             uow.commit();
 

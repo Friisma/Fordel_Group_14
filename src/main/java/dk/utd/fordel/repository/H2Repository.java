@@ -392,11 +392,10 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         try (var statement = getConnection().prepareStatement(stmt);
              var resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
-                projects.add(new Project(
-                        resultSet.getString("title"),
-                        resultSet.getString("description"),
-                        resultSet.getInt("id")
-                ));
+                Project project = new Project(resultSet.getString("title"),
+                        resultSet.getString("description"));
+                project.setProjectID(resultSet.getInt("id"));
+                projects.add(project);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -486,7 +485,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     @Override
     public Project read(Project project) {
         try {
-            return new Project( "t","",0);
+            return new Project( "t","");
         } catch (Project.InvalidProject e) {
 
         }

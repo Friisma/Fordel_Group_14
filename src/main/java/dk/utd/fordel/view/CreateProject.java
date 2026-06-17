@@ -80,7 +80,7 @@ public class CreateProject {
 
         Project project = null;
         try {
-             project = new Project(projectName, projectDescription, 0);
+             project = new Project(projectName, projectDescription);
         } catch (Project.InvalidProject e) {
             isValid = false;
             projectNameMessage = "Cant create project";
