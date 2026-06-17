@@ -7,6 +7,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import dk.utd.fordel.domain.UserDoesNotExist;
+import dk.utd.fordel.services.Authenticator;
+import dk.utd.fordel.services.Authenticator.Auth;
+import dk.utd.fordel.services.Authenticator.BadCredentials;
+import dk.utd.fordel.utils.UnitOfWork;
+import dk.utd.fordel.utils.UnitOfWork.UnitOfWorkException;
 
 @Controller
 public class UpdatePasswordController {
@@ -14,6 +22,16 @@ public class UpdatePasswordController {
         private static final String PASSWORD_DESCRIPTION = "Current password";
         private static final String NEW_PASSWORD_DESCRIPTION = "New password";
         private static final String CONFIRM_PASSWORD_DESCRIPTION = "Confirm new password";
+        private static final String PASSWORDS_DO_NOT_MATCH = "Passwords do not match";
+        private static final String CURRENT_PASSWORD_INCORRECT = "Current password is incorrect";
+
+        private final UnitOfWork unitOfWork;
+        private final Authenticator authenticator;
+
+        public UpdatePasswordController(UnitOfWork unitOfWork, Authenticator authenticator) {
+                this.unitOfWork = unitOfWork;
+                this.authenticator = authenticator;
+        }
 
         @GetMapping("/update-password")
         public String getChangePassword(Model model, HttpSession session) {
@@ -31,21 +49,44 @@ public class UpdatePasswordController {
                         HttpSession session,
                         @RequestParam("currentPassword") String currentPassword,
                         @RequestParam("newPassword") String newPassword,
-                        @RequestParam("confirmNewPassword") String confirmNewPassword) {
+                        @RequestParam("confirmNewPassword") String confirmNewPassword,
+                        RedirectAttributes redirectAttributes) {
                 if (!isAuthenticated(session)) {
                         return "redirect:/login";
                 }
 
                 model.addAttribute("title", "Change Password");
 
-                String confirmNewPasswordMessage = null;
                 if (!newPassword.equals(confirmNewPassword)) {
-                        confirmNewPasswordMessage = "Passwords do not match";
+                        model.addAttribute("error", PASSWORDS_DO_NOT_MATCH);
+                        addPasswordFields(model, currentPassword, newPassword, confirmNewPassword,
+                                        PASSWORDS_DO_NOT_MATCH);
+                        return "update-password";
                 }
 
-                addPasswordFields(model, currentPassword, newPassword, confirmNewPassword, confirmNewPasswordMessage);
+                Auth auth = currentAuth(session);
+                if (auth == null) {
+                        return "redirect:/login";
+                }
 
-                return confirmNewPasswordMessage == null ? "redirect:/" : "update-password";
+                try (var uow = unitOfWork.begin()) {
+                        authenticator.authenticate(auth.user(), currentPassword);
+                        authenticator.register(auth.user(), newPassword);
+                        uow.commit();
+                } catch (BadCredentials e) {
+                        addPasswordFields(model, currentPassword, newPassword, confirmNewPassword, null);
+                        model.addAttribute("error", CURRENT_PASSWORD_INCORRECT);
+                        return "update-password";
+                } catch (UserDoesNotExist e) {
+                        addPasswordFields(model, currentPassword, newPassword, confirmNewPassword, null);
+                        model.addAttribute("error", CURRENT_PASSWORD_INCORRECT);
+                        return "update-password";
+                } catch (UnitOfWorkException e) {
+                        throw new RuntimeException("Failed to update password", e);
+                }
+
+                redirectAttributes.addFlashAttribute("message", "Password changed");
+                return "redirect:/";
         }
 
         private void addPasswordFields(Model model, String currentPassword, String newPassword,
@@ -63,5 +104,10 @@ public class UpdatePasswordController {
 
         private boolean isAuthenticated(HttpSession session) {
                 return session.getAttribute("auth") != null;
+        }
+
+        private Auth currentAuth(HttpSession session) {
+                Object authObject = session.getAttribute("auth");
+                return authObject instanceof Auth auth ? auth : null;
         }
 }
