@@ -6,6 +6,110 @@
 <body>
 <header th:replace="~{fragments/header :: header}"></header>
 <main class="container">
+    <section id="manage-study-line-students">
+        <h1>List of students on study line</h1>
+        <button></button>
+        <table>
+            <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
+                <th scope="col">Role</th>
+                <th scope="col">Actions</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="user : ${studyLineStudents}">
+                <td th:text="${user.name()}">Name</td>
+                <td th:text="${user.email()}">Email</td>
+                <td th:text="${#strings.listJoin(user.roles(), ', ')}">Role</td>
+                <td> <!--Action dropdown button-->
+                    <nav>
+                        <ul>
+                            <li>
+                                <details class="dropdown">
+                                    <summary role="button" class="secondary">Action</summary>
+                                    <ul>
+                                        <!--Contact user -->
+                                        <li>
+                                            <!--SKAL ÆNDRES SÅ DEN TAGER USERS MAIL -->
+                                            <button onclick="window.location.href='mailto:test@utd.dk';">
+                                                Contact
+                                            </button>
+                                        </li>
+
+                                        <!--Remove from study line button -->
+                                        <li>
+                                            <button data-target="modal-confirm-remove-user-from-study-line"
+                                                    th:data-email="${user.email()}"
+                                                    onclick="openConfirmRemoveStudyLineModal(event, this)">
+                                                Remove
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </details>
+                            </li>
+                        </ul>
+                    </nav>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="manage-study-line-leaders">
+        <h1>List of leaders on study line</h1>
+        <button></button>
+        <table>
+            <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
+                <th scope="col">Role</th>
+                <th scope="col">Actions</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="user : ${studyLineLeaders}">
+                <td th:text="${user.name()}">Name</td>
+                <td th:text="${user.email()}">Email</td>
+                <td th:text="${#strings.listJoin(user.roles(), ', ')}">Role</td>
+                <td> <!--Action dropdown button-->
+                    <nav>
+                        <ul>
+                            <li>
+                                <details class="dropdown">
+                                    <summary role="button" class="secondary">Action</summary>
+                                    <ul>
+                                        <!--Contact user -->
+                                        <li>
+                                            <!--SKAL ÆNDRES SÅ DEN TAGER USERS MAIL -->
+                                            <button onclick="window.location.href='mailto:test@utd.dk';">
+                                                Contact
+                                            </button>
+                                        </li>
+
+                                        <!--Remove from study line button -->
+                                        <li>
+                                            <button data-target="modal-confirm-remove-user-from-study-line"
+                                                    th:data-email="${user.email()}"
+                                                    onclick="openConfirmRemoveStudyLineModal(event, this)">
+                                                Remove
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </details>
+                            </li>
+                        </ul>
+                    </nav>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
     <section id="manage-study-line">
         <h1>List of user on study line</h1>
         <button></button>

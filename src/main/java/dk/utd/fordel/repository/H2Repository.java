@@ -373,6 +373,68 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         return studyLineUsers;
     }
 
+    @Override
+    public List<UserInfo> getAllStudentsRelatedToStudyLine(int studyLineId) {
+        List<UserInfo> studyLineUsers = new ArrayList<>();
+        var stmt = """
+                    SELECT user_id
+                    FROM study_line_students
+                    WHERE study_line_id = ?
+                    """;
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, studyLineId);
+            var resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                int userId = resultSet.getInt("user_id");
+                var currUser = getUserByUserId(userId);
+                var currUserData = read(currUser);
+                studyLineUsers.add(new UserInfo(String.valueOf(userId),
+                        currUser.getEmail().asString(),
+                        currUserData.name(),
+                        currUserData.roles(),
+                        currUserData.studyLine()));
+            }
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e,
+                    "Failed to get all users from study line: " + studyLineId);
+        } catch (UserDoesNotExist e) {
+            throw new RuntimeException(e);
+        }
+        return studyLineUsers;
+    }
+
+    @Override
+    public List<UserInfo> getAllLeadersRelatedToStudyLine(int studyLineId) {
+        List<UserInfo> studyLineUsers = new ArrayList<>();
+        var stmt = """
+                    SELECT user_id
+                    FROM study_line_leaders
+                    WHERE study_line_id = ?
+                    """;
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, studyLineId);
+            var resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                int userId = resultSet.getInt("user_id");
+                var currUser = getUserByUserId(userId);
+                var currUserData = read(currUser);
+                studyLineUsers.add(new UserInfo(String.valueOf(userId),
+                        currUser.getEmail().asString(),
+                        currUserData.name(),
+                        currUserData.roles(),
+                        currUserData.studyLine()));
+            }
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e,
+                    "Failed to get all users from study line: " + studyLineId);
+        } catch (UserDoesNotExist e) {
+            throw new RuntimeException(e);
+        }
+        return studyLineUsers;
+    }
+
     /**
      * Grants a chosen user a specified role.
      * This method insert a user_id and role_id into database so the user becomes

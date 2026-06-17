@@ -52,6 +52,13 @@ public class StudyLineController {
 
             var studyLineUsers = userManager.getAllUsersRelatedToStudyLine(id);
             model.addAttribute("studyLineUsers", studyLineUsers);
+
+            var studyLineStudents = userManager.getAllStudentsRelatedToStudyLine(id);
+            model.addAttribute("studyLineStudents", studyLineStudents);
+
+            var studyLineLeaders = userManager.getAllLeadersRelatedToStudyLine(id);
+            model.addAttribute("studyLineLeaders", studyLineLeaders);
+
             model.addAttribute("studyLineId", id);
             uow.commit();
 

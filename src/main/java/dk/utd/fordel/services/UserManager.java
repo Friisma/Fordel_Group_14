@@ -23,6 +23,8 @@ public class UserManager {
         List<UserInfo> getAllUsers();
 
         List<UserInfo> getAllUsersRelatedToStudyLine(int studyLineId);
+        List<UserInfo> getAllStudentsRelatedToStudyLine(int studyLineId);
+        List<UserInfo> getAllLeadersRelatedToStudyLine(int studyLineId);
     }
 
     private final UserRepository userRepository;
@@ -66,5 +68,12 @@ public class UserManager {
 
     public List<UserRepository.UserInfo> getAllUsersRelatedToStudyLine(int studyLineId) {
         return userRepository.getAllUsersRelatedToStudyLine(studyLineId);
+    }
+
+    public List<UserRepository.UserInfo> getAllStudentsRelatedToStudyLine(int studyLineId) {
+        return userRepository.getAllStudentsRelatedToStudyLine(studyLineId);
+    }
+    public List<UserRepository.UserInfo> getAllLeadersRelatedToStudyLine(int studyLineId) {
+        return userRepository.getAllLeadersRelatedToStudyLine(studyLineId);
     }
 }
