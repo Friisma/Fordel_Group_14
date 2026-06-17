@@ -254,7 +254,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     }
 
     @Override
-    public List<StudyLine> getAllStudyLines() {
+    public List<StudyLine> getAllStudyLineObjects() {
         var stmt = "SELECT name FROM study_lines";
         List<StudyLine> studyLines = new ArrayList<>();
         try (var statement = getConnection().prepareStatement(stmt);

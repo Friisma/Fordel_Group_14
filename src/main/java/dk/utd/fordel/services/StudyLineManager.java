@@ -12,7 +12,7 @@ public class StudyLineManager {
     public interface StudyLineRepository {
         void create(StudyLine studyLine) throws StudyLineAlreadyExists;
         List<String> getAllStudyLines();
-        List<StudyLine> getAllStudyLines();
+        List<StudyLine> getAllStudyLineObjects();
     }
 
     private final StudyLineRepository studyLineRepository;
