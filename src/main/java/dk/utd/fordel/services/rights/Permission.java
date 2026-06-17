@@ -5,5 +5,6 @@ public enum Permission {
     EDIT_OWN_PROFILE,
     VIEW_ADMIN_PAGE,
     GRANT_ROLES,
-    VIEW_ALL_PROJECTS
+    VIEW_ALL_PROJECTS,
+    MANAGE_STUDY_LINE
 }

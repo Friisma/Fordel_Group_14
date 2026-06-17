@@ -206,6 +206,27 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
+    public User getUserByUserId(int id) {
+        String stmt = "SELECT email FROM users WHERE id = ?";
+
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, id);
+
+            try (var resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return User.of(resultSet.getString("email"));
+                }
+            }
+            throw new UserDoesNotExist(User.of("email"), "User does not exists");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (UserDoesNotExist e){
+            throw Log.giveUp(logger, e, "User does not exist");
+        } catch (Email.InvalidEmail e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     //TODO Write more proper repository methods to update the database.
 
     @Override
@@ -281,7 +302,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         WHERE ps.student_id = ?
         """;
         try (var statement = getConnection().prepareStatement(stmt);
-             var resultSet = statement.executeQuery()) {
+            var resultSet = statement.executeQuery()) {
             statement.setInt(1, userId);
             while (resultSet.next()) {
                 projects.add(new Project(
@@ -328,6 +349,131 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         return null;
     }
 
+    @Override
+    public boolean canManageStudyLine(User user, int studyLineId) {
+        int userId = getUserIdByEmail(user.getEmail());
+        var stmt = """
+                    SELECT 1
+                    FROM study_line_students
+                    WHERE user_id = ? AND study_line_id = ?
+                    UNION
+                    SELECT 1
+                    FROM study_line_leaders
+                    WHERE user_id = ? AND study_line_id = ?
+                    """;
+
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, userId);
+            statement.setInt(2, studyLineId);
+            statement.setInt(3, userId);
+            statement.setInt(4, studyLineId);
+
+            try (var resultSet = statement.executeQuery()) {
+                return resultSet.next();
+            }
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e,
+                    "Failed to check study line membership for user: " + user + ", study line: " + studyLineId);
+        }
+    }
+
+    @Override
+    public List<UserInfo> getAllUsersRelatedToStudyLine(int studyLineId) {
+        List<UserInfo> studyLineUsers = new ArrayList<>();
+        var stmt = """
+                    SELECT user_id
+                    FROM study_line_students
+                    WHERE study_line_id = ?
+                    UNION
+                    SELECT user_id
+                    FROM study_line_leaders
+                    WHERE study_line_id = ?
+                    """;
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, studyLineId);
+            statement.setInt(2, studyLineId);
+            var resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                int userId = resultSet.getInt("user_id");
+                var currUser = getUserByUserId(userId);
+                var currUserData = read(currUser);
+                studyLineUsers.add(new UserInfo(String.valueOf(userId),
+                        currUser.getEmail().asString(),
+                        currUserData.name(),
+                        currUserData.roles(),
+                        currUserData.studyLine()));
+            }
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e,
+                    "Failed to get all users from study line: " + studyLineId);
+        } catch (UserDoesNotExist e) {
+            throw new RuntimeException(e);
+        }
+        return studyLineUsers;
+    }
+
+    @Override
+    public List<UserInfo> getAllStudentsRelatedToStudyLine(int studyLineId) {
+        List<UserInfo> studyLineUsers = new ArrayList<>();
+        var stmt = """
+                    SELECT user_id
+                    FROM study_line_students
+                    WHERE study_line_id = ?
+                    """;
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, studyLineId);
+            var resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                int userId = resultSet.getInt("user_id");
+                var currUser = getUserByUserId(userId);
+                var currUserData = read(currUser);
+                studyLineUsers.add(new UserInfo(String.valueOf(userId),
+                        currUser.getEmail().asString(),
+                        currUserData.name(),
+                        currUserData.roles(),
+                        currUserData.studyLine()));
+            }
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e,
+                    "Failed to get all users from study line: " + studyLineId);
+        } catch (UserDoesNotExist e) {
+            throw new RuntimeException(e);
+        }
+        return studyLineUsers;
+    }
+
+    @Override
+    public List<UserInfo> getAllLeadersRelatedToStudyLine(int studyLineId) {
+        List<UserInfo> studyLineUsers = new ArrayList<>();
+        var stmt = """
+                    SELECT user_id
+                    FROM study_line_leaders
+                    WHERE study_line_id = ?
+                    """;
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, studyLineId);
+            var resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                int userId = resultSet.getInt("user_id");
+                var currUser = getUserByUserId(userId);
+                var currUserData = read(currUser);
+                studyLineUsers.add(new UserInfo(String.valueOf(userId),
+                        currUser.getEmail().asString(),
+                        currUserData.name(),
+                        currUserData.roles(),
+                        currUserData.studyLine()));
+            }
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e,
+                    "Failed to get all users from study line: " + studyLineId);
+        } catch (UserDoesNotExist e) {
+            throw new RuntimeException(e);
+        }
+        return studyLineUsers;
+    }
 
     /**
      * Grants a chosen user a specified role.
@@ -599,6 +745,75 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
             statement.executeUpdate();
         } catch (SQLException e) {
             throw Log.giveUp(logger, e, "Failed to assign study line to user");
+        }
+    }
+
+    @Override
+    public void addStudent(User user, int studyLineId) {
+        var stmt = """
+                INSERT INTO study_line_students (user_id, role_id)
+                VALUES (
+                    (SELECT id FROM users WHERE email = ?),
+                    (?)
+                )
+                """;
+
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setString(1, user.getEmail().asString());
+            statement.setInt(2, studyLineId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Could not add user to study line");
+        }
+    }
+
+    @Override
+    public void addStudyLeader(User user, int studyLineId) {
+        var stmt = """
+                INSERT INTO study_line_leaders (user_id, role_id)
+                VALUES (
+                    (SELECT id FROM users WHERE email = ?),
+                    (?)
+                )
+                """;
+
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setString(1, user.getEmail().asString());
+            statement.setInt(2, studyLineId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Could not add user to study line");
+        }
+    }
+
+    @Override
+    public void removeUser(User user, int studyLineId) {
+        var stmt1 = """
+        DELETE FROM study_line_students
+               WHERE user_id = ?
+               AND study_line_id = ?
+        """;
+
+        try (var statement = getConnection().prepareStatement(stmt1)) {
+            statement.setInt(1, getUserIdByEmail(user.getEmail()));
+            statement.setInt(2, studyLineId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Could not add role to user");
+        }
+
+        var stmt2 = """
+        DELETE FROM study_line_leaders
+               WHERE user_id = ?
+               AND study_line_id = ?
+        """;
+
+        try (var statement = getConnection().prepareStatement(stmt2)) {
+            statement.setInt(1, getUserIdByEmail(user.getEmail()));
+            statement.setInt(2, studyLineId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Could not add role to user");
         }
     }
 

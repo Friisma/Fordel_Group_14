@@ -46,8 +46,9 @@
 
                       <li>
                         <button data-target="modal-remove-role"
-                                th:data-roles="${user.roles()}"
-                                onclick="openRoleModal(event, this)">
+                                th:data-email="${user.email()}"
+                                th:data-roles="${#strings.listJoin(user.roles(), ', ')}"
+                                onclick="openRemoveRoleModal(event, this)">
                           Remove role
                         </button>
                       </li>
@@ -81,7 +82,7 @@
       </header>
 
       <form action="/adminpage/grant-role" method="post">
-        <input type="hidden" id="modal-email-input" name="email" value="" />
+        <input type="hidden" id="assignRole-modal-email" name="email" value="" />
 
         <div style="display: flex; gap: 1rem; align-items: flex-end;">
           <div style="flex-grow: 1;">
@@ -108,12 +109,12 @@
   <dialog id="modal-remove-role">
     <article>
       <header>
-        <button aria-label="Close" rel="prev" data-target="modal-assign-role" onclick="toggleModal(event)"></button>
-        <h3>Assign role</h3>
+        <button aria-label="Close" rel="prev" data-target="modal-remove-role" onclick="toggleModal(event)"></button>
+        <h3>Remove role</h3>
       </header>
 
       <form action="/adminpage/remove-role" method="post">
-        <input type="hidden" id="modal-role-input" name="role" value="" />
+        <input type="hidden" id="removeRole-modal-email" name="email" value="" />
         <table>
           <thead>
           <tr>
@@ -123,9 +124,8 @@
           </tr>
           </thead>
 
-          <tr th:each="role : ${roles}">
-            <td th:text="role.name()"></td>
-          </tr>
+          <tbody id="remove-role-tbody"></tbody>
+
         </table>
       </form>
     </article>
