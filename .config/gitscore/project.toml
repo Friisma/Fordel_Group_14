@@ -1,5 +1,5 @@
 name = "fordel-14"
-milestones = [ "M1" ]
+milestones = [ "M1", "M2" ]
 
 [[members]]
 name = "Mahmoud Mohammad Mustafa"
@@ -35,7 +35,7 @@ description = """
 *I want to* create study lines
 *such that* I can assign students and study leaders
 """
-completed = false
+completed = true
 
 [[requirements]]
 id = "US3"
@@ -45,7 +45,7 @@ description = """
 *I want to* assign users as advisors
 *such that* they can advise students
 """
-completed = false
+completed = true
 
 [[requirements]]
 id = "US4"
@@ -55,7 +55,7 @@ description = """
 *I want to* assign a study leader to a study line
 *such that* they can administrate the students of that line
 """
-completed = false
+completed = true
 
 [[requirements]]
 id = "US5"
@@ -75,7 +75,7 @@ description = """
 *I want to* see a list of potential projects
 *such that* I can choose some to advise
 """
-completed = false
+completed = true
 
 [[requirements]]
 id = "US10"
@@ -85,7 +85,7 @@ description = """
 *I want to* to create a project
 *such that* it can be chosen by an advisor
 """
-completed = false
+completed = true
 
 [[requirements]]
 id = "US14"
@@ -95,7 +95,7 @@ description = """
 *I want to* see a list of potential advisors
 *such that* I can send a request to join the project
 """
-completed = false
+completed = true
 
 [[requirements]]
 id = "US16"
@@ -115,7 +115,7 @@ description = """
 *I want to* to be informed about the use of cookies
 *such that* my rights are upheld
 """
-completed = false
+completed = true
 
 [[requirements]]
 id = "US22"
@@ -125,7 +125,7 @@ description = """
 *I want to* to be able change my name and information
 *such that* be represented as I prefer
 """
-completed = false
+completed = true
 
 [[requirements]]
 id = "US23"
@@ -144,6 +144,96 @@ description = """
 *As* as a system administrator
 *I want to* require passwords to expire after 3 months
 *such that* to harden the security of the system
+"""
+completed = false
+
+[[requirements]]
+id = "US9"
+title = "Advisor Project Dashboard"
+description = """
+*As* an advisor
+*I want to* see a list of projects I have accepted to advise
+*such that* I can have an overview of the projects I'm advising
+"""
+completed = false
+
+[[requirements]]
+id = "US11"
+title = "Project Draft Creation"
+description = """
+*As* a student
+*I want to* save the project as a draft
+*such that* I do not have to publish an unfinished project
+"""
+completed = false
+
+[[requirements]]
+id = "US12"
+title = "Multistudent Project"
+description = """
+*As* a student
+*I want to* to add other students to my project
+*such that* I can work with them on the project
+"""
+completed = false
+
+[[requirements]]
+id = "US13"
+title = "Project Collaborator Invitation"
+description = """
+*As* a student
+*I want to* accept or reject an invitation to be part of a project
+*such that* I can choose which project to work on
+"""
+completed = false
+
+[[requirements]]
+id = "US19"
+title = "Advisor Project Creation"
+description = """
+*As* an advisor
+*I want to* publish a potential project
+*such that* students can choose it
+"""
+completed = false
+
+[[requirements]]
+id = "US21"
+title = "Delete Users"
+description = """
+*As* any user
+*I want to* to be able to have my account deleted
+*such that* my rights are upheld
+"""
+completed = false
+
+[[requirements]]
+id = "US25"
+title = "Invite co-advisors"
+description = """
+*As* as an advisor
+*I want to* to be able to invite students and other advisors to the project
+*such that* I can get a co-advisors
+"""
+completed = false
+
+[[requirements]]
+id = "US26"
+title = "Update of project"
+description = """
+*As* as an advisor
+*I want to* to be able update the name and abstract of the project after start
+*such that* the description match the project done.
+"""
+completed = false
+
+[[requirements]]
+id = "US27"
+title = "A Change of Language"
+description = """
+*As* as a user
+*I want to* to be able to see the webpage in both Danish and English
+*such that* the page is easy to understand for me
 """
 completed = false
 
