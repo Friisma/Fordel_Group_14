@@ -254,11 +254,28 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     }
 
     @Override
+    public List<StudyLine> getAllStudyLines() {
+        var stmt = "SELECT name FROM study_lines";
+        List<StudyLine> studyLines = new ArrayList<>();
+        try (var statement = getConnection().prepareStatement(stmt);
+             var resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                studyLines.add(new StudyLine(
+                        resultSet.getString("name")
+                ));
+            }
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to fetch study lines");
+        }
+        return studyLines;
+    }
+
+    @Override
     public List<Project> getAllProjectsRelatedToUser(User user) throws Project.InvalidProject {
         List<Project> projects = new ArrayList<>();
         int userId = getUserIdByEmail(user.getEmail());
         var stmt = """
-        SELECT p.title, p.description
+        SELECT p.title, p.description, p.id
         FROM projects p
         JOIN projects_student ps ON p.id = ps.project_id
         WHERE ps.student_id = ?
@@ -269,7 +286,30 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
             while (resultSet.next()) {
                 projects.add(new Project(
                         resultSet.getString("title"),
-                        resultSet.getString("description")
+                        resultSet.getString("description"),
+                        resultSet.getInt("id")
+                ));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return projects;
+    }
+
+    @Override
+    public List<Project> getAllProjects() throws Project.InvalidProject {
+        List<Project> projects = new ArrayList<>();
+        var stmt = """
+        SELECT p.title, p.description, p.id
+        FROM projects p
+        """;
+        try (var statement = getConnection().prepareStatement(stmt);
+             var resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                projects.add(new Project(
+                        resultSet.getString("title"),
+                        resultSet.getString("description"),
+                        resultSet.getInt("id")
                 ));
             }
         } catch (SQLException e) {
@@ -281,7 +321,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     @Override
     public Project read(Project project) {
         try {
-            return new Project( "t","");
+            return new Project( "t","",0);
         } catch (Project.InvalidProject e) {
 
         }
@@ -401,7 +441,10 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
-    //INVITATION
+    /**
+     * creates an advisor invitation from a project to an advisor.
+     * This method posts relevant data to the database to create an invitation.
+     */
     @Override
     public void create (User invited, Project project){
         int invitedUserId = getUserIdByEmail(invited.getEmail());
@@ -419,6 +462,30 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
+    /**
+     * Assigns a user (who can advise) to a specific project.
+     * A user and a project is passed in as parameters, and the database is updated accordingly.
+     */
+    @Override
+    public void assignAdvisor(User advisor, Project project) throws AdvisorAlreadyAdvises{
+        int userId = getUserIdByEmail(advisor.getEmail());
+        int projectId = project.getProjectID();
+        var stmt = "INSERT INTO project_advisors (user_id, project_id) VALUES (?,?)";
+        try (var statement = getConnection().prepareStatement(stmt)){
+            statement.setInt(1, userId);
+            statement.setInt(2, projectId);
+            statement.executeUpdate();
+        } catch (SQLException e){
+            if (e.getErrorCode() == 23505){
+                throw new AdvisorAlreadyAdvises("Advisor already assigned");
+            }
+            throw Log.giveUp(logger, e, "Failed to assign advisor");
+        }
+    }
+
+    /**
+     * Gets all invites received by a specific user from the DB
+     */
     @Override
     public List<AdvisorInvitation> getAllInvitesReceived(User invited){
         int userId = getUserIdByEmail(invited.getEmail());
