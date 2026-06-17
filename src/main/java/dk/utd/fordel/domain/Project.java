@@ -4,6 +4,7 @@ public class Project {
     private int projectID = 0;
     private String projectName;
     private String description;
+    private StudyLine studyLine;
 
     public Project(String projectName, String description, int projectID) throws InvalidProject {
 

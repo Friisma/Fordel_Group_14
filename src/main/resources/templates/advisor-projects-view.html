@@ -33,6 +33,9 @@
     </tr>
     </tbody>
 </table>
+        <article th:if="${errorMessage}" style="border-left: 4px solid red;">
+            <p th:text="${errorMessage}"></p>
+        </article>
     </section>
 </main>
 </body>

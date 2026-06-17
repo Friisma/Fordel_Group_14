@@ -254,6 +254,23 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     }
 
     @Override
+    public List<StudyLine> getAllStudyLines() {
+        var stmt = "SELECT name FROM study_lines";
+        List<StudyLine> studyLines = new ArrayList<>();
+        try (var statement = getConnection().prepareStatement(stmt);
+             var resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                studyLines.add(new StudyLine(
+                        resultSet.getString("name")
+                ));
+            }
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to fetch study lines");
+        }
+        return studyLines;
+    }
+
+    @Override
     public List<Project> getAllProjectsRelatedToUser(User user) throws Project.InvalidProject {
         List<Project> projects = new ArrayList<>();
         int userId = getUserIdByEmail(user.getEmail());
@@ -424,7 +441,10 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
-    //INVITATION
+    /**
+     * creates an advisor invitation from a project to an advisor.
+     * This method posts relevant data to the database to create an invitation.
+     */
     @Override
     public void create (User invited, Project project){
         int invitedUserId = getUserIdByEmail(invited.getEmail());
@@ -442,8 +462,12 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
+    /**
+     * Assigns a user (who can advise) to a specific project.
+     * A user and a project is passed in as parameters, and the database is updated accordingly.
+     */
     @Override
-    public void assignAdvisor(User advisor, Project project){
+    public void assignAdvisor(User advisor, Project project) throws AdvisorAlreadyAdvises{
         int userId = getUserIdByEmail(advisor.getEmail());
         int projectId = project.getProjectID();
         var stmt = "INSERT INTO project_advisors (user_id, project_id) VALUES (?,?)";
@@ -453,13 +477,15 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
             statement.executeUpdate();
         } catch (SQLException e){
             if (e.getErrorCode() == 23505){
-                throw new AdvisorAlreadyInvited("Advisor already assigned");
+                throw new AdvisorAlreadyAdvises("Advisor already assigned");
             }
             throw Log.giveUp(logger, e, "Failed to assign advisor");
         }
     }
 
-
+    /**
+     * Gets all invites received by a specific user from the DB
+     */
     @Override
     public List<AdvisorInvitation> getAllInvitesReceived(User invited){
         int userId = getUserIdByEmail(invited.getEmail());

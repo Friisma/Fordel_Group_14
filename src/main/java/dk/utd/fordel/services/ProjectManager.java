@@ -15,7 +15,7 @@ public class ProjectManager {
         void update(Project project) throws ProjectDoesNotExist;
         void delete(Project project) throws ProjectDoesNotExist;
         List<Project> getAllProjects() throws Project.InvalidProject;
-        void assignAdvisor(User advisor,Project project);
+        void assignAdvisor(User advisor,Project project) throws AdvisorAlreadyAdvises;
     }
 
     private final ProjectRepository projectRepository;
@@ -26,7 +26,7 @@ public class ProjectManager {
         projectRepository.create(project, user, userId);
     }
 
-    public void assignAdvisor(Project project, User user){
+    public void assignAdvisor(Project project, User user) throws AdvisorAlreadyAdvises{
         projectRepository.assignAdvisor(user,project);
     }
 

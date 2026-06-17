@@ -4,11 +4,14 @@ import dk.utd.fordel.domain.StudyLine;
 import dk.utd.fordel.domain.StudyLineAlreadyExists;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class StudyLineManager {
 
     public interface StudyLineRepository {
         void create(StudyLine studyLine) throws StudyLineAlreadyExists;
+        List<StudyLine> getAllStudyLines();
     }
 
     private final StudyLineRepository studyLineRepository;
