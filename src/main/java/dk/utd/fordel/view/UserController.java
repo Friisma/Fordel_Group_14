@@ -5,6 +5,7 @@ import dk.utd.fordel.domain.Roles;
 import dk.utd.fordel.domain.User;
 import dk.utd.fordel.domain.UserDoesNotExist;
 import dk.utd.fordel.services.UserManager;
+import dk.utd.fordel.services.StudyLineManager;
 import dk.utd.fordel.services.rights.RightsContext;
 import dk.utd.fordel.services.rights.RightsService;
 import org.slf4j.Logger;
@@ -27,11 +28,13 @@ public class UserController {
     private final UserManager userManager;
     private final RightsService rightsService;
     private final UnitOfWork unitOfWork;
+    private final StudyLineManager studyLineManager;
 
-    public UserController(UserManager userManager, RightsService rightsService, UnitOfWork unitOfWork) {
+    public UserController(UserManager userManager, RightsService rightsService, UnitOfWork unitOfWork, StudyLineManager studyLineManager) {
         this.userManager = userManager;
         this.rightsService = rightsService;
         this.unitOfWork = unitOfWork;
+        this.studyLineManager = studyLineManager;
     }
 
     @GetMapping("/adminpage")
@@ -48,8 +51,11 @@ public class UserController {
 
         try (var uow = unitOfWork.begin()) {
             var usersList = userManager.getAllUsers();
+            var studyLines = studyLineManager.getAllStudyLines();
+
             model.addAttribute("title", "Admin Dashboard");
             model.addAttribute("users", usersList);
+            model.addAttribute("studyLines", studyLines);
             uow.commit();
         } catch (UnitOfWorkException e) {
             throw Log.giveUp(logger, e);
@@ -78,6 +84,33 @@ public class UserController {
             throw Log.giveUp(logger, e, "Invalid user");
         } catch (UnitOfWorkException e) {
             throw Log.giveUp(logger, e, "Could not grant user role");
+        }
+
+        return "redirect:/adminpage";
+    }
+
+    @PostMapping("/adminpage/assign-study-line")
+    public String assignStudyLine(HttpSession session,
+                                  @RequestParam("email") String email,
+                                  @RequestParam("studyLine") String studyLineName) {
+        if (session.getAttribute("auth") == null) {
+            return "redirect:/login";
+        }
+
+        Object userData = session.getAttribute("userData");
+        RightsContext rights = rightsService.from(userData instanceof User.Data data ? data : null);
+        if (!rightsService.canViewAdminPage(rights)) {
+            return "redirect:/forbidden";
+        }
+
+        try (var uow = unitOfWork.begin()) {
+            User user = User.of(email);
+            userManager.assignStudyLine(user, studyLineName);
+            uow.commit();
+        } catch (Email.InvalidEmail e) {
+            throw Log.giveUp(logger, e, "Invalid user");
+        } catch (UnitOfWorkException e) {
+            throw Log.giveUp(logger, e, "Could not assign study line");
         }
 
         return "redirect:/adminpage";
