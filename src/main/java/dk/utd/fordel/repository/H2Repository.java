@@ -359,7 +359,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
                 var currUser = getUserByUserId(userId);
                 var currUserData = read(currUser);
                 studyLineUsers.add(new UserInfo(String.valueOf(userId),
-                        currUser.getEmail().toString(),
+                        currUser.getEmail().asString(),
                         currUserData.name(),
                         currUserData.roles(),
                         currUserData.studyLine()));
