@@ -1,0 +1,52 @@
+<!-- Confirm Kick Modal Fragment -->
+<dialog id="modal-confirm-kick" th:fragment="confirmKickModal">
+    <article>
+        <header>
+            <button aria-label="Close" rel="prev" data-target="modal-confirm-kick"
+                onclick="toggleModal(event)"></button>
+            <h3>Kick member?</h3>
+        </header>
+
+        <p>
+            Are you sure you want to kick
+            <strong id="kick-member-name">this user</strong>
+            from the project?
+        </p>
+
+        <form id="kick-member-form" action="#" method="post">
+            <input type="hidden" id="kick-member-email-input" name="memberEmail" value="" />
+            <input type="hidden" id="kick-project-id-input" value="" />
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+            <div class="kick-modal-actions">
+                <button type="button" class="secondary" data-target="modal-confirm-kick"
+                    onclick="toggleModal(event)">Cancel</button>
+                <button type="submit" class="kick-button">Yes, kick</button>
+            </div>
+        </form>
+    </article>
+
+    <script>
+        function openKickConfirm(event, buttonElement) {
+            const memberEmail = buttonElement.getAttribute('data-member-email');
+            const memberName = buttonElement.getAttribute('data-member-name');
+            const projectId = buttonElement.getAttribute('data-project-id');
+
+            const nameNode = document.getElementById('kick-member-name');
+            const emailInput = document.getElementById('kick-member-email-input');
+            const form = document.getElementById('kick-member-form');
+
+            if (nameNode) {
+                nameNode.textContent = memberName || 'this user';
+            }
+            if (emailInput) {
+                emailInput.value = memberEmail || '';
+            }
+            if (form && projectId) {
+                form.action = '/project/' + encodeURIComponent(projectId) + '/members/kick';
+            }
+
+            toggleModal(event);
+        }
+    </script>
+</dialog>

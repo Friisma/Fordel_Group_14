@@ -23,6 +23,10 @@ public class RightsService {
         permissions.add(Permission.EDIT_OWN_PROFILE);
         permissions.add(Permission.MANAGE_STUDY_LINE);
 
+        if (!roles.isEmpty()) {
+            permissions.add(Permission.VIEW_PROJECT);
+        }
+
         if (roles.contains(Roles.ADMINISTRATOR)) {
             permissions.add(Permission.VIEW_ADMIN_PAGE);
             permissions.add(Permission.GRANT_ROLES);
@@ -45,6 +49,10 @@ public class RightsService {
 
     public boolean canEditOwnProfile(RightsContext rights) {
         return rights != null && rights.hasPermission(Permission.EDIT_OWN_PROFILE);
+    }
+
+    public boolean canViewProject(RightsContext rights) {
+        return rights != null && rights.hasPermission(Permission.VIEW_PROJECT);
     }
 
     public boolean canViewAllProjects(RightsContext rights) {

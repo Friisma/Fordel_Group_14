@@ -16,9 +16,8 @@ import dk.utd.fordel.services.Authenticator.DefaultPasswordEncoder;
 import dk.utd.fordel.services.Authenticator.PasswordEncoding;
 import dk.utd.fordel.utils.UnitOfWork.UnitOfWorkException;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class H2RepositoryTest {
 
@@ -45,7 +44,7 @@ public class H2RepositoryTest {
         User user = new User(email);
 
         User.Data data = new User.Data("name",new ArrayList<>(),"line", LocalDate.of(2001,1,1));
-        Project project = new Project("test","test",0);
+        Project project = new Project("test","test");
 
 
         try (var ignored = h2Repository.begin()){
@@ -81,6 +80,24 @@ public class H2RepositoryTest {
             assertEquals(encoding, h2Repository.getPassword(user));
         }
 
+    }
+
+    @Test
+    void only_users_linked_to_a_project_can_view_it() throws Exception {
+        String suffix = UUID.randomUUID().toString();
+        User member = User.of("student@test.dk");
+        User outsider = User.of("outsider-" + suffix + "@test.dk");
+        Project project = new Project("Project " + suffix, "desc");
+
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(outsider, new User.Data("Outsider", List.of(), null, null));
+
+            int memberId = h2Repository.getUserIdByEmail(member.getEmail());
+            h2Repository.create(project, member, memberId);
+
+            assertTrue(h2Repository.canViewProject(member, project.getProjectID()));
+            assertTrue(!h2Repository.canViewProject(outsider, project.getProjectID()));
+        }
     }
 
     @Test
