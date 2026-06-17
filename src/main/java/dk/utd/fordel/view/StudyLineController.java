@@ -50,9 +50,6 @@ public class StudyLineController {
                 return "redirect:/forbidden";
             }
 
-            var studyLineUsers = userManager.getAllUsersRelatedToStudyLine(id);
-            model.addAttribute("studyLineUsers", studyLineUsers);
-
             var studyLineStudents = userManager.getAllStudentsRelatedToStudyLine(id);
             model.addAttribute("studyLineStudents", studyLineStudents);
 
