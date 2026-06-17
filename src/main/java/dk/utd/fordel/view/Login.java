@@ -55,7 +55,7 @@ public class Login {
         } catch (Email.InvalidEmail e) {
             model.addAttribute("error_email", e.getMessage());
             logger.atError().setCause(e).log("Invalid email");
-            return "home";
+            return "login";
         }
 
         Auth auth;
@@ -67,7 +67,7 @@ public class Login {
         } catch (BadCredentials e) {
             model.addAttribute("error_password", "Du har indtastet forkert password eller email");
             logger.atWarn().setCause(e).log("Bad credentials");
-            return "home";
+            return "login";
         } catch (UserDoesNotExist e) {
             throw Log.giveUp(logger, e, "Authenticated user could not be loaded");
         } catch (UnitOfWorkException e) {

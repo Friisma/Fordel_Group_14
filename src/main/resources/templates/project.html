@@ -1,0 +1,78 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="da">
+
+<head th:replace="~{fragments/head ::head}"></head>
+
+<body>
+    <header th:replace="~{fragments/header ::header}"></header>
+
+    <main class="container">
+        <section id="project" class="project-section">
+            <details open>
+                <summary>Project</summary>
+                <div class="project-card">
+                    <div class="project-header" style="justify-content:space-between;align-items:center;">
+                        <h1 th:text="${title}">Project</h1>
+                        <span class="badge role">#<span th:text="${projectId}">0</span></span>
+                    </div>
+
+                    <p class="study-line" th:if="${project != null}">
+                        <strong>Study line:</strong>
+                        <span th:text="${project.studyLine}">Software Technology</span>
+                    </p>
+
+                    <p th:if="${project != null}" th:text="${project.description}">Project description</p>
+                    <p th:if="${project == null}">No project details available.</p>
+                </div>
+            </details>
+            <th:block th:if="${rights.isAdvisor()}">
+                <!-- Advisor invitations section removed per request; advisors won't see an invitations panel here -->
+            </th:block>
+        </section>
+
+        <section id="members" class="members-section">
+            <details open>
+                <summary>Members</summary>
+                <div class="project-members">
+                    <th:block th:if="${members != null and #lists.isEmpty(members) == false}">
+                        <th:block th:each="member : ${members}">
+                            <article
+                                th:replace="~{fragments/member-card :: memberCard(member=${member}, projectId=${projectId})}">
+                            </article>
+                        </th:block>
+                    </th:block>
+                    <th:block th:if="${members == null or #lists.isEmpty(members)}">
+                        <p>No members found.</p>
+                    </th:block>
+                </div>
+            </details>
+        </section>
+
+        <section id="invitations" class="invitations-section">
+            <th:block th:if="${rights.isStudent()}">
+                <details open>
+                    <summary>Invitations</summary>
+                    <div class="card">
+                        <p>Student invitations will appear here.</p>
+                        <button data-target="modal-invite-advisor" th:attr="data-project-id=${projectId}" type="button"
+                            class="primary" onclick="openInviteModal(event, this)">Invite Advisor to Project</button>
+                        <div class="project-invitations">
+                            <th:block th:each="inv : ${projectInvitations}">
+                                <article th:replace="~{fragments/invitation-card :: invitationCard(invitation=${inv})}">
+                                </article>
+                            </th:block>
+                        </div>
+                    </div>
+                </details>
+            </th:block>
+
+        </section>
+    </main>
+
+    <footer th:replace="~{fragments/footer ::footer}"></footer>
+    <!-- Include invite advisor modal fragment -->
+    <div th:replace="~{fragments/invite-advisor-modal :: inviteAdvisorModal(availableAdvisors=${availableAdvisors})}">
+    </div>
+</body>
+
+</html>

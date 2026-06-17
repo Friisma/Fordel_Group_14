@@ -1,0 +1,15 @@
+<article th:fragment="memberCard(member, projectId)">
+    <div class="member-card-content">
+        <div class="invitation-header">
+            <h3 class="font-normal" th:text="${member.name}">Member Name</h3>
+            <span class="badge role" th:text="${member.rolesDisplay}">Role</span>
+        </div>
+
+        <div class="member-card-actions">
+            <a role="button" class="member-card-message" th:href="@{|mailto:${member.email}|}">Message User</a>
+            <button th:if="${member.kickable}" type="button" class="kick-button" data-target="modal-confirm-kick"
+                th:attr="data-member-email=${member.email},data-member-name=${member.name},data-project-id=${projectId}"
+                onclick="openKickConfirm(event, this)">Kick</button>
+        </div>
+    </div>
+</article>
