@@ -4,14 +4,15 @@ public class Project {
     private int projectID = 0;
     private String projectName;
     private String description;
+    private StudyLine studyLine;
 
-    public Project(String projectName, String description) throws InvalidProject {
+    public Project(String projectName, String description, int projectID) throws InvalidProject {
 
         if (projectName.isEmpty()){
             throw new InvalidProject("Cant have an empty project name");
         }
 
-        this.projectID = 0;
+        this.projectID = projectID;
         this.projectName = projectName;
         this.description = description;
     }

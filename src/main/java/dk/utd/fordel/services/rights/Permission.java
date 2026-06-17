@@ -4,5 +4,6 @@ public enum Permission {
     VIEW_HOME,
     EDIT_OWN_PROFILE,
     VIEW_ADMIN_PAGE,
-    GRANT_ROLES
+    GRANT_ROLES,
+    VIEW_ALL_PROJECTS
 }

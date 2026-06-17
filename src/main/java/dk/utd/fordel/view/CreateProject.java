@@ -67,7 +67,7 @@ public class CreateProject {
         }
             Project project = null;
         try {
-             project = new Project(projectName, projectDescription);
+             project = new Project(projectName, projectDescription, 0);
         } catch (Project.InvalidProject e) {
             isValid = false;
             projectNameMessage = "Cant create project";

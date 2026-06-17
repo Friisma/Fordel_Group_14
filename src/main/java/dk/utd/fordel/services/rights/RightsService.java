@@ -27,6 +27,10 @@ public class RightsService {
             permissions.add(Permission.GRANT_ROLES);
         }
 
+        if (roles.contains(Roles.ADVISOR)) {
+            permissions.add(Permission.VIEW_ALL_PROJECTS);
+        }
+
         return new RightsContext(true, roles, permissions);
     }
 
@@ -40,6 +44,10 @@ public class RightsService {
 
     public boolean canEditOwnProfile(RightsContext rights) {
         return rights != null && rights.hasPermission(Permission.EDIT_OWN_PROFILE);
+    }
+
+    public boolean canViewAllProjects(RightsContext rights) {
+        return rights != null && rights.hasPermission(Permission.VIEW_ALL_PROJECTS);
     }
 
     private static <E extends Enum<E>> Set<E> toEnumSet(Iterable<E> values, Class<E> enumType) {
