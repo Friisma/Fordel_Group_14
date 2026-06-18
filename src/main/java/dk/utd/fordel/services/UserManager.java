@@ -46,6 +46,10 @@ public class UserManager {
         userRepository.update(user, data);
     }
 
+    public void deleteUser(User user) throws UserDoesNotExist {
+        userRepository.delete(user);
+    }
+
     //TODO Maybe find a better solution, once the domain is complete
     public int getUserIdByEmail(Email email){
         return userRepository.getUserIdByEmail(email);
