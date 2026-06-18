@@ -11,16 +11,18 @@ enjoy the javascript magic...
 
 document.addEventListener('DOMContentLoaded', function () {
     var form = document.getElementById('change-password-form');
-    var button = document.getElementById('update-password-button');
+    var openButton = document.getElementById('open-update-password-modal');
+    var confirmButton = document.getElementById('update-password-button');
 
-    if (!form || !button) {
+    if (!form || !openButton || !confirmButton) {
         return;
     }
 
+    var currentPassword = form.elements.namedItem('currentPassword');
     var newPassword = form.elements.namedItem('newPassword');
     var confirmNewPassword = form.elements.namedItem('confirmNewPassword');
 
-    function showPasswordMismatchPopup() {
+    function showValidationPopup(message) {
         var existingPopup = document.querySelector('[data-password-mismatch-popup="true"]');
         if (existingPopup) {
             existingPopup.remove();
@@ -32,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function () {
         popup.setAttribute('aria-live', 'assertive');
         popup.setAttribute('data-autohide-ms', '5000');
         popup.setAttribute('data-password-mismatch-popup', 'true');
-        popup.innerHTML = '<p>Passwords do not match</p>';
+        popup.innerHTML = '<p>' + message + '</p>';
         document.body.appendChild(popup);
 
         window.setTimeout(function () {
@@ -45,17 +47,28 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function updateConfirmFieldState() {
-        if (!(newPassword instanceof HTMLInputElement) || !(confirmNewPassword instanceof HTMLInputElement)) {
+        if (!(currentPassword instanceof HTMLInputElement) || !(newPassword instanceof HTMLInputElement) || !(confirmNewPassword instanceof HTMLInputElement)) {
             return;
         }
 
-        if (newPassword.value) {
-            newPassword.setAttribute('aria-invalid', 'false');
-        } else {
+        if (!newPassword.value) {
             newPassword.removeAttribute('aria-invalid');
+            newPassword.setCustomValidity('');
+            confirmNewPassword.removeAttribute('aria-invalid');
+            confirmNewPassword.setCustomValidity('');
+            return;
+        }
+
+        if (newPassword.value === currentPassword.value) {
+            newPassword.setAttribute('aria-invalid', 'true');
+            newPassword.setCustomValidity('New password must be different from your current password');
+            confirmNewPassword.setAttribute('aria-invalid', 'true');
+            confirmNewPassword.setCustomValidity('New password must be different from your current password');
+            return;
         }
 
         if (!confirmNewPassword.value) {
+            newPassword.setAttribute('aria-invalid', 'false');
             confirmNewPassword.removeAttribute('aria-invalid');
             confirmNewPassword.setCustomValidity('');
             return;
@@ -70,8 +83,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
         newPassword.setAttribute('aria-invalid', 'false');
         confirmNewPassword.setAttribute('aria-invalid', 'false');
+        newPassword.setCustomValidity('');
         confirmNewPassword.setCustomValidity('');
     }
+
+    openButton.addEventListener('click', function (event) {
+        updateConfirmFieldState();
+
+        if (!(currentPassword instanceof HTMLInputElement) || !(newPassword instanceof HTMLInputElement) || !(confirmNewPassword instanceof HTMLInputElement)) {
+            return;
+        }
+
+        if (newPassword.value === currentPassword.value) {
+            event.preventDefault();
+            showValidationPopup('New password must be different from your current password');
+            return;
+        }
+
+        toggleModal(event);
+    });
 
     if (newPassword instanceof HTMLInputElement) {
         newPassword.addEventListener('input', updateConfirmFieldState);
@@ -81,20 +111,23 @@ document.addEventListener('DOMContentLoaded', function () {
         confirmNewPassword.addEventListener('input', updateConfirmFieldState);
     }
 
+    if (currentPassword instanceof HTMLInputElement) {
+        currentPassword.addEventListener('input', updateConfirmFieldState);
+    }
+
     updateConfirmFieldState();
 
-    button.addEventListener('click', function (event) {
+    confirmButton.addEventListener('click', function (event) {
         updateConfirmFieldState();
 
-        if (!(newPassword instanceof HTMLInputElement) || !(confirmNewPassword instanceof HTMLInputElement)) {
+        if (!(currentPassword instanceof HTMLInputElement) || !(newPassword instanceof HTMLInputElement) || !(confirmNewPassword instanceof HTMLInputElement)) {
             return;
         }
 
         if (newPassword.value !== confirmNewPassword.value) {
-            showPasswordMismatchPopup();
+            event.preventDefault();
+            showValidationPopup('Passwords do not match');
             return;
         }
-
-        toggleModal(event);
     });
 });
