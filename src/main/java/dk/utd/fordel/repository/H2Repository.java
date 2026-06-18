@@ -521,17 +521,12 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     public List<UserInfo> getAllUsersRelatedToStudyLine(int studyLineId) {
         List<UserInfo> studyLineUsers = new ArrayList<>();
         var stmt = """
-                    SELECT user_id
-                    FROM study_line_students
-                    WHERE study_line_id = ?
-                    UNION
-                    SELECT user_id
-                    FROM study_line_leaders
+                    SELECT DISTINCT user_id
+                    FROM study_line_memberships
                     WHERE study_line_id = ?
                     """;
         try (var statement = getConnection().prepareStatement(stmt)) {
             statement.setInt(1, studyLineId);
-            statement.setInt(2, studyLineId);
             var resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -1015,33 +1010,20 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
 
     @Override
     public void removeUser(User user, int studyLineId) {
-        var stmt1 = """
-        DELETE FROM study_line_students
-               WHERE user_id = ?
-               AND study_line_id = ?
+        var stmt = """
+               DELETE FROM study_line_memberships
+                    WHERE user_id = ?
+                    AND study_line_id = ?
         """;
 
-        try (var statement = getConnection().prepareStatement(stmt1)) {
+        try (var statement = getConnection().prepareStatement(stmt)) {
             statement.setInt(1, getUserIdByEmail(user.getEmail()));
             statement.setInt(2, studyLineId);
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw Log.giveUp(logger, e, "Could not add role to user");
+            throw Log.giveUp(logger, e, "Could not remove user from study line");
         }
 
-        var stmt2 = """
-        DELETE FROM study_line_leaders
-               WHERE user_id = ?
-               AND study_line_id = ?
-        """;
-
-        try (var statement = getConnection().prepareStatement(stmt2)) {
-            statement.setInt(1, getUserIdByEmail(user.getEmail()));
-            statement.setInt(2, studyLineId);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw Log.giveUp(logger, e, "Could not add role to user");
-        }
     }
 
     @Override
