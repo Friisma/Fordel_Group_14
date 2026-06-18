@@ -63,10 +63,20 @@ public class H2RepositoryTest {
         }
     }
     @Test
-    void creatingAProjectWithAStudyLine(){
+    void creatingAProjectWithAStudyLine()
+    throws UserDoesNotExist, EmailAlreadyInUse, UnitOfWorkException, StudyLineAlreadyExists, Project.InvalidProject {
         StudyLine studyLine = new StudyLine("testing");
         Email email = new Email("test","test");
         User user = new User(email);
+        Project project = new Project("test1", "test1");
+
+
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(studyLine);
+            h2Repository.create(user, new User.Data("Peter", List.of(), "testing", null));
+            int userid = h2Repository.getUserIdByEmail(email);
+            h2Repository.create(project, user,"testing", userid);
+        }
 
 
     }

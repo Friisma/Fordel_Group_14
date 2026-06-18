@@ -1049,8 +1049,9 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         List<Project> projects = new ArrayList<>();
         int userId = getUserIdByEmail(advisor.getEmail());
         var stmt = """
-                SELECT p.id, p.title, p.description
+                SELECT p.id, p.title, p.description, sl.name
                 FROM projects p JOIN project_advisors pa ON p.id = pa.project_id
+                    JOIN study_lines sl on p.study_line_id = sl.id
                 WHERE pa.user_id = ?
                 """;
         try (var statement = getConnection().prepareStatement(stmt)) {
@@ -1061,7 +1062,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
                             resultSet.getString("title"),
                             resultSet.getString("description"));
                     project.setProjectID(resultSet.getInt("id"));
-                    String studyLineName = resultSet.getString("study_line_name");
+                    String studyLineName = resultSet.getString("name");
                     if (studyLineName != null) {
                         project.setStudyLine(studyLineName);
                     }
@@ -1076,6 +1077,29 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
 
         return projects;
+    }
+
+    @Override
+    public int getCountOfAdvisorProjects(User advisor){
+
+        var stmt = """
+                SELECT COUNT(*)
+                FROM project_advisors pa JOIN projects p 
+                    ON pa.project_id = p.id 
+                WHERE user_id = ? AND p.STATUS = 'DRAFT'
+                """;
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            int userId = getUserIdByEmail(advisor.getEmail());
+            statement.setInt(1,userId);
+            try (var resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1);
+                }
+            }
+        } catch (SQLException e){
+            throw Log.giveUp(logger, e, "Failed to fetch advisor/project relation");
+        }
+        return 0;
     }
 
     @Override

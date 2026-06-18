@@ -391,7 +391,7 @@ public class ProjectController {
         return "redirect:/project/" + id;
     }
     @GetMapping("/advisor-dashboard")
-    public String getAllAdviserProjects(Model model, HttpSession session){
+    public String getAllAdviserProjects(Model model, HttpSession session) throws Project.InvalidProject {
         if (session.getAttribute("auth") == null) {
             return "redirect:/login";
         }
@@ -400,12 +400,36 @@ public class ProjectController {
         if (!rightsService.canViewAdvisorDashboard(rights)) {
             return "redirect:/forbidden";
         }
-
-        try (var uow = unitOfWork.begin()){
-
-        } catch (UnitOfWork.UnitOfWorkException e){
-            throw Log.giveUp(logger, e);
+        Object authObject = session.getAttribute("auth");
+        if (authObject instanceof Auth auth) {
+            try (var uow = unitOfWork.begin()) {
+                int projectCount = projectManager.getCountOfAdvisedProjects(auth.user());
+                var projects = projectManager.getAllAdvisorProjects(auth.user());
+                var projectCards = projects.stream().map(p -> new HomepageController.ProjectCard(
+                        String.valueOf(p.getProjectID()),
+                        p.getProjectName(),
+                        p.getDescription() != null ? p.getDescription() : "",
+                        p.getStudyLine() != null ? p.getStudyLine() : "",
+                        p.getStatus().toString())).toList();
+                model.addAttribute("projectCount",projectCount);
+                model.addAttribute("projects", projectCards);
+                uow.commit();
+            } catch (Project.InvalidProject e) {
+                model.addAttribute("projects", placeholderProjects());
+            } catch (UnitOfWork.UnitOfWorkException e) {
+                model.addAttribute("projects", placeholderProjects());
+            }
+        } else {
+            model.addAttribute("projects", placeholderProjects());
         }
-        return "";
+        return "advisor-dashboard";
     }
+
+
+
+    private List<HomepageController.ProjectCard> placeholderProjects() {
+        return List.of(
+                new HomepageController.ProjectCard("1", "Project 1", "Placeholder project description.", "Software Technology", "ACTIVE"),
+                new HomepageController.ProjectCard("2", "Project 2", "Placeholder project description.", "Software Technology", "ACTIVE"));
+        }
 }

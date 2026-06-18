@@ -1,10 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
+<html xmlns:th="http://www.thymeleaf.org" lang="da">
+<head th:replace="~{fragments/head ::head}"></head>
 <body>
+<header th:replace="~{fragments/header ::header}"></header>
+<main class="container">
+<article>
+    <div>
+        <header>
+        <h3>Current advisor workload</h3>
+        </header>
+        <p>Current active/working projects: <span th:text="${projectCount}">0</span></p>
+        <footer>
+        <progress th:value="${projectCount}" max="5" />
+        </footer>
+    </div>
+</article>
+    <hr />
+<section>
 
+<div class="project-grid">
+    <th:block th:each="project : ${projects}">
+        <article th:replace="~{fragments/project-card :: projectCard(project=${project})}"></article>
+    </th:block>
+</div>
+</section>
+</main>
 </body>
 </html>
