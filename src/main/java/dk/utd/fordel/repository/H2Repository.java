@@ -497,19 +497,16 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         int userId = getUserIdByEmail(user.getEmail());
         var stmt = """
                     SELECT 1
-                    FROM study_line_students
-                    WHERE user_id = ? AND study_line_id = ?
-                    UNION
-                    SELECT 1
-                    FROM study_line_leaders
-                    WHERE user_id = ? AND study_line_id = ?
+                    FROM study_line_memberships slm
+                    JOIN roles r ON slm.role_id = r.id
+                    WHERE slm.user_id = ? AND slm.study_line_id = ?
+                    AND (r.name = 'student' OR r.name = 'study leader')
+                    
                     """;
 
         try (var statement = getConnection().prepareStatement(stmt)) {
             statement.setInt(1, userId);
             statement.setInt(2, studyLineId);
-            statement.setInt(3, userId);
-            statement.setInt(4, studyLineId);
 
             try (var resultSet = statement.executeQuery()) {
                 return resultSet.next();
@@ -560,9 +557,11 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     public List<UserInfo> getAllStudentsRelatedToStudyLine(int studyLineId) {
         List<UserInfo> studyLineUsers = new ArrayList<>();
         var stmt = """
-                    SELECT user_id
-                    FROM study_line_students
-                    WHERE study_line_id = ?
+                    SELECT slm.user_id AS user_id
+                    FROM study_line_memberships slm
+                    JOIN roles r ON slm.role_id = r.id
+                    WHERE slm.study_line_id = ?
+                    AND r.name = 'student'
                     """;
         try (var statement = getConnection().prepareStatement(stmt)) {
             statement.setInt(1, studyLineId);
@@ -978,17 +977,17 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     @Override
     public void addStudent(User user, int studyLineId) {
         var stmt = """
-            INSERT INTO study_line_memberships (user_id, study_line_id, role_id)
-            VALUES (
-                (SELECT id FROM users WHERE email = ?),
-                ?,
-                (SELECT id FROM roles WHERE name = 'student')
-            )
+            MERGE INTO study_line_memberships (user_id, study_line_id, role_id)
+            KEY (user_id, study_line_id, role_id)
+                SELECT u.id, ?, r.id
+                FROM users u, roles r
+                WHERE u.email = ?
+                AND r.name = 'student'
             """;
 
         try (var statement = getConnection().prepareStatement(stmt)) {
-            statement.setString(1, user.getEmail().asString());
-            statement.setInt(2, studyLineId);
+            statement.setInt(1, studyLineId);
+            statement.setString(2, user.getEmail().asString());
             statement.executeUpdate();
         } catch (SQLException e) {
             throw Log.giveUp(logger, e, "Could not add student to study line");
@@ -1087,3 +1086,4 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 }
+
