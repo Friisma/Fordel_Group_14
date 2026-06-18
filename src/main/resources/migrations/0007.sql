@@ -1,4 +1,4 @@
--- Test account with an expiring password.
+-- Test account with an expired password.
 -- Password for the account: password
 -- Password last changed on 2026-03-17.
 

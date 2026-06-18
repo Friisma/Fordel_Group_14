@@ -22,9 +22,8 @@
       </div>
     </div>
 
-    <hr th:if="${sectionVisibility.projectsVisible or sectionVisibility.advisorsVisible}">
-
     <section id="projects" th:if="${sectionVisibility.projectsVisible}">
+      <hr>
       <details open="">
         <summary><a href="/projects" class="project-link">Projects</a></summary>
         <div>
@@ -38,12 +37,10 @@
           </th:block>
         </div>
       </details>
-
     </section>
 
-    <hr th:if="${sectionVisibility.projectsVisible and sectionVisibility.advisorsVisible}">
-
     <section id="advisors" th:if="${sectionVisibility.advisorsVisible}">
+      <hr>
       <details open="">
         <summary>Invitations to Projects</summary>
         <div th:if="${rights.isAdvisor()}">
@@ -65,7 +62,17 @@
       </details>
     </section>
 
+    <section id="student-progress" th:if="${studentProgress != null}">
+      <hr>
+      <details open="">
+        <summary>Student Progress</summary>
+        <div th:replace="~{fragments/student-progress-card :: studentProgressCard(studentProgress=${studentProgress})}">
+        </div>
+      </details>
+    </section>
+
     <section id="password-last-changed">
+      <hr>
       <details open="">
         <summary>Password status</summary>
         <div

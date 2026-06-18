@@ -259,6 +259,23 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
+    @Override
+    public void updateStudyStart(User user, LocalDate studyStart) throws UserDoesNotExist {
+        Assert.isNotNull(user, "User cannot be null");
+        Assert.isNotNull(studyStart, "studyStart cannot be null");
+
+        var stmt = "UPDATE users SET study_start_date = ? WHERE email = ?";
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setObject(1, studyStart);
+            statement.setString(2, user.getEmail().asString());
+            if (statement.executeUpdate() != 1) {
+                throw new UserDoesNotExist(user, "While updating study start date");
+            }
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to update study start date for user: " + user);
+        }
+    }
+
     // TODO Write more proper repository methods to update the database.
 
     @Override

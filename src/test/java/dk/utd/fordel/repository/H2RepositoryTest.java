@@ -145,4 +145,19 @@ public class H2RepositoryTest {
         }
     }
 
+    @Test
+    void updating_the_study_start_date_should_persist() throws Exception {
+        String suffix = UUID.randomUUID().toString();
+        User user = User.of("study-start-" + suffix + "@test.dk");
+        LocalDate studyStart = LocalDate.of(2021, 9, 1);
+
+        try (var uow = h2Repository.begin()) {
+            h2Repository.create(user, new User.Data("Student", List.of(Roles.STUDENT), null, null));
+            h2Repository.updateStudyStart(user, studyStart);
+
+            User.Data data = h2Repository.read(user);
+            assertEquals(studyStart, data.studyStart());
+        }
+    }
+
 }

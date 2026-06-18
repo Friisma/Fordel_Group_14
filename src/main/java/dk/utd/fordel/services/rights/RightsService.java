@@ -63,6 +63,13 @@ public class RightsService {
         return rights != null && rights.hasPermission(Permission.MANAGE_STUDY_LINE);
     }
 
+    public boolean canViewStudentProgress(RightsContext rights) {
+        return rights != null && rights.isStudent();
+    }
+
+    public boolean canUpdateStudyStart(RightsContext rights) {
+        return rights != null && rights.isStudent();
+    }
 
     private static <E extends Enum<E>> Set<E> toEnumSet(Iterable<E> values, Class<E> enumType) {
         if (values == null) {
