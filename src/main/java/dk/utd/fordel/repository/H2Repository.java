@@ -978,19 +978,20 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     @Override
     public void addStudent(User user, int studyLineId) {
         var stmt = """
-                INSERT INTO study_line_students (user_id, role_id)
-                VALUES (
-                    (SELECT id FROM users WHERE email = ?),
-                    (?)
-                )
-                """;
+            INSERT INTO study_line_memberships (user_id, study_line_id, role_id)
+            VALUES (
+                (SELECT id FROM users WHERE email = ?),
+                ?,
+                (SELECT id FROM roles WHERE name = 'student')
+            )
+            """;
 
         try (var statement = getConnection().prepareStatement(stmt)) {
             statement.setString(1, user.getEmail().asString());
             statement.setInt(2, studyLineId);
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw Log.giveUp(logger, e, "Could not add user to study line");
+            throw Log.giveUp(logger, e, "Could not add student to study line");
         }
     }
 
