@@ -19,6 +19,8 @@ import dk.utd.fordel.utils.UnitOfWork;
 import dk.utd.fordel.utils.UnitOfWork.UnitOfWorkException;
 import jakarta.servlet.http.HttpSession;
 
+import java.time.LocalDateTime;
+
 @Controller
 public class Login {
 
@@ -63,6 +65,10 @@ public class Login {
         try (var uow = unitOfWork.begin()) {
             auth = authenticator.authenticate(user, password);
             userData = userManager.readUser(user);
+            LocalDateTime passwordChangedAt = userManager.getPasswordChangedAt(user);
+            if (passwordChangedAt == null) {
+                userManager.setPasswordChangedAt(user, LocalDateTime.now());
+            }
             uow.commit();
         } catch (BadCredentials e) {
             model.addAttribute("error_password", "Du har indtastet forkert password eller email");

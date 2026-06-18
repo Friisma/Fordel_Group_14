@@ -31,6 +31,12 @@ public class TopController {
         return "forbidden";
     }
 
+    @GetMapping("/password-expired")
+    public String getPasswordExpired(Model model) {
+        model.addAttribute("title", "Password expired");
+        return "password-expired";
+    }
+
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
