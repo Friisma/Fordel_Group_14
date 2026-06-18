@@ -383,6 +383,76 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     }
 
     @Override
+    public List<Project> getAllProjectsRelatedToStudyLine(int studyLineId) {
+        List<Project> projects = new ArrayList<>();
+        var stmt = """
+                SELECT id, title, description
+                FROM projects
+                WHERE study_line_id = ?
+                """;
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, studyLineId);
+            try (var resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Project project = new Project(
+                            resultSet.getString("title"),
+                            resultSet.getString("description"));
+                    project.setProjectID(resultSet.getInt("id"));
+                    projects.add(project);
+                }
+            } catch (Project.InvalidProject e) {
+                throw new RuntimeException(e);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return projects;
+    }
+
+    @Override
+    public List<Project> getAllProjectsRelatedToStudyLineAndUser(int studyLineId, User user) {
+        List<Project> projects = new ArrayList<>();
+        int userId = getUserIdByEmail(user.getEmail());
+        var stmt = """
+                SELECT p.id, p.title, p.description
+                FROM projects p
+                WHERE p.study_line_id = ?
+                    AND (
+                        EXISTS (
+                            SELECT 1
+                            FROM project_students ps
+                            WHERE ps.project_id = p.id AND ps.user_id = ?
+                        )
+                        OR
+                        EXISTS (
+                            SELECT 1
+                            FROM project_advisors pad
+                            WHERE pad.project_id = p.id AND pad.user_id = ?
+                        )
+                    );
+                """;
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, studyLineId);
+            statement.setInt(2, userId);
+            statement.setInt(3, userId);
+            try (var resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Project project = new Project(
+                            resultSet.getString("title"),
+                            resultSet.getString("description"));
+                    project.setProjectID(resultSet.getInt("id"));
+                    projects.add(project);
+                }
+            } catch (Project.InvalidProject e) {
+                throw new RuntimeException(e);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return projects;
+    }
+
+    @Override
     public List<Project> getAllProjects() throws Project.InvalidProject {
         List<Project> projects = new ArrayList<>();
         var stmt = """
@@ -493,6 +563,28 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     }
 
     @Override
+    public String getStudyLineNameById(int studyLineId) {
+        var stmt = """
+                    SELECT name
+                    FROM study_lines
+                    WHERE id = ?
+                    """;
+
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, studyLineId);
+
+            var resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                return resultSet.getString("name");
+            }
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to check study line name, study line: " + studyLineId);
+        }
+        return "";
+    }
+
+    @Override
     public boolean canManageStudyLine(User user, int studyLineId) {
         int userId = getUserIdByEmail(user.getEmail());
         var stmt = """
@@ -510,6 +602,28 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
             statement.setInt(2, studyLineId);
             statement.setInt(3, userId);
             statement.setInt(4, studyLineId);
+
+            try (var resultSet = statement.executeQuery()) {
+                return resultSet.next();
+            }
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e,
+                    "Failed to check study line membership for user: " + user + ", study line: " + studyLineId);
+        }
+    }
+
+    @Override
+    public boolean canViewStudyLine(User user, int studyLineId) {
+        int userId = getUserIdByEmail(user.getEmail());
+        var stmt = """
+                    SELECT 1
+                    FROM study_line_memberships
+                    WHERE user_id = ? AND study_line_id = ?
+                    """;
+
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, userId);
+            statement.setInt(2, studyLineId);
 
             try (var resultSet = statement.executeQuery()) {
                 return resultSet.next();

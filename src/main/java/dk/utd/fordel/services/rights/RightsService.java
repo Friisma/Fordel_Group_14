@@ -21,15 +21,21 @@ public class RightsService {
 
         permissions.add(Permission.VIEW_HOME);
         permissions.add(Permission.EDIT_OWN_PROFILE);
-        permissions.add(Permission.MANAGE_STUDY_LINE);
+        permissions.add(Permission.VIEW_STUDY_LINE);
+
 
         if (!roles.isEmpty()) {
             permissions.add(Permission.VIEW_PROJECT);
         }
 
+        if (roles.contains(Roles.STUDY_LEADER)) {
+            permissions.add(Permission.MANAGE_STUDY_LINE);
+        }
+
         if (roles.contains(Roles.ADMINISTRATOR)) {
             permissions.add(Permission.VIEW_ADMIN_PAGE);
             permissions.add(Permission.GRANT_ROLES);
+            permissions.add(Permission.MANAGE_STUDY_LINE);
         }
 
         if (roles.contains(Roles.ADVISOR)) {
@@ -61,6 +67,10 @@ public class RightsService {
 
     public boolean canManageStudyLine(RightsContext rights) {
         return rights != null && rights.hasPermission(Permission.MANAGE_STUDY_LINE);
+    }
+
+    public boolean canViewStudyLine(RightsContext rights) {
+        return rights != null && rights.hasPermission(Permission.VIEW_STUDY_LINE);
     }
 
 

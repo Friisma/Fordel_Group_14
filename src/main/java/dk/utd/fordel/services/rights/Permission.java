@@ -7,5 +7,6 @@ public enum Permission {
     VIEW_ADMIN_PAGE,
     GRANT_ROLES,
     VIEW_ALL_PROJECTS,
-    MANAGE_STUDY_LINE
+    MANAGE_STUDY_LINE,
+    VIEW_STUDY_LINE
 }

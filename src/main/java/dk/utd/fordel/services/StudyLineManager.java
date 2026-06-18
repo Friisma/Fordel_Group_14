@@ -14,7 +14,8 @@ public class StudyLineManager {
         void create(StudyLine studyLine) throws StudyLineAlreadyExists;
         List<String> getAllStudyLines();
         List<StudyLine> getAllStudyLineObjects();
-
+        String getStudyLineNameById(int studyLineId);
+        boolean canViewStudyLine(User user, int studyLineId);
         boolean canManageStudyLine(User user, int studyLineId);
 
         void addStudent(User user, int studyLineId);
@@ -34,6 +35,14 @@ public class StudyLineManager {
 
     public List<String> getAllStudyLines() {
         return studyLineRepository.getAllStudyLines();
+    }
+
+    public String getStudyLineNameById(int studyLineId) {
+        return studyLineRepository.getStudyLineNameById(studyLineId);
+    }
+
+    public boolean canViewStudyLine(User user, int studyLineId) {
+        return studyLineRepository.canViewStudyLine(user, studyLineId);
     }
 
     public boolean canManageStudyLine(User user, int studyLineId) {
