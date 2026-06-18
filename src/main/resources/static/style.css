@@ -35,6 +35,37 @@
     color: #fff;
 }
 
+.header-nav {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.header-nav>ul {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+}
+
+.header-nav>ul:first-child {
+    justify-content: flex-start;
+}
+
+.header-nav>ul:last-child {
+    justify-content: flex-end;
+}
+
+.header-nav>ul>li {
+    display: flex;
+    align-items: center;
+}
+
+.header-nav>ul>li>a {
+    white-space: nowrap;
+}
+
 .project-header {
     display: flex;
     justify-content: space-between;
