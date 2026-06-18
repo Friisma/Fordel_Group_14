@@ -27,6 +27,8 @@ public class ProjectManager {
 
         int getCountOfAdvisorProjects(User advisor);
 
+        void StartProject(User advisor,Project project);
+
         void update(Project project) throws ProjectDoesNotExist;
 
         void delete(Project project) throws ProjectDoesNotExist;
@@ -75,6 +77,11 @@ public class ProjectManager {
 
     public int getCountOfAdvisedProjects(User user){
         return projectRepository.getCountOfAdvisorProjects(user);
+    }
+
+    public void StartProject(User advisor, Project project){
+        projectRepository.StartProject(advisor,project);
+
     }
 
 }

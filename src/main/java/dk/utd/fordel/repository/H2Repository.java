@@ -6,16 +6,10 @@ import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.sql.DataSource;
 
 import dk.utd.fordel.domain.*;
-import dk.utd.fordel.domain.*;
-import dk.utd.fordel.services.InvitationManager;
-import dk.utd.fordel.services.ProjectManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -1100,6 +1094,58 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
             throw Log.giveUp(logger, e, "Failed to fetch advisor/project relation");
         }
         return 0;
+    }
+
+    @Override
+    public void StartProject(User advisor, Project project){
+        var stmt = """
+                UPDATE projects
+                SET status = 'PUBLISHED'
+                WHERE project_id = ?
+                """;
+        if (project.getStatus() == Project.Status.DRAFT) {
+            try (var statement = getConnection().prepareStatement(stmt)) {
+                project.setStatus(Project.Status.STARTED);
+            } catch (SQLException e) {
+                throw Log.giveUp(logger, e, "Failed to publish project");
+            }
+        } else {
+            throw new ProjectAlreadyFinished("Project already published");
+        }
+    }
+
+    @Override
+    public int getMaxWorkLoad(User user){
+        var stmt = "SELECT max_workload FROM users WHERE id = ?";
+        try (var statement = getConnection().prepareStatement(stmt)){
+            int userId = getUserIdByEmail(user.getEmail());
+            statement.setInt(1,userId);
+            try (var rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e){
+            throw Log.giveUp(logger, e, "Failed to fetch maximum workload");
+        }
+        return 0;
+    }
+
+    @Override
+    public void updateMaxWorkLoad(User user, int newMaxLoad) {
+        var stmt = """
+                UPDATE users
+                SET max_workload = ?
+                WHERE id = ?
+                """;
+        try (var statement = getConnection().prepareStatement(stmt)){
+            int userid = getUserIdByEmail(user.getEmail());
+            statement.setInt(1,newMaxLoad);
+            statement.setInt(2,userid);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to update maximum workload");
+        }
     }
 
     @Override

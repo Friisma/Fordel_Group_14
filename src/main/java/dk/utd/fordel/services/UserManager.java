@@ -14,6 +14,8 @@ public class UserManager {
         void update(User user, User.Data data) throws UserDoesNotExist;
         void delete(User user) throws UserDoesNotExist;
         int getUserIdByEmail(Email email);
+        int getMaxWorkLoad(User user);
+        void updateMaxWorkLoad(User user, int newMaxLoad);
 
         public void grantRole(User user, Roles roleToGrant);
         public void removeRole(User user, Roles roleToRemove);
@@ -71,6 +73,12 @@ public class UserManager {
 
     public List<UserRepository.UserInfo> getAllUsersRelatedToStudyLine(int studyLineId) {
         return userRepository.getAllUsersRelatedToStudyLine(studyLineId);
+    }
+
+    public int getMaxWorkLoad(User user){return userRepository.getMaxWorkLoad(user);}
+
+    public void updateMaxWorkLoad(User user, int newMaxLoad){
+        userRepository.updateMaxWorkLoad(user,newMaxLoad);
     }
 
     public List<UserRepository.UserInfo> getAllStudentsRelatedToStudyLine(int studyLineId) {

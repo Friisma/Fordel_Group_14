@@ -1,7 +1,7 @@
 package dk.utd.fordel.domain;
 
-public class ProjectAlreadyPublished extends RuntimeException {
-    public ProjectAlreadyPublished(String message) {
+public class ProjectAlreadyFinished extends RuntimeException {
+    public ProjectAlreadyFinished(String message) {
         super(message);
     }
 }

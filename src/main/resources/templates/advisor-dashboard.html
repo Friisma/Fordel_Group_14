@@ -9,10 +9,15 @@
         <header>
         <h3>Current advisor workload</h3>
         </header>
-        <p>Current active/working projects: <span th:text="${projectCount}">0</span></p>
+        <p>Current active/working projects: <span th:text="${projectCount}">0</span> out of <span th:text="${maxProjectCount}"></span></p>
         <footer>
-        <progress th:value="${projectCount}" max="5" />
+        <progress th:value="${projectCount}" th:max="${maxProjectCount}" />
         </footer>
+        <section id="modal">
+            <button class="button" data-target="modal-example" onclick="toggleModal(event)">
+                set max work load
+            </button>
+        </section>
     </div>
 </article>
     <hr />
@@ -24,6 +29,26 @@
     </th:block>
 </div>
 </section>
+    <dialog id="modal-example">
+        <article>
+            <header>
+                <button
+                        aria-label="Close"
+                        rel="prev"
+                        data-target="modal-example"
+                        onclick="toggleModal(event)"
+                ></button>
+                <h3>Set max work load (amount of projects)</h3>
+            </header>
+            <form method="post" action="/advisor-dashboard/change-maxWorkLoad">
+            <input type="number" name="number" placeholder="Number" aria-label="Number">
+            <footer>
+                <button type="submit" autofocus>Confirm
+            </button>
+            </footer>
+            </form>
+        </article>
+    </dialog>
 </main>
 </body>
 </html>

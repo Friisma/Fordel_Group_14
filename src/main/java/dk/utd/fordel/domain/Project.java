@@ -4,6 +4,7 @@ public class Project {
 
     public enum Status {
         DRAFT,
+        STARTED,
         FINISHED
     }
 
