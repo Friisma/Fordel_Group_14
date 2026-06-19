@@ -61,6 +61,14 @@
                         </button>
                       </li>
 
+                      <li>
+                        <button data-target="modal-confirm-delete-user"
+                                th:data-email="${user.email()}"
+                                onclick="openConfirmDeleteUserModal(event, this)">
+                          Delete user
+                        </button>
+                      </li>
+
                     </ul>
                   </details>
                 </li>
@@ -163,31 +171,32 @@
     </article>
   </dialog>
 
+  <!--Modal to delete user from system  -->
+  <dialog id="modal-confirm-delete-user">
+    <article>
+      <header>
+        <button aria-label="Close" rel="prev" data-target="modal-confirm-delete-user" onclick="toggleModal(event)"></button>
+        <h3 style="text-align: center; width: 100%; margin: 0;">Delete user</h3>
+      </header>
+
+      <form th:action="@{/adminpage/delete-user}" method="post">
+        <input type="hidden" id="confirm-delete-user-email" name="email" value="" />
+
+        <p style="text-align: center;">Are you sure you want to delete this user from the system?</p>
+
+        <footer style="display: flex; gap: 10px;">
+          <button type="button" class="secondary" data-target="modal-confirm-delete-user" onclick="toggleModal(event)" style="flex: 1; margin: 0;">
+            Cancel
+          </button>
+
+          <button type="submit" style="flex: 1; margin: 0;">
+            Confirm
+          </button>
+        </footer>
+      </form>
+    </article>
+  </dialog>
+
   <script th:src="@{/js/modal.js}" defer></script>
-  <script>
-    function openRoleModal(event, buttonElement) {
-      const userEmail = buttonElement.getAttribute('data-email');
-
-      document.getElementById('modal-email-input').value = userEmail;
-
-      toggleModal(event);
-    }
-
-    function openRemoveRoleModal(event, buttonElement) {
-      const userRoles = buttonElement.getAttribute('data-roles');
-
-      document.getElementById('modal-role-input').value = userRoles;
-
-      toggleModal(event);
-    }
-
-  function openStudyLineModal(event, buttonElement) {
-    const userEmail = buttonElement.getAttribute('data-email');
-
-    document.getElementById('study-line-modal-email-input').value = userEmail;
-
-    toggleModal(event);
-  }
-  </script>
 </body>
 </html>

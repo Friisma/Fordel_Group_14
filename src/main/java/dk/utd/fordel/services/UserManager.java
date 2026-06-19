@@ -22,6 +22,8 @@ public class UserManager {
         void delete(User user) throws UserDoesNotExist;
 
         int getUserIdByEmail(Email email);
+        int getMaxWorkLoad(User user);
+        void updateMaxWorkLoad(User user, int newMaxLoad);
 
         LocalDateTime getPasswordChangedAt(User user) throws UserDoesNotExist;
 
@@ -69,6 +71,9 @@ public class UserManager {
         userRepository.updateStudyStart(user, studyStart);
     }
 
+    public void deleteUser(User user) throws UserDoesNotExist {
+        userRepository.delete(user);
+    }
     // TODO Maybe find a better solution, once the domain is complete
     public int getUserIdByEmail(Email email) {
         return userRepository.getUserIdByEmail(email);
@@ -90,9 +95,7 @@ public class UserManager {
         userRepository.removeRole(user, roleToRemove);
     }
 
-    public void assignStudyLine(User user, String studyLineName) {
-        userRepository.assignStudyLine(user, studyLineName);
-    }
+    public void assignStudyLine(User user, String studyLineName) { userRepository.assignStudyLine(user, studyLineName); }
 
     public List<Roles> getUserRoles(User user) {
         return userRepository.getUserRoles(user);
@@ -104,6 +107,12 @@ public class UserManager {
 
     public List<UserRepository.UserInfo> getAllUsersRelatedToStudyLine(int studyLineId) {
         return userRepository.getAllUsersRelatedToStudyLine(studyLineId);
+    }
+
+    public int getMaxWorkLoad(User user){return userRepository.getMaxWorkLoad(user);}
+
+    public void updateMaxWorkLoad(User user, int newMaxLoad){
+        userRepository.updateMaxWorkLoad(user,newMaxLoad);
     }
 
     public List<UserRepository.UserInfo> getAllStudentsRelatedToStudyLine(int studyLineId) {

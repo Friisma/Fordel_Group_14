@@ -123,3 +123,19 @@ function openConfirmRemoveStudyLineModal (event, buttonElement) {
 
   toggleModal(event);
 }
+
+function openStudyLineModal(event, buttonElement) {
+  const userEmail = buttonElement.getAttribute('data-email');
+
+  document.getElementById('study-line-modal-email-input').value = userEmail;
+
+  toggleModal(event);
+}
+
+function openConfirmDeleteUserModal(event, buttonElement) {
+  const userEmail = buttonElement.getAttribute('data-email');
+
+  document.getElementById('confirm-delete-user-email').value = userEmail;
+
+  toggleModal(event);
+}
