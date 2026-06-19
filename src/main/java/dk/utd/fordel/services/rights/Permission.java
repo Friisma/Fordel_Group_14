@@ -2,6 +2,7 @@ package dk.utd.fordel.services.rights;
 
 public enum Permission {
     VIEW_HOME,
+    VIEW_STUDENT,
     VIEW_PROJECT,
     EDIT_OWN_PROFILE,
     VIEW_ADMIN_PAGE,
@@ -11,5 +12,7 @@ public enum Permission {
     ADVISOR_DASHBOARD,
     CAN_EDIT_STARTED_PROJECT,
     CAN_EDIT_PROJECT,
-    VIEW_STUDY_LINE
+    VIEW_STUDY_LINE,
+    CAN_EDIT_STUDENT,
+    VIEW_STUDENT_PROJECTS
 }
