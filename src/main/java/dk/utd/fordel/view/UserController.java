@@ -72,6 +72,39 @@ public class UserController {
         return "adminpage";
     }
 
+    @GetMapping("/users")
+    public String getUsers(HttpSession session, Model model) {
+        if (session.getAttribute("auth") == null) {
+            return "redirect:/login";
+        }
+
+        Object userData = session.getAttribute("userData");
+        RightsContext rights = rightsService.from(userData instanceof User.Data data ? data : null);
+        if (!rightsService.canViewStudent(rights)) {
+            return "redirect:/forbidden";
+        }
+
+        try (var uow = unitOfWork.begin()) {
+            var usersList = userManager.getAllUsers().stream()
+                    .map(user -> new UserCard(
+                            user.id(),
+                            user.name(),
+                            user.roles(),
+                            user.email(),
+                            null,
+                            false))
+                    .toList();
+
+            model.addAttribute("title", "Users");
+            model.addAttribute("users", usersList);
+            uow.commit();
+        } catch (UnitOfWorkException e) {
+            throw Log.giveUp(logger, e, "Could not load users");
+        }
+
+        return "users";
+    }
+
     @GetMapping("/user/{id}")
     public String getUser(@PathVariable int id, HttpSession session, Model model) {
         if (session.getAttribute("auth") == null) {
@@ -332,5 +365,28 @@ public class UserController {
     }
 
     public record ProjectCard(String id, String title, String description, String studyLine, String status) {
+    }
+
+    public record UserCard(String id, String name, List<Roles> roles, String email, Integer projectId,
+            boolean kickable) {
+        public String rolesDisplay() {
+            if (roles == null || roles.isEmpty()) {
+                return "No role";
+            }
+
+            return roles.stream()
+                    .map(UserController::displayName)
+                    .collect(java.util.stream.Collectors.joining(", "));
+        }
+    }
+
+    private static String displayName(Roles role) {
+        return switch (role) {
+            case STUDENT -> "Student";
+            case ADVISOR -> "Advisor";
+            case TEACHER -> "Teacher";
+            case STUDY_LEADER -> "Study Leader";
+            case ADMINISTRATOR -> "Administrator";
+        };
     }
 }

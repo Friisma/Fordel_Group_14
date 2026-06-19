@@ -27,7 +27,7 @@ public class RightsService {
 
         if (!roles.isEmpty()) {
             permissions.add(Permission.VIEW_PROJECT);
-            permissions.add(Permission.VIEW_STUDENT);
+            permissions.add(Permission.VIEW_USER);
         }
 
         if (roles.contains(Roles.STUDY_LEADER)) {
@@ -98,7 +98,7 @@ public class RightsService {
     }
 
     public boolean canViewStudent(RightsContext rights) {
-        return rights != null && rights.hasPermission(Permission.VIEW_STUDENT);
+        return rights != null && rights.hasPermission(Permission.VIEW_USER);
     }
 
     public boolean canEditStudent(RightsContext rights) {

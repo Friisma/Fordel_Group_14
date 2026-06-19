@@ -61,7 +61,10 @@
             <hr>
             <details open="">
                 <summary>Projects</summary>
-                <div class="project-grid">
+                <div th:if="${projects == null or #lists.isEmpty(projects)}">
+                    <p>This user has no projects</p>
+                </div>
+                <div class="project-grid" th:unless="${projects == null or #lists.isEmpty(projects)}">
                     <th:block th:each="project : ${projects}">
                         <article th:replace="~{fragments/project-card :: projectCard(project=${project})}"></article>
                     </th:block>
