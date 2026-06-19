@@ -17,6 +17,10 @@ public class ProjectManager {
 
         List<Project> getAllProjectsRelatedToUser(User user) throws Project.InvalidProject;
 
+        List<Project> getAllProjectsRelatedToStudyLine(int studyLineId);
+
+        List<Project> getAllProjectsRelatedToStudyLineAndUser(int studyLineId, User user);
+
         boolean canViewProject(User user, int projectId);
 
         String getProjectCreatorEmail(int projectId);
@@ -49,6 +53,14 @@ public class ProjectManager {
 
     public List<Project> getAllProjectsRelatedToUser(User user) throws Project.InvalidProject {
         return projectRepository.getAllProjectsRelatedToUser(user);
+    }
+
+    public List<Project> getAllProjectsRelatedToStudyLine(int studyLineId) {
+        return projectRepository.getAllProjectsRelatedToStudyLine(studyLineId);
+    }
+
+    public List<Project> getAllProjectsRelatedToStudyLineAndUser(int studyLineId, User user) {
+        return projectRepository.getAllProjectsRelatedToStudyLineAndUser(studyLineId, user);
     }
 
     public boolean canViewProject(User user, int projectId) {

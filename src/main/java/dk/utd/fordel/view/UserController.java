@@ -32,8 +32,7 @@ public class UserController {
     private final UnitOfWork unitOfWork;
     private final StudyLineManager studyLineManager;
 
-    public UserController(UserManager userManager, RightsService rightsService, UnitOfWork unitOfWork,
-            StudyLineManager studyLineManager) {
+    public UserController(UserManager userManager, RightsService rightsService, UnitOfWork unitOfWork, StudyLineManager studyLineManager) {
         this.userManager = userManager;
         this.rightsService = rightsService;
         this.unitOfWork = unitOfWork;
@@ -68,8 +67,8 @@ public class UserController {
 
     @PostMapping("/adminpage/remove-role")
     public String removeRole(HttpSession session,
-            @RequestParam("email") String email,
-            @RequestParam("role") String roleString) {
+                            @RequestParam("email") String email,
+                            @RequestParam("role") String roleString) {
         if (session.getAttribute("auth") == null) {
             return "redirect:/login";
         }
@@ -100,8 +99,8 @@ public class UserController {
 
     @PostMapping("/adminpage/assign-study-line")
     public String assignStudyLine(HttpSession session,
-            @RequestParam("email") String email,
-            @RequestParam("studyLine") String studyLineName) {
+                                  @RequestParam("email") String email,
+                                  @RequestParam("studyLine") String studyLineName) {
         if (session.getAttribute("auth") == null) {
             return "redirect:/login";
         }
@@ -231,5 +230,32 @@ public class UserController {
 
         session.setAttribute("userData", updatedData);
         return "redirect:/";
+    }
+
+    @PostMapping("/adminpage/delete-user")
+    public String deleteUser(HttpSession session,
+                             @RequestParam("email") String email) {
+        Object authObj = session.getAttribute("auth");
+        if (authObj == null) {
+            return "redirect:/login";
+        }
+
+        if (!(authObj instanceof dk.utd.fordel.services.Authenticator.Auth auth)) {
+            return "redirect:/login";
+        }
+
+        try (var uow = unitOfWork.begin()) {
+            User userToDelete = User.of(email);
+            userManager.deleteUser(userToDelete);
+            uow.commit();
+        } catch (UserDoesNotExist e) {
+            throw Log.giveUp(logger, e, "Could not update username");
+        } catch (UnitOfWorkException e) {
+            throw Log.giveUp(logger, e, "Could not update username");
+        } catch (Email.InvalidEmail e) {
+            throw Log.giveUp(logger, e, "Invalid email");
+        }
+
+        return "redirect:/adminpage";
     }
 }

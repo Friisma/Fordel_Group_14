@@ -71,6 +71,9 @@ public class UserManager {
         userRepository.updateStudyStart(user, studyStart);
     }
 
+    public void deleteUser(User user) throws UserDoesNotExist {
+        userRepository.delete(user);
+    }
     // TODO Maybe find a better solution, once the domain is complete
     public int getUserIdByEmail(Email email) {
         return userRepository.getUserIdByEmail(email);
@@ -92,9 +95,7 @@ public class UserManager {
         userRepository.removeRole(user, roleToRemove);
     }
 
-    public void assignStudyLine(User user, String studyLineName) {
-        userRepository.assignStudyLine(user, studyLineName);
-    }
+    public void assignStudyLine(User user, String studyLineName) { userRepository.assignStudyLine(user, studyLineName); }
 
     public List<Roles> getUserRoles(User user) {
         return userRepository.getUserRoles(user);
