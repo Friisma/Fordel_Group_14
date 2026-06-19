@@ -22,6 +22,7 @@ public class RightsService {
         permissions.add(Permission.VIEW_HOME);
         permissions.add(Permission.EDIT_OWN_PROFILE);
         permissions.add(Permission.MANAGE_STUDY_LINE);
+        permissions.add(Permission.CAN_EDIT_PROJECT);
 
         if (!roles.isEmpty()) {
             permissions.add(Permission.VIEW_PROJECT);
@@ -33,7 +34,10 @@ public class RightsService {
         }
 
         if (roles.contains(Roles.ADVISOR)) {
+            permissions.add(Permission.ADVISOR_DASHBOARD);
             permissions.add(Permission.VIEW_ALL_PROJECTS);
+            permissions.add(Permission.CAN_EDIT_STARTED_PROJECT);
+            permissions.add(Permission.CAN_EDIT_PROJECT);
         }
 
         return new RightsContext(true, roles, permissions);
@@ -55,8 +59,16 @@ public class RightsService {
         return rights != null && rights.hasPermission(Permission.VIEW_PROJECT);
     }
 
+    public boolean canViewAdvisorDashboard(RightsContext rights) {
+        return rights != null && rights.hasPermission(Permission.ADVISOR_DASHBOARD);
+    }
+
     public boolean canViewAllProjects(RightsContext rights) {
         return rights != null && rights.hasPermission(Permission.VIEW_ALL_PROJECTS);
+    }
+
+    public boolean canEditStartedProject(RightsContext rights) {
+        return rights != null && rights.hasPermission(Permission.CAN_EDIT_STARTED_PROJECT);
     }
 
     public boolean canManageStudyLine(RightsContext rights) {

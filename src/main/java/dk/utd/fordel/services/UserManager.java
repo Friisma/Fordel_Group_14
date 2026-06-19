@@ -22,6 +22,8 @@ public class UserManager {
         void delete(User user) throws UserDoesNotExist;
 
         int getUserIdByEmail(Email email);
+        int getMaxWorkLoad(User user);
+        void updateMaxWorkLoad(User user, int newMaxLoad);
 
         LocalDateTime getPasswordChangedAt(User user) throws UserDoesNotExist;
 
@@ -104,6 +106,12 @@ public class UserManager {
 
     public List<UserRepository.UserInfo> getAllUsersRelatedToStudyLine(int studyLineId) {
         return userRepository.getAllUsersRelatedToStudyLine(studyLineId);
+    }
+
+    public int getMaxWorkLoad(User user){return userRepository.getMaxWorkLoad(user);}
+
+    public void updateMaxWorkLoad(User user, int newMaxLoad){
+        userRepository.updateMaxWorkLoad(user,newMaxLoad);
     }
 
     public List<UserRepository.UserInfo> getAllStudentsRelatedToStudyLine(int studyLineId) {
