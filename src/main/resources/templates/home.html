@@ -14,6 +14,14 @@
       </div>
     </section>
 
+    <div th:if="${showPasswordExpiryReminder}">
+      <button id="open-password-expiry-reminder" type="button" hidden data-target="modal-password-expiry-reminder"
+        onclick="toggleModal(event)">Open password expiry reminder</button>
+      <div
+        th:replace="~{fragments/password-expiry-reminder-modal :: passwordExpiryReminderModal(showPasswordExpiryReminder=${showPasswordExpiryReminder})}">
+      </div>
+    </div>
+
     <hr th:if="${sectionVisibility.projectsVisible or sectionVisibility.advisorsVisible}">
 
     <section id="projects" th:if="${sectionVisibility.projectsVisible}">
@@ -56,9 +64,19 @@
         </div>
       </details>
     </section>
+
+    <section id="password-last-changed">
+      <details open="">
+        <summary>Password status</summary>
+        <div
+          th:replace="~{fragments/password-last-changed :: passwordLastChanged(passwordChangedAt=${passwordChangedAt}, passwordExpiresAt=${passwordExpiresAt})}">
+        </div>
+      </details>
+    </section>
   </main>
 
   <footer th:replace="~{fragments/footer ::footer}"></footer>
+  <script th:src="@{/js/password-expiry-reminder.js}" defer></script>
 </body>
 
 </html>

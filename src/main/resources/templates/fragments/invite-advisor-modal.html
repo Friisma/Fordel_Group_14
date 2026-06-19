@@ -1,4 +1,3 @@
-<!-- Invite Advisor Modal Fragment -->
 <dialog id="modal-invite-advisor" th:fragment="inviteAdvisorModal(availableAdvisors)">
     <article>
         <header>
@@ -7,7 +6,6 @@
             <h3>Invite advisor to project</h3>
         </header>
 
-        <!-- This form is a frontend-only placeholder for now -->
         <form id="invite-advisor-form" action="#" method="post"
             th:onsubmit="|document.getElementById('invite-advisor-form').action = document.getElementById('invite-advisor-form').action|">
             <input type="hidden" id="modal-project-id-input" name="projectId" value="" />
