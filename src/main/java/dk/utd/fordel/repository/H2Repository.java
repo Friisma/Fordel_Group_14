@@ -585,9 +585,11 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     public List<UserInfo> getAllLeadersRelatedToStudyLine(int studyLineId) {
         List<UserInfo> studyLineUsers = new ArrayList<>();
         var stmt = """
-                    SELECT user_id
-                    FROM study_line_leaders
-                    WHERE study_line_id = ?
+                    SELECT slm.user_id AS user_id
+                    FROM study_line_memberships slm
+                    JOIN roles r ON slm.role_id = r.id
+                    WHERE slm.study_line_id = ?
+                    AND r.name = 'study leader'
                     """;
         try (var statement = getConnection().prepareStatement(stmt)) {
             statement.setInt(1, studyLineId);
@@ -971,16 +973,28 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
 
     @Override
     public void addStudent(User user, int studyLineId) {
-        var stmt = """
-            MERGE INTO study_line_memberships (user_id, study_line_id, role_id)
-            KEY (user_id, study_line_id, role_id)
+        var stmt1 = """
+            DELETE FROM study_line_memberships
+            WHERE user_id = (SELECT id FROM users WHERE email = ?)
+            AND role_id = (SELECT id FROM roles WHERE name = 'student')
+            """;
+
+        var stmt2 = """
+                MERGE INTO study_line_memberships (user_id, study_line_id, role_id)
+                KEY (user_id, study_line_id, role_id)
                 SELECT u.id, ?, r.id
                 FROM users u, roles r
                 WHERE u.email = ?
                 AND r.name = 'student'
-            """;
+                """;
+        try (var statement = getConnection().prepareStatement(stmt1)) {
+            statement.setString(1, user.getEmail().asString());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Could not remove old student role");
+        }
 
-        try (var statement = getConnection().prepareStatement(stmt)) {
+        try (var statement = getConnection().prepareStatement(stmt2)) {
             statement.setInt(1, studyLineId);
             statement.setString(2, user.getEmail().asString());
             statement.executeUpdate();
@@ -992,19 +1006,20 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     @Override
     public void addStudyLeader(User user, int studyLineId) {
         var stmt = """
-                INSERT INTO study_line_leaders (user_id, role_id)
-                VALUES (
-                    (SELECT id FROM users WHERE email = ?),
-                    (?)
-                )
+                MERGE INTO study_line_memberships (user_id, study_line_id, role_id)
+                KEY (user_id, study_line_id, role_id)
+                SELECT u.id, ?, r.id
+                FROM users u, roles r
+                WHERE u.email = ?
+                AND r.name = 'study leader'
                 """;
 
         try (var statement = getConnection().prepareStatement(stmt)) {
-            statement.setString(1, user.getEmail().asString());
-            statement.setInt(2, studyLineId);
+            statement.setInt(1, studyLineId);
+            statement.setString(2, user.getEmail().asString());
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw Log.giveUp(logger, e, "Could not add user to study line");
+            throw Log.giveUp(logger, e, "Could not add study leader to study line");
         }
     }
 
