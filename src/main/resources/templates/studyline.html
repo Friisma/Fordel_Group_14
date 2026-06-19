@@ -1,0 +1,36 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="da">
+
+<head th:replace="~{fragments/head ::head}"></head>
+
+<body>
+<header th:replace="~{fragments/header ::header}"></header>
+
+<main class="container">
+    <h1 th:text="${studyLineName}">Study line</h1>
+    <form th:action="@{/studyline/{id}/members(id=${studyLineId})}" method="get">
+        <button type="submit">Members</button>
+    </form>
+    <section>
+        <h2>All projects</h2>
+        <div class="project-grid">
+            <th:block th:each="project : ${studyLineAllProjects}">
+                <article th:replace="~{fragments/project-card :: projectCard(project=${project})}"></article>
+            </th:block>
+        </div>
+    </section>
+
+    <section>
+        <h2>My projects</h2>
+        <div class="project-grid">
+            <th:block th:each="project : ${studyLineLoggedInUserProjects}">
+                <article th:replace="~{fragments/project-card :: projectCard(project=${project})}"></article>
+            </th:block>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/footer ::footer}"></footer>
+</body>
+
+</html>

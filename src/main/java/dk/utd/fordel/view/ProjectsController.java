@@ -54,7 +54,7 @@ public class ProjectsController {
         return "projects";
     }
 
-    private static ProjectCard toProjectCard(Project project) {
+    public static ProjectCard toProjectCard(Project project) {
         return new ProjectCard(
                 String.valueOf(project.getProjectID()),
                 project.getProjectName(),

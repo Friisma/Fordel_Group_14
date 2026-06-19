@@ -23,14 +23,21 @@ public class RightsService {
         permissions.add(Permission.EDIT_OWN_PROFILE);
         permissions.add(Permission.MANAGE_STUDY_LINE);
         permissions.add(Permission.CAN_EDIT_PROJECT);
+        permissions.add(Permission.VIEW_STUDY_LINE);
+
 
         if (!roles.isEmpty()) {
             permissions.add(Permission.VIEW_PROJECT);
         }
 
+        if (roles.contains(Roles.STUDY_LEADER)) {
+            permissions.add(Permission.MANAGE_STUDY_LINE);
+        }
+
         if (roles.contains(Roles.ADMINISTRATOR)) {
             permissions.add(Permission.VIEW_ADMIN_PAGE);
             permissions.add(Permission.GRANT_ROLES);
+            permissions.add(Permission.MANAGE_STUDY_LINE);
         }
 
         if (roles.contains(Roles.ADVISOR)) {
@@ -82,6 +89,10 @@ public class RightsService {
     public boolean canUpdateStudyStart(RightsContext rights) {
         return rights != null && rights.isStudent();
     }
+    public boolean canViewStudyLine(RightsContext rights) {
+        return rights != null && rights.hasPermission(Permission.VIEW_STUDY_LINE);
+    }
+
 
     private static <E extends Enum<E>> Set<E> toEnumSet(Iterable<E> values, Class<E> enumType) {
         if (values == null) {
