@@ -3,6 +3,7 @@ package dk.utd.fordel.services;
 import dk.utd.fordel.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,6 +16,8 @@ public class UserManager {
         User.Data read(User user) throws UserDoesNotExist;
 
         void update(User user, User.Data data) throws UserDoesNotExist;
+
+        void updateStudyStart(User user, LocalDate studyStart) throws UserDoesNotExist;
 
         void delete(User user) throws UserDoesNotExist;
 
@@ -60,6 +63,10 @@ public class UserManager {
 
     public void updateUser(User user, User.Data data) throws UserDoesNotExist {
         userRepository.update(user, data);
+    }
+
+    public void updateStudyStart(User user, LocalDate studyStart) throws UserDoesNotExist {
+        userRepository.updateStudyStart(user, studyStart);
     }
 
     // TODO Maybe find a better solution, once the domain is complete

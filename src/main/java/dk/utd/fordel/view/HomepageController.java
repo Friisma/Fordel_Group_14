@@ -8,6 +8,7 @@ import dk.utd.fordel.domain.AdvisorInvitation;
 import dk.utd.fordel.services.ProjectManager;
 import dk.utd.fordel.services.InvitationManager;
 import dk.utd.fordel.services.UserManager;
+import dk.utd.fordel.services.StudentProgressService;
 import dk.utd.fordel.utils.UnitOfWork;
 import dk.utd.fordel.services.Authenticator.Auth;
 import dk.utd.fordel.services.rights.RightsContext;
@@ -32,14 +33,17 @@ public class HomepageController {
     private final ProjectManager projectManager;
     private final InvitationManager invitationManager;
     private final UserManager userManager;
+    private final StudentProgressService studentProgressService;
     private final UnitOfWork unitOfWork;
 
     public HomepageController(RightsService rightsService, ProjectManager projectManager,
-            InvitationManager invitationManager, UserManager userManager, UnitOfWork unitOfWork) {
+            InvitationManager invitationManager, UserManager userManager,
+            StudentProgressService studentProgressService, UnitOfWork unitOfWork) {
         this.rightsService = rightsService;
         this.projectManager = projectManager;
         this.invitationManager = invitationManager;
         this.userManager = userManager;
+        this.studentProgressService = studentProgressService;
         this.unitOfWork = unitOfWork;
     }
 
@@ -79,6 +83,9 @@ public class HomepageController {
         model.addAttribute("userData", userData);
         model.addAttribute("title", "Fordel");
         model.addAttribute("roleBadge", buildRoleBadge(rights));
+        if (rightsService.canViewStudentProgress(rights)) {
+            model.addAttribute("studentProgress", studentProgressService.build(userData));
+        }
         model.addAttribute("sectionVisibility", new SectionVisibility(
                 rightsService.canViewProject(rights),
                 rights != null && rights.isAdvisor()));
