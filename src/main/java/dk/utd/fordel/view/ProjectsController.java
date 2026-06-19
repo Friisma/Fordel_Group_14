@@ -59,9 +59,11 @@ public class ProjectsController {
                 String.valueOf(project.getProjectID()),
                 project.getProjectName(),
                 project.getDescription() != null ? project.getDescription() : "",
-                project.getStudyLine() != null ? project.getStudyLine() : "");
+                project.getStudyLine() != null ? project.getStudyLine() : "",
+                project.getStatus() != null ? project.getStatus().toString() : ""
+        );
     }
 
-    public record ProjectCard(String id, String title, String description, String studyLine) {
+    public record ProjectCard(String id, String title, String description, String studyLine, String status) {
     }
 }

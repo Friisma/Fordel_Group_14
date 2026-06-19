@@ -1,10 +1,18 @@
 package dk.utd.fordel.domain;
 
 public class Project {
+
+    public enum Status {
+        DRAFT,
+        STARTED,
+        FINISHED
+    }
+
     private int projectID = 0;
     private String projectName;
     private String description;
     private String studyLine;
+    private Status status;
 
     public Project(String projectName, String description) throws InvalidProject {
 
@@ -16,6 +24,8 @@ public class Project {
         this.projectName = projectName;
         this.description = description;
         this.studyLine = "";
+        this.status = Status.DRAFT;
+
     }
     public int getProjectID() {
         return this.projectID;
@@ -53,6 +63,14 @@ public class Project {
         public InvalidProject(String msg) {
             super(msg);
         }
+    }
+
+    public void setStatus(Status status){
+        this.status = status;
+    }
+
+    public Status getStatus() {
+        return status;
     }
 }
 
