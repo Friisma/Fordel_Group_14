@@ -1,0 +1,191 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="da">
+
+<head th:replace="~{fragments/head ::head}"></head>
+
+<body>
+    <header th:replace="~{fragments/header ::header}"></header>
+
+    <main class="container">
+        <section>
+            <h1 th:text="${userName}">User name</h1>
+            <p th:text="'User id: ' + ${userId}">User id</p>
+            <p th:text="'E-mail: ' + ${userEmail}">User email</p>
+            <p th:text="'Study line: ' + ${userStudyLine}">Study line</p>
+            <a role="button" class="member-card-message" th:href="@{|mailto:${userEmail}|}">Message User</a>
+        </section>
+
+        <section th:if="${canEditStudent}">
+            <nav>
+                <ul>
+                    <li>
+                        <details class="dropdown">
+                            <summary role="button" class="secondary">Action</summary>
+                            <ul>
+                                <li>
+                                    <button data-target="modal-assign-role" th:data-email="${userEmail}"
+                                        onclick="openRoleModal(event, this)">
+                                        Assign role
+                                    </button>
+                                </li>
+
+                                <li>
+                                    <button data-target="modal-remove-role" th:data-email="${userEmail}"
+                                        th:data-roles="${#strings.listJoin(userRoles, ', ')}"
+                                        onclick="openRemoveRoleModal(event, this)">
+                                        Remove role
+                                    </button>
+                                </li>
+
+                                <li>
+                                    <button data-target="modal-assign-study-line" th:data-email="${userEmail}"
+                                        onclick="openStudyLineModal(event, this)">
+                                        Assign study line
+                                    </button>
+                                </li>
+
+                                <li>
+                                    <button data-target="modal-confirm-delete-user" th:data-email="${userEmail}"
+                                        onclick="openConfirmDeleteUserModal(event, this)">
+                                        Delete user
+                                    </button>
+                                </li>
+                            </ul>
+                        </details>
+                    </li>
+                </ul>
+            </nav>
+        </section>
+
+        <section id="projects" th:if="${projectsVisible}">
+            <hr>
+            <details open="">
+                <summary>Projects</summary>
+                <div class="project-grid">
+                    <th:block th:each="project : ${projects}">
+                        <article th:replace="~{fragments/project-card :: projectCard(project=${project})}"></article>
+                    </th:block>
+                </div>
+            </details>
+        </section>
+    </main>
+
+    <dialog id="modal-assign-role">
+        <article>
+            <header>
+                <button aria-label="Close" rel="prev" data-target="modal-assign-role"
+                    onclick="toggleModal(event)"></button>
+                <h3>Assign role</h3>
+            </header>
+
+            <form action="/adminpage/grant-role" method="post">
+                <input type="hidden" id="assignRole-modal-email" name="email" value="" />
+
+                <div style="display: flex; gap: 1rem; align-items: flex-end;">
+                    <div style="flex-grow: 1;">
+                        <label for="role-select">Assign user a role</label>
+                        <select id="role-select" name="role" required>
+                            <option value="" disabled selected>Select role</option>
+                            <option value="STUDENT">Student</option>
+                            <option value="ADVISOR">Advisor</option>
+                            <option value="TEACHER">Teacher</option>
+                            <option value="STUDY_LEADER">Study leader</option>
+                            <option value="ADMINISTRATOR">Administrator</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" style="width: auto;">
+                        Assign role
+                    </button>
+                </div>
+            </form>
+        </article>
+    </dialog>
+
+    <dialog id="modal-remove-role">
+        <article>
+            <header>
+                <button aria-label="Close" rel="prev" data-target="modal-remove-role"
+                    onclick="toggleModal(event)"></button>
+                <h3>Remove role</h3>
+            </header>
+
+            <form action="/adminpage/remove-role" method="post">
+                <input type="hidden" id="removeRole-modal-email" name="email" value="" />
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Role</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="remove-role-tbody"></tbody>
+
+                </table>
+            </form>
+        </article>
+    </dialog>
+
+    <dialog id="modal-assign-study-line">
+        <article>
+            <header>
+                <button aria-label="Close" rel="prev" data-target="modal-assign-study-line"
+                    onclick="toggleModal(event)"></button>
+                <h3>Assign study line</h3>
+            </header>
+
+            <form action="/adminpage/assign-study-line" method="post">
+                <input type="hidden" id="study-line-modal-email-input" name="email" value="" />
+
+                <div style="display: flex; gap: 1rem; align-items: flex-end;">
+                    <div style="flex-grow: 1;">
+                        <label for="study-line-select">Assign user to study line</label>
+                        <select id="study-line-select" name="studyLine" required>
+                            <option value="" disabled selected>Select study line</option>
+                            <option th:each="studyLine : ${studyLines}" th:value="${studyLine}" th:text="${studyLine}">
+                                Study line
+                            </option>
+                        </select>
+                    </div>
+
+                    <button type="submit" style="width: auto;">
+                        Assign study line
+                    </button>
+                </div>
+            </form>
+        </article>
+    </dialog>
+
+    <dialog id="modal-confirm-delete-user">
+        <article>
+            <header>
+                <button aria-label="Close" rel="prev" data-target="modal-confirm-delete-user"
+                    onclick="toggleModal(event)"></button>
+                <h3 style="text-align: center; width: 100%; margin: 0;">Delete user</h3>
+            </header>
+
+            <form th:action="@{/adminpage/delete-user}" method="post">
+                <input type="hidden" id="confirm-delete-user-email" name="email" value="" />
+
+                <p style="text-align: center;">Are you sure you want to delete this user from the system?</p>
+
+                <footer style="display: flex; gap: 10px;">
+                    <button type="button" class="secondary" data-target="modal-confirm-delete-user"
+                        onclick="toggleModal(event)" style="flex: 1; margin: 0;">
+                        Cancel
+                    </button>
+
+                    <button type="submit" style="flex: 1; margin: 0;">
+                        Confirm
+                    </button>
+                </footer>
+            </form>
+        </article>
+    </dialog>
+
+    <footer th:replace="~{fragments/footer ::footer}"></footer>
+    <script th:src="@{/js/modal.js}" defer></script>
+</body>
+
+</html>

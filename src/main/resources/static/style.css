@@ -148,6 +148,17 @@
     margin: 0;
 }
 
+details.dropdown > summary[role="button"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+details.dropdown > summary[role="button"]::after {
+    margin-left: auto;
+}
+
 .member-card-kick-form {
     margin: 0;
     display: flex;

@@ -20,7 +20,6 @@ public class RightsService {
         Set<Permission> permissions = EnumSet.noneOf(Permission.class);
 
         permissions.add(Permission.VIEW_HOME);
-        permissions.add(Permission.VIEW_STUDENT);
         permissions.add(Permission.EDIT_OWN_PROFILE);
         permissions.add(Permission.MANAGE_STUDY_LINE);
         permissions.add(Permission.CAN_EDIT_PROJECT);
@@ -28,10 +27,12 @@ public class RightsService {
 
         if (!roles.isEmpty()) {
             permissions.add(Permission.VIEW_PROJECT);
+            permissions.add(Permission.VIEW_STUDENT);
         }
 
         if (roles.contains(Roles.STUDY_LEADER)) {
             permissions.add(Permission.MANAGE_STUDY_LINE);
+            permissions.add(Permission.VIEW_STUDENT_PROJECTS);
         }
 
         if (roles.contains(Roles.ADMINISTRATOR)) {
@@ -39,6 +40,7 @@ public class RightsService {
             permissions.add(Permission.GRANT_ROLES);
             permissions.add(Permission.MANAGE_STUDY_LINE);
             permissions.add(Permission.CAN_EDIT_STUDENT);
+            permissions.add(Permission.VIEW_STUDENT_PROJECTS);
         }
 
         if (roles.contains(Roles.ADVISOR)) {

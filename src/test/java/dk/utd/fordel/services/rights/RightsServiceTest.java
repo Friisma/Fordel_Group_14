@@ -21,6 +21,13 @@ class RightsServiceTest {
     }
 
     @Test
+    void it_does_not_grant_student_visibility_to_users_without_roles() {
+        RightsContext rights = rightsService.from(new User.Data("No Roles", List.of(), null, null));
+
+        assertFalse(rights.hasPermission(Permission.VIEW_STUDENT));
+    }
+
+    @Test
     void it_grants_admin_student_edit_rights() {
         RightsContext rights = rightsService.from(new User.Data("Admin", List.of(Roles.ADMINISTRATOR), null, null));
 
