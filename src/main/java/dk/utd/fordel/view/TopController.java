@@ -21,12 +21,20 @@ public class TopController {
 
     @GetMapping("/error")
     public String getError(Model model) {
+        model.addAttribute("title", "Error");
         return "error";
     }
 
     @GetMapping("/forbidden")
     public String getForbidden(Model model) {
+        model.addAttribute("title", "Access Denied");
         return "forbidden";
+    }
+
+    @GetMapping("/password-expired")
+    public String getPasswordExpired(Model model) {
+        model.addAttribute("title", "Password expired");
+        return "password-expired";
     }
 
     @GetMapping("/logout")

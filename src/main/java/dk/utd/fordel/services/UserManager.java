@@ -3,6 +3,8 @@ package dk.utd.fordel.services;
 import dk.utd.fordel.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -10,21 +12,38 @@ public class UserManager {
 
     public static interface UserRepository {
         void create(User user, User.Data data) throws EmailAlreadyInUse;
+
         User.Data read(User user) throws UserDoesNotExist;
+
         void update(User user, User.Data data) throws UserDoesNotExist;
+
+        void updateStudyStart(User user, LocalDate studyStart) throws UserDoesNotExist;
+
         void delete(User user) throws UserDoesNotExist;
+
         int getUserIdByEmail(Email email);
 
+        LocalDateTime getPasswordChangedAt(User user) throws UserDoesNotExist;
+
+        void setPasswordChangedAt(User user, LocalDateTime passwordChangedAt) throws UserDoesNotExist;
+
         public void grantRole(User user, Roles roleToGrant);
+
         public void removeRole(User user, Roles roleToRemove);
+
         void assignStudyLine(User user, String studyLineName);
+
         public List<Roles> getUserRoles(User user);
 
-        public record UserInfo(String id, String email, String name, List<Roles> roles, String studyLine) {}
+        public record UserInfo(String id, String email, String name, List<Roles> roles, String studyLine) {
+        }
+
         List<UserInfo> getAllUsers();
 
         List<UserInfo> getAllUsersRelatedToStudyLine(int studyLineId);
+
         List<UserInfo> getAllStudentsRelatedToStudyLine(int studyLineId);
+
         List<UserInfo> getAllLeadersRelatedToStudyLine(int studyLineId);
     }
 
@@ -46,9 +65,21 @@ public class UserManager {
         userRepository.update(user, data);
     }
 
-    //TODO Maybe find a better solution, once the domain is complete
-    public int getUserIdByEmail(Email email){
+    public void updateStudyStart(User user, LocalDate studyStart) throws UserDoesNotExist {
+        userRepository.updateStudyStart(user, studyStart);
+    }
+
+    // TODO Maybe find a better solution, once the domain is complete
+    public int getUserIdByEmail(Email email) {
         return userRepository.getUserIdByEmail(email);
+    }
+
+    public LocalDateTime getPasswordChangedAt(User user) throws UserDoesNotExist {
+        return userRepository.getPasswordChangedAt(user);
+    }
+
+    public void setPasswordChangedAt(User user, LocalDateTime passwordChangedAt) throws UserDoesNotExist {
+        userRepository.setPasswordChangedAt(user, passwordChangedAt);
     }
 
     public void grantRole(User user, Roles roleToGrant) {
@@ -59,7 +90,9 @@ public class UserManager {
         userRepository.removeRole(user, roleToRemove);
     }
 
-    public void assignStudyLine(User user, String studyLineName) { userRepository.assignStudyLine(user, studyLineName); }
+    public void assignStudyLine(User user, String studyLineName) {
+        userRepository.assignStudyLine(user, studyLineName);
+    }
 
     public List<Roles> getUserRoles(User user) {
         return userRepository.getUserRoles(user);
@@ -76,6 +109,7 @@ public class UserManager {
     public List<UserRepository.UserInfo> getAllStudentsRelatedToStudyLine(int studyLineId) {
         return userRepository.getAllStudentsRelatedToStudyLine(studyLineId);
     }
+
     public List<UserRepository.UserInfo> getAllLeadersRelatedToStudyLine(int studyLineId) {
         return userRepository.getAllLeadersRelatedToStudyLine(studyLineId);
     }

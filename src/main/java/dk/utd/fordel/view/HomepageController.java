@@ -2,11 +2,13 @@ package dk.utd.fordel.view;
 
 import dk.utd.fordel.domain.Roles;
 import dk.utd.fordel.domain.User;
+import dk.utd.fordel.domain.UserDoesNotExist;
 import dk.utd.fordel.domain.Project;
 import dk.utd.fordel.domain.AdvisorInvitation;
 import dk.utd.fordel.services.ProjectManager;
 import dk.utd.fordel.services.InvitationManager;
 import dk.utd.fordel.services.UserManager;
+import dk.utd.fordel.services.StudentProgressService;
 import dk.utd.fordel.utils.UnitOfWork;
 import dk.utd.fordel.services.Authenticator.Auth;
 import dk.utd.fordel.services.rights.RightsContext;
@@ -21,6 +23,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Comparator;
 import java.util.List;
+import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 @Controller
@@ -30,14 +33,17 @@ public class HomepageController {
     private final ProjectManager projectManager;
     private final InvitationManager invitationManager;
     private final UserManager userManager;
+    private final StudentProgressService studentProgressService;
     private final UnitOfWork unitOfWork;
 
     public HomepageController(RightsService rightsService, ProjectManager projectManager,
-            InvitationManager invitationManager, UserManager userManager, UnitOfWork unitOfWork) {
+            InvitationManager invitationManager, UserManager userManager,
+            StudentProgressService studentProgressService, UnitOfWork unitOfWork) {
         this.rightsService = rightsService;
         this.projectManager = projectManager;
         this.invitationManager = invitationManager;
         this.userManager = userManager;
+        this.studentProgressService = studentProgressService;
         this.unitOfWork = unitOfWork;
     }
 
@@ -49,15 +55,41 @@ public class HomepageController {
 
         User.Data userData = sessionUserData(session);
         RightsContext rights = rightsService.from(userData);
+        model.addAttribute("passwordChangedAt", null);
+        model.addAttribute("passwordExpiresAt", null);
+        model.addAttribute("showPasswordExpiryReminder", false);
+
+        Object authObject = session.getAttribute("auth");
+        if (authObject instanceof Auth auth) {
+            try (var uow = unitOfWork.begin()) {
+                LocalDateTime passwordChangedAt = userManager.getPasswordChangedAt(auth.user());
+                LocalDateTime passwordExpiresAt = passwordChangedAt != null ? passwordChangedAt.plusMonths(3) : null;
+                model.addAttribute("passwordChangedAt", passwordChangedAt);
+                model.addAttribute("passwordExpiresAt", passwordExpiresAt);
+                model.addAttribute("showPasswordExpiryReminder",
+                        passwordExpiresAt != null
+                                && !passwordExpiresAt.isAfter(LocalDateTime.now().plusDays(7))
+                                && passwordExpiresAt.isAfter(LocalDateTime.now()));
+                uow.commit();
+            } catch (UserDoesNotExist e) {
+                model.addAttribute("passwordChangedAt", null);
+                model.addAttribute("passwordExpiresAt", null);
+                model.addAttribute("showPasswordExpiryReminder", false);
+            } catch (UnitOfWork.UnitOfWorkException e) {
+                throw new RuntimeException("Could not load password change date", e);
+            }
+        }
 
         model.addAttribute("userData", userData);
         model.addAttribute("title", "Fordel");
         model.addAttribute("roleBadge", buildRoleBadge(rights));
+        if (rightsService.canViewStudentProgress(rights)) {
+            model.addAttribute("studentProgress", studentProgressService.build(userData));
+        }
         model.addAttribute("sectionVisibility", new SectionVisibility(
                 rightsService.canViewProject(rights),
                 rights != null && rights.isAdvisor()));
         // load actual projects for this user
-        Object authObject = session.getAttribute("auth");
         if (authObject instanceof Auth auth) {
             try (var uow = unitOfWork.begin()) {
                 var projects = projectManager.getAllProjectsRelatedToUser(auth.user());
