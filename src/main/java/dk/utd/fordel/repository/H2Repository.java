@@ -1242,6 +1242,18 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         return projects;
     }
 
+    /**
+     *
+     * @param advisor getting checked
+     * @return boolean. True if the advisor advises fewer projects than the max set for the user
+     */
+    public boolean checkMaxWorkLoad(User advisor){
+        int countOfAdvicedProjects = getCountOfAdvisorProjects(advisor);
+        int maxWorkLoad = getMaxWorkLoad(advisor);
+
+        return countOfAdvicedProjects < maxWorkLoad;
+    }
+
     @Override
     public int getCountOfAdvisorProjects(User advisor){
 
@@ -1269,7 +1281,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     public void StartProject(User advisor, Project project){
         var stmt = """
                 UPDATE projects
-                SET status = 'PUBLISHED'
+                SET status = 'STARTED'
                 WHERE project_id = ?
                 """;
         if (project.getStatus() == Project.Status.DRAFT) {

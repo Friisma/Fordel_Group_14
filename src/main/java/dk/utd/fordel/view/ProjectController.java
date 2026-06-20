@@ -1,15 +1,11 @@
 package dk.utd.fordel.view;
 
-import dk.utd.fordel.domain.AdvisorAlreadyAdvises;
-import dk.utd.fordel.domain.Project;
-import dk.utd.fordel.domain.User;
-import dk.utd.fordel.domain.Project;
+import dk.utd.fordel.domain.*;
 import dk.utd.fordel.services.Authenticator;
 import dk.utd.fordel.services.Authenticator.Auth;
 import dk.utd.fordel.services.ProjectManager;
 import dk.utd.fordel.services.UserManager;
 import dk.utd.fordel.services.InvitationManager;
-import dk.utd.fordel.domain.Roles;
 import dk.utd.fordel.services.rights.RightsContext;
 import dk.utd.fordel.services.rights.RightsService;
 import dk.utd.fordel.utils.Log;
@@ -25,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
-import dk.utd.fordel.domain.AdvisorAlreadyInvited;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -106,7 +101,9 @@ public class ProjectController {
         try (var uow = unitOfWork.begin()) {
             Authenticator.Auth auth = (Authenticator.Auth)session.getAttribute("auth");
             User user = auth.user();
-            int userId = userManager.getUserIdByEmail(user.getEmail());
+            if (!userManager.checkMaxWorkLoad(user)){throw new AdvisorReachedMaxWorkLoad(
+                    "Advisor reached max workload");
+            }
             Project project = new Project(projectName,projectDescription);
             project.setProjectID(projectId);
             projectManager.assignAdvisor(project,user);
@@ -116,15 +113,15 @@ public class ProjectController {
             throw Log.giveUp(logger, e, "Failed to assign advisor");
         } catch (Project.InvalidProject e) {
             throw Log.giveUp(logger, e, "Could not assign advisor - invalid project" + projectName);
-        } catch (AdvisorAlreadyAdvises e){
+        } catch (AdvisorAlreadyAdvises | AdvisorReachedMaxWorkLoad e){
             try (var uow = unitOfWork.begin()) {
-                model.addAttribute("errorMessage", "Advisor is already assigned to this project.");
+                model.addAttribute("errorMessage", e.getMessage());
                 model.addAttribute("projects", projectManager.getAllProjects());
                 uow.commit();
             } catch (Project.InvalidProject ex) {
                 throw Log.giveUp(logger, ex, "Could not load projects");
             } catch (UnitOfWork.UnitOfWorkException ex) {
-                throw Log.giveUp(logger, e, "Failed to load projects");
+                throw Log.giveUp(logger, ex, "Failed to load projects");
             }
             return "advisor-projects-view";
         }
@@ -361,6 +358,7 @@ public class ProjectController {
                 var invited = User.of(advisorEmail);
                 // prevent duplicate invites even before hitting DB unique constraint
                 var existingInvites = invitationManager.getInvitesForProject(id);
+                boolean maxWorkLoadNotReached = userManager.checkMaxWorkLoad(invited);
                 boolean alreadyInvited = existingInvites.stream()
                         .anyMatch(iv -> iv.email() != null && iv.email().equalsIgnoreCase(advisorEmail));
                 if (alreadyInvited) {
@@ -368,6 +366,12 @@ public class ProjectController {
                     redirectAttributes.addFlashAttribute("error", "Advisor already invited");
                     return "redirect:/project/" + id;
                 }
+                if (!maxWorkLoadNotReached){
+                    uow.rollback();
+                    redirectAttributes.addFlashAttribute("error", "Advisor reached max workload");
+                    return "redirect:/project/" + id;
+                }
+
                 try {
                     invitationManager.createInvitaion(invited, project);
                     uow.commit();

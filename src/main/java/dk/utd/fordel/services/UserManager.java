@@ -37,6 +37,8 @@ public class UserManager {
 
         public List<Roles> getUserRoles(User user);
 
+        boolean checkMaxWorkLoad(User advisor);
+
         public record UserInfo(String id, String email, String name, List<Roles> roles, String studyLine) {
         }
 
@@ -47,6 +49,7 @@ public class UserManager {
         List<UserInfo> getAllStudentsRelatedToStudyLine(int studyLineId);
 
         List<UserInfo> getAllLeadersRelatedToStudyLine(int studyLineId);
+
     }
 
     private final UserRepository userRepository;
@@ -74,7 +77,11 @@ public class UserManager {
     public void deleteUser(User user) throws UserDoesNotExist {
         userRepository.delete(user);
     }
-    // TODO Maybe find a better solution, once the domain is complete
+
+    public boolean checkMaxWorkLoad(User advisor){
+        return userRepository.checkMaxWorkLoad(advisor);
+    }
+
     public int getUserIdByEmail(Email email) {
         return userRepository.getUserIdByEmail(email);
     }
