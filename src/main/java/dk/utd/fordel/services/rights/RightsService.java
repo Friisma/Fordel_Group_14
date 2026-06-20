@@ -45,6 +45,7 @@ public class RightsService {
             permissions.add(Permission.VIEW_ALL_PROJECTS);
             permissions.add(Permission.CAN_EDIT_STARTED_PROJECT);
             permissions.add(Permission.CAN_EDIT_PROJECT);
+            permissions.add(Permission.CAN_START_PROJECT);
         }
 
         return new RightsContext(true, roles, permissions);
@@ -72,6 +73,10 @@ public class RightsService {
 
     public boolean canViewAllProjects(RightsContext rights) {
         return rights != null && rights.hasPermission(Permission.VIEW_ALL_PROJECTS);
+    }
+
+    public boolean canStartProject(RightsContext rights){
+        return rights != null && rights.hasPermission(Permission.CAN_START_PROJECT);
     }
 
     public boolean canEditStartedProject(RightsContext rights) {

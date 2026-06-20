@@ -430,6 +430,29 @@ public class ProjectController {
         }
         return "advisor-dashboard";
     }
+    @PostMapping("/project/{id}/start_project")
+    public String startProject(User advisor, HttpSession session,
+                               @PathVariable int id,
+                               RedirectAttributes redirectAttributes){
+        if (session.getAttribute("auth") == null) {
+            return "redirect:/login";
+        }
+        Object userData = session.getAttribute("userData");
+        RightsContext rights = rightsService.from(userData instanceof User.Data data ? data : null);
+        if (!rightsService.canStartProject(rights)) {
+            return "redirect:/forbidden";
+        }
+        try (var uow = unitOfWork.begin()) {
+            projectManager.startProject(id);
+            uow.commit();
+        } catch (ProjectAlreadyFinished e){
+            redirectAttributes.addFlashAttribute("error", "Project already started");
+
+        } catch (UnitOfWork.UnitOfWorkException e){
+            redirectAttributes.addFlashAttribute("error", "Failed to invite ");
+        }
+        return "redirect:/project/" + id;
+    }
 
     @PostMapping("/advisor-dashboard/change-maxWorkLoad")
 public String changeMaxWorkLoad(Model model, HttpSession session,
@@ -445,12 +468,18 @@ public String changeMaxWorkLoad(Model model, HttpSession session,
         try (var uow = unitOfWork.begin()) {
             Authenticator.Auth auth = (Authenticator.Auth)session.getAttribute("auth");
             User user = auth.user();
+
+            int currentCount = projectManager.getCountOfAdvisedProjects(user);
+            if (maxWorkLoad < currentCount){
+                throw new AdvisorReachedMaxWorkLoad("Advisor Reached max workload");
+            }
             userManager.updateMaxWorkLoad(
-                    user, maxWorkLoad
-                    );
+                    user, maxWorkLoad);
             uow.commit();
         } catch (UnitOfWork.UnitOfWorkException e){
             model.addAttribute("projects", placeholderProjects());
+        } catch (AdvisorReachedMaxWorkLoad e){
+            model.addAttribute("error",e.getMessage());
         }
         try {
             return getAllAdviserProjects(model, session);

@@ -1278,20 +1278,20 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     }
 
     @Override
-    public void StartProject(User advisor, Project project){
+    public void startProject(int projectId) throws ProjectAlreadyFinished {
         var stmt = """
-                UPDATE projects
-                SET status = 'STARTED'
-                WHERE project_id = ?
-                """;
-        if (project.getStatus() == Project.Status.DRAFT) {
-            try (var statement = getConnection().prepareStatement(stmt)) {
-                project.setStatus(Project.Status.STARTED);
-            } catch (SQLException e) {
-                throw Log.giveUp(logger, e, "Failed to publish project");
+            UPDATE projects
+            SET status = 'STARTED'
+            WHERE id = ? AND status = 'DRAFT'
+            """;
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, projectId);
+            int rowsAffected = statement.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new ProjectAlreadyFinished("Project already started or does not exist");
             }
-        } else {
-            throw new ProjectAlreadyFinished("Project already published");
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to start project: " + projectId);
         }
     }
 
