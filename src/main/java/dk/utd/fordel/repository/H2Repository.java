@@ -280,7 +280,22 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     // TODO Write more proper repository methods to update the database.
 
     @Override
-    public void update(Project project){}
+    public void update(Project project){
+        var stmt = """
+                UPDATE projects
+                SET title = ?
+                ,description = ?
+                WHERE id = ?
+                """;
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setString(1,project.getProjectName());
+            statement.setString(2,project.getDescription());
+            statement.setInt(3,project.getProjectID());
+            statement.executeUpdate();
+        } catch (SQLException e){
+            throw Log.giveUp(logger, e, "Failed to update project");
+        }
+    }
 
     @Override
     public void delete(Project project){}
@@ -296,6 +311,13 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
             throws ProjectTitleAlreadyInUse {
         int studyLineId = getStudyLineIdByName(studyLineName);
         createProjectWithStudyLine(project, userId, studyLineId);
+    }
+
+    public void advisorCreation(Project project, String studyLineName, int userId){
+        int studyLineId = getStudyLineIdByName(studyLineName);
+        createProjectWithStudyLine(project ,userId, studyLineId);
+
+        project.setStatus(Project.Status.OPEN_FOR_STUDENTS);
     }
 
     private void createProjectWithStudyLine(Project project, int userId, int studyLineId)
@@ -401,7 +423,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         List<Project> projects = new ArrayList<>();
         int userId = getUserIdByEmail(user.getEmail());
         var stmt = """
-                SELECT p.id, p.title, p.description, sl.name AS study_line_name
+                SELECT p.id, p.title, p.description, p.status, sl.name AS study_line_name
                 FROM projects p
                 LEFT JOIN study_lines sl ON p.study_line_id = sl.id
                 WHERE p.id IN (
@@ -418,6 +440,8 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
                     Project project = new Project(
                             resultSet.getString("title"),
                             resultSet.getString("description"));
+                    String status = resultSet.getString("status");
+                    project.setStatus(Project.Status.valueOf(status));
                     project.setProjectID(resultSet.getInt("id"));
                     String studyLineName = resultSet.getString("study_line_name");
                     if (studyLineName != null) {
@@ -1212,7 +1236,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         List<Project> projects = new ArrayList<>();
         int userId = getUserIdByEmail(advisor.getEmail());
         var stmt = """
-                SELECT p.id, p.title, p.description, sl.name
+                SELECT p.id, p.title, p.description, p.status, sl.name
                 FROM projects p JOIN project_advisors pa ON p.id = pa.project_id
                     JOIN study_lines sl on p.study_line_id = sl.id
                 WHERE pa.user_id = ?
@@ -1225,6 +1249,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
                             resultSet.getString("title"),
                             resultSet.getString("description"));
                     project.setProjectID(resultSet.getInt("id"));
+                    project.setStatus(Project.Status.valueOf(resultSet.getString("status")));
                     String studyLineName = resultSet.getString("name");
                     if (studyLineName != null) {
                         project.setStudyLine(studyLineName);
@@ -1261,7 +1286,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
                 SELECT COUNT(*)
                 FROM project_advisors pa JOIN projects p 
                     ON pa.project_id = p.id 
-                WHERE user_id = ? AND p.STATUS = 'DRAFT'
+                WHERE user_id = ? AND p.STATUS = 'STARTED'
                 """;
         try (var statement = getConnection().prepareStatement(stmt)) {
             int userId = getUserIdByEmail(advisor.getEmail());

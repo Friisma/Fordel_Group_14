@@ -140,7 +140,7 @@ public class ProjectController {
         if (!rightsService.canViewProject(rights)) {
             return "redirect:/forbidden";
         }
-
+        List<MemberCard> members = java.util.List.of();
         Project project = null;
         try (var uow = unitOfWork.begin()) {
             if (!projectManager.canViewProject(auth.user(), id)) {
@@ -165,7 +165,7 @@ public class ProjectController {
                 String creatorEmail = projectManager.getProjectCreatorEmail(id);
                 model.addAttribute("projectCreatorEmail", creatorEmail);
                 var allUsers = userManager.getAllUsers();
-                var members = allUsers.stream()
+                 members = allUsers.stream()
                         .filter(u -> {
                             try {
                                 return projectManager.canViewProject(User.of(u.email()), id);
@@ -217,6 +217,19 @@ public class ProjectController {
                 model.addAttribute("advisorInvitations", java.util.List.of());
             }
             uow.commit();
+
+            //Adding a button for advisors to start project
+            String currentEmail = auth.user().getEmail().asString();
+            boolean isAssignedAdvisor = members.stream()
+                    .anyMatch(m -> m.email().equalsIgnoreCase(currentEmail) && m.roles().contains(Roles.ADVISOR));
+            boolean isDraft = project != null && project.getStatus() == Project.Status.DRAFT;
+            boolean canStart = rightsService.canStartProject(rights) && isAssignedAdvisor && isDraft;
+            model.addAttribute("canStartProject", canStart);
+
+            if (project.getStatus() == Project.Status.DRAFT && rightsService.canEditPage(rights)){
+                model.addAttribute("canEditPage", true);
+            }
+
         } catch (UnitOfWork.UnitOfWorkException e) {
             throw new RuntimeException("Could not open project access transaction", e);
         }
@@ -228,6 +241,48 @@ public class ProjectController {
         }
         model.addAttribute("projectId", id);
         return "project";
+    }
+
+    @PostMapping("/project/{id}/updateProject")
+    public String updateProject(@PathVariable int id,
+                                @RequestParam("newTitle") String newTitle,
+                                @RequestParam("newDescription") String newDescription,
+                                HttpSession session,
+                                Model model, RedirectAttributes redirectAttributes
+    ){
+        Object authObject = session.getAttribute("auth");
+        if (!(authObject instanceof Auth auth)) {
+            return "redirect:/login";
+        }
+
+        Object userData = session.getAttribute("userData");
+        RightsContext rights = rightsService.from(userData instanceof User.Data data ? data : null);
+        if (!rightsService.canEditPage(rights)) {
+            return "redirect:/forbidden";
+        }
+
+        try (var uow = unitOfWork.begin()){
+            Project project = new Project(newTitle, newDescription);
+            project.setProjectID(id);
+
+            if (newTitle.isEmpty() || newDescription.isEmpty()){
+                redirectAttributes.addFlashAttribute("error", "Project needs a title and description");
+                uow.rollback();
+                return "redirect:/project/" + id;
+            }
+
+            projectManager.update(project);
+            redirectAttributes.addFlashAttribute("message", "Project edited successfully");
+            uow.commit();
+        } catch (UnitOfWork.UnitOfWorkException e){
+            redirectAttributes.addFlashAttribute("error", "Failed to update project");
+
+        } catch (Project.InvalidProject | ProjectDoesNotExist e){
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/project/" + id;
+        }
+
+        return "redirect:/project/" + id;
     }
 
     private static String formatRoles(List<Roles> roles) {
@@ -430,8 +485,9 @@ public class ProjectController {
         }
         return "advisor-dashboard";
     }
+
     @PostMapping("/project/{id}/start_project")
-    public String startProject(User advisor, HttpSession session,
+    public String startProject( HttpSession session,
                                @PathVariable int id,
                                RedirectAttributes redirectAttributes){
         if (session.getAttribute("auth") == null) {

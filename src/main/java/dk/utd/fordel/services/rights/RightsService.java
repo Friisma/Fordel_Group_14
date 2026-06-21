@@ -51,6 +51,10 @@ public class RightsService {
         return new RightsContext(true, roles, permissions);
     }
 
+    public boolean canEditPage(RightsContext rights){
+        return rights != null && rights.hasPermission(Permission.CAN_EDIT_PROJECT);
+    }
+
     public boolean canViewAdminPage(RightsContext rights) {
         return rights != null && rights.hasPermission(Permission.VIEW_ADMIN_PAGE);
     }

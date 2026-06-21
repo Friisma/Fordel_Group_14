@@ -96,4 +96,8 @@ public class ProjectManager {
 
     }
 
+    public void update(Project project) throws ProjectDoesNotExist{
+        projectRepository.update(project);
+    }
+
 }
