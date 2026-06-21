@@ -298,8 +298,10 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         var stmt = """
                 SELECT sl.id
                 FROM study_lines sl
-                JOIN study_line_students sls ON sl.id = sls.study_line_id
-                WHERE sls.user_id = (SELECT id FROM users WHERE email = ?)
+                JOIN study_line_memberships slm ON sl.id = slm.study_line_id
+                JOIN roles r ON slm.role_id = r.id
+                WHERE slm.user_id = (SELECT id FROM users WHERE email = ?)
+                AND r.name = 'student'
                 """;
 
         try (var statement = getConnection().prepareStatement(stmt)) {
