@@ -13,13 +13,55 @@
                 <label th:replace="~{fragments/field :: field(${name})}"></label>
                 <label th:replace="~{fragments/field :: field(${email})}"></label>
                 <label th:replace="~{fragments/field :: field(${password})}"></label>
-                <button type="submit" aria-busy="false" onclick="this.setAttribute('aria-busy', 'true')">Create
+                <fieldset>
+                    <label for="terms">
+                        <input type="checkbox" role="switch" id="terms" name="terms">
+                        I agree to the
+                        <a href="#" data-target="modal-terms-of-service" onclick="toggleModal(event)">Terms of Service</a>
+                        and
+                        <a href="#" data-target="modal-privacy-policy" onclick="toggleModal(event)">Privacy Policy</a>
+                    </label>
+                </fieldset>
+                <button disabled id="login-btn" type="submit" aria-busy="false" onclick="this.setAttribute('aria-busy', 'true')">Create
                     user</button>
             </form>
         </section>
     </main>
 
+    <script th:src="@{/js/modal.js}" defer></script>
+    <script th:src="@{/js/terms-checkbox.js}" defer></script>
     <footer th:replace="~{fragments/footer ::footer}"></footer>
-</body>
 
+    <!--Modal for Terms of Service-->
+    <dialog id="modal-terms-of-service">
+        <article>
+            <header>
+                <button aria-label="Close" rel="prev" data-target="modal-terms-of-service" onclick="toggleModal(event)"></button>
+                <h3>Terms of Service</h3>
+            </header>
+
+            <div th:replace="~{fragments/terms-of-service :: terms-of-service-text}"></div>
+
+            <footer>
+                <button type="button" data-target="modal-terms-of-service" onclick="toggleModal(event)">Close</button>
+            </footer>
+        </article>
+    </dialog>
+
+    <!--Modal for Privacy Policy-->
+    <dialog id="modal-privacy-policy">
+        <article>
+            <header>
+                <button aria-label="Close" rel="prev" data-target="modal-privacy-policy" onclick="toggleModal(event)"></button>
+                <h3>Privacy Policy</h3>
+            </header>
+
+                <div th:replace="~{fragments/privacy-policy :: privacy-policy-text}"></div>
+
+            <footer>
+                <button type="button" data-target="modal-privacy-policy" onclick="toggleModal(event)">Close</button>
+            </footer>
+        </article>
+    </dialog>
+</body>
 </html>

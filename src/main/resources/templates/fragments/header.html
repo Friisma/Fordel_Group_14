@@ -1,5 +1,5 @@
 <header>
-  <nav class="container">
+  <nav class="container header-nav">
     <ul>
       <li><a href="/display" class="secondary">About</a></li>
     </ul>
@@ -7,7 +7,14 @@
     <ul>
       <li><strong><a href="/" class="secondary">Fordel</a></strong></li>
     </ul>
+
     <ul>
+      <li th:if="${userData != null && userData.roles().contains(T(dk.utd.fordel.domain.Roles).STUDY_LEADER)}">
+        <a href="/create-study-line" class="secondary">Create Study Line</a>
+      </li>
+      <li th:if="${userData != null && userData.roles().contains(T(dk.utd.fordel.domain.Roles).ADMINISTRATOR)}">
+        <a href="/adminpage" class="secondary">Admin Page</a>
+      </li>
       <li>
         <a th:if="${session.auth == null || session.auth.user == null}" href="/login" class="secondary">
           <svg width="1rem" height="1rem" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -27,6 +34,7 @@
           </svg></a>
       </li>
     </ul>
+
   </nav>
 
   <dialog id="modal-user-settings">
@@ -73,12 +81,18 @@
       <section id="account-settings">
         <details open="">
           <summary>Account Settings</summary>
-          <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+          <div style="display: flex; gap: 1rem; margin-top: 1rem;">
             <a href="/login" role="button" class="secondary" style="flex: 1; text-align: center; margin: 0;">
               Sign in To Another Account
             </a>
-            <a href="/logout" role="button" class="secondary" style="flex: 1; text-align: center; margin: 0; background-color: #ff595e;">
+            <a href="/logout" role="button" class="secondary"
+              style="flex: 1; text-align: center; margin: 0; background-color: #ff595e;">
               Sign Out
+            </a>
+          </div>
+          <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+            <a href="/update-password" role="button" class="secondary" style="flex: 1; text-align: center; margin: 0;">
+              Update Password
             </a>
           </div>
         </details>

@@ -16,7 +16,10 @@ import dk.utd.fordel.services.Authenticator.DefaultPasswordEncoder;
 import dk.utd.fordel.services.Authenticator.PasswordEncoding;
 import dk.utd.fordel.utils.UnitOfWork.UnitOfWorkException;
 
+import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -24,12 +27,13 @@ import java.util.UUID;
 public class H2RepositoryTest {
 
     static H2Repository h2Repository;
+    static DataSource dataSource;
 
     @BeforeAll
     static void setUp() {
         // Set up the test environment
 
-        javax.sql.DataSource dataSource = DataSourceBuilder.create()
+        dataSource = DataSourceBuilder.create()
                 .url("jdbc:h2:mem:testdb")
                 .driverClassName("org.h2.Driver")
                 .username("sa")
@@ -44,21 +48,36 @@ public class H2RepositoryTest {
             throws ProjectTitleAlreadyInUse, UnitOfWorkException, Project.InvalidProject, EmailAlreadyInUse, StudyLineAlreadyExists {
         Email email = new Email("test","test");
         User user = new User(email);
+        StudyLine studyLine = new StudyLine("line");
 
         User.Data data = new User.Data("name",new ArrayList<>(),"line", LocalDate.of(2001,1,1));
         Project project = new Project("test","test");
-        StudyLine studyLine = new StudyLine("line");
-
 
         try (var ignored = h2Repository.begin()){
-            h2Repository.create(user, data);
             h2Repository.create(studyLine);
+            h2Repository.create(user, data);
 
             int userId = h2Repository.getUserIdByEmail(user.getEmail());
 
             h2Repository.create(project,user,"line", userId);
             assertThrows(ProjectTitleAlreadyInUse.class,
                     () -> h2Repository.create(project,user,"line", userId));
+        }
+    }
+    @Test
+    void creatingAProjectWithAStudyLine()
+    throws UserDoesNotExist, EmailAlreadyInUse, UnitOfWorkException, StudyLineAlreadyExists, Project.InvalidProject {
+        StudyLine studyLine = new StudyLine("testing");
+        Email email = new Email("test","test");
+        User user = new User(email);
+        Project project = new Project("test1", "test1");
+
+
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(studyLine);
+            h2Repository.create(user, new User.Data("Peter", List.of(), "testing", null));
+            int userid = h2Repository.getUserIdByEmail(email);
+            h2Repository.create(project, user,"testing", userid);
         }
 
 
@@ -75,13 +94,25 @@ public class H2RepositoryTest {
 
     @Test
     void setting_the_password_for_an_existing_user_should_succeed()
-            throws InvalidEmail, UserDoesNotExist, EmailAlreadyInUse, UnitOfWorkException {
+            throws InvalidEmail, UserDoesNotExist, EmailAlreadyInUse, UnitOfWorkException, SQLException {
         var user = User.of("known@user.dk");
-        try (var ignored = h2Repository.begin()) {
+        try (var uow = h2Repository.begin()) {
             h2Repository.create(user, new User.Data("Peter", List.of(), null, null));
             var encoding = new DefaultPasswordEncoder().encode("password");
             h2Repository.setPassword(user, encoding);
             assertEquals(encoding, h2Repository.getPassword(user));
+            uow.commit();
+        }
+
+        try (var connection = dataSource.getConnection();
+                var statement = connection.prepareStatement("SELECT password_changed_at FROM users WHERE email = ?")) {
+            statement.setString(1, user.getEmail().asString());
+            try (var resultSet = statement.executeQuery()) {
+                assertTrue(resultSet.next());
+                LocalDateTime passwordChangedAt = resultSet.getObject("password_changed_at", LocalDateTime.class);
+                assertTrue(passwordChangedAt != null);
+                assertEquals(LocalDate.now(), passwordChangedAt.toLocalDate());
+            }
         }
 
     }

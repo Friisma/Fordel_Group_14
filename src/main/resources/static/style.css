@@ -35,6 +35,37 @@
     color: #fff;
 }
 
+.header-nav {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.header-nav>ul {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+}
+
+.header-nav>ul:first-child {
+    justify-content: flex-start;
+}
+
+.header-nav>ul:last-child {
+    justify-content: flex-end;
+}
+
+.header-nav>ul>li {
+    display: flex;
+    align-items: center;
+}
+
+.header-nav>ul>li>a {
+    white-space: nowrap;
+}
+
 .project-header {
     display: flex;
     justify-content: space-between;
@@ -172,9 +203,46 @@
     gap: 1rem;
 }
 
+#password-last-changed .grid {
+    gap: 1rem;
+}
+
+.password-card {
+    margin-top: 0.5rem;
+    padding: 1rem;
+    background-color: var(--pico-card-background-color);
+    border: 1px solid var(--pico-muted-border-color);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.password-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.password-card-header h2 {
+    margin-bottom: 0;
+}
+
+.password-card-description {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
 @media (max-width: 720px) {
     .project-grid {
         grid-template-columns: 1fr;
+    }
+
+    .password-card-header {
+        align-items: flex-start;
+        flex-direction: column;
     }
 }
 

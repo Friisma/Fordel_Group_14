@@ -11,7 +11,7 @@ import dk.utd.fordel.services.rights.RightsService;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import dk.utd.fordel.utils.Log;
@@ -20,6 +20,8 @@ import dk.utd.fordel.utils.UnitOfWork.UnitOfWorkException;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.time.LocalDate;
 
 @Controller
 public class UserController {
@@ -187,5 +189,73 @@ public class UserController {
 
         session.setAttribute("userData", updatedData);
         return "redirect:/";
+    }
+
+    @PostMapping("/user/update-study-start")
+    public String updateStudyStart(HttpSession session,
+            @RequestParam("studyStart") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate studyStart) {
+        Object authObj = session.getAttribute("auth");
+        if (authObj == null) {
+            return "redirect:/login";
+        }
+
+        if (!(authObj instanceof dk.utd.fordel.services.Authenticator.Auth auth)) {
+            return "redirect:/login";
+        }
+
+        Object userData = session.getAttribute("userData");
+        RightsContext rights = rightsService.from(userData instanceof User.Data data ? data : null);
+        if (!rightsService.canUpdateStudyStart(rights)) {
+            return "redirect:/forbidden";
+        }
+
+        if (studyStart == null) {
+            return "redirect:/";
+        }
+
+        User user = auth.user();
+        User.Data currentData = userData instanceof User.Data data ? data : null;
+        User.Data updatedData = currentData == null
+                ? new User.Data("", java.util.List.of(), null, studyStart)
+                : new User.Data(currentData.name(), currentData.roles(), currentData.studyLine(), studyStart);
+
+        try (var uow = unitOfWork.begin()) {
+            userManager.updateStudyStart(user, studyStart);
+            uow.commit();
+        } catch (UserDoesNotExist e) {
+            throw Log.giveUp(logger, e, "Could not update study start date");
+        } catch (UnitOfWorkException e) {
+            throw Log.giveUp(logger, e, "Could not update study start date");
+        }
+
+        session.setAttribute("userData", updatedData);
+        return "redirect:/";
+    }
+
+    @PostMapping("/adminpage/delete-user")
+    public String deleteUser(HttpSession session,
+                             @RequestParam("email") String email) {
+        Object authObj = session.getAttribute("auth");
+        if (authObj == null) {
+            return "redirect:/login";
+        }
+
+        if (!(authObj instanceof dk.utd.fordel.services.Authenticator.Auth auth)) {
+            return "redirect:/login";
+        }
+
+        try (var uow = unitOfWork.begin()) {
+            User userToDelete = User.of(email);
+            userManager.deleteUser(userToDelete);
+            uow.commit();
+        } catch (UserDoesNotExist e) {
+            throw Log.giveUp(logger, e, "Could not update username");
+        } catch (UnitOfWorkException e) {
+            throw Log.giveUp(logger, e, "Could not update username");
+        } catch (Email.InvalidEmail e) {
+            throw Log.giveUp(logger, e, "Invalid email");
+        }
+
+        return "redirect:/adminpage";
     }
 }

@@ -4,18 +4,15 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.sql.DataSource;
 
 import dk.utd.fordel.domain.*;
-import dk.utd.fordel.domain.*;
-import dk.utd.fordel.services.InvitationManager;
-import dk.utd.fordel.services.ProjectManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -86,8 +83,44 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     }
 
     @Override
+    public LocalDateTime getPasswordChangedAt(User user) throws UserDoesNotExist {
+        Assert.isNotNull(user, "User cannot be null");
+
+        var stmt = "SELECT password_changed_at FROM users WHERE email = ?";
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setString(1, user.getEmail().asString());
+            var resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getObject("password_changed_at", LocalDateTime.class);
+            }
+        } catch (SQLException e) {
+            Log.giveUp(logger, e, "Failed to get password change date for user: " + user);
+        }
+
+        throw new UserDoesNotExist(user, "User not found");
+    }
+
+    @Override
+    public void setPasswordChangedAt(User user, LocalDateTime passwordChangedAt) throws UserDoesNotExist {
+        Assert.isNotNull(user, "User cannot be null");
+        Assert.isNotNull(passwordChangedAt, "passwordChangedAt cannot be null");
+
+        var stmt = "UPDATE users SET password_changed_at = ? WHERE email = ? AND password_changed_at IS NULL";
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setObject(1, passwordChangedAt);
+            statement.setString(2, user.getEmail().asString());
+            var affectedRows = statement.executeUpdate();
+            if (affectedRows == 0) {
+                throw new UserDoesNotExist(user, "User not found, while setting password change date");
+            }
+        } catch (SQLException e) {
+            Log.giveUp(logger, e, "Failed to set password change date for user: " + user);
+        }
+    }
+
+    @Override
     public void setPassword(User user, PasswordEncoding encoding) throws UserDoesNotExist {
-        var stmt = "UPDATE users SET password_hash = ? WHERE email = ?";
+        var stmt = "UPDATE users SET password_hash = ?, password_changed_at = CURRENT_TIMESTAMP WHERE email = ?";
         try (var statement = getConnection().prepareStatement(stmt)) {
             statement.setString(1, encoding.hash());
             statement.setString(2, user.getEmail().asString());
@@ -234,7 +267,24 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
-    //TODO Write more proper repository methods to update the database.
+    @Override
+    public void updateStudyStart(User user, LocalDate studyStart) throws UserDoesNotExist {
+        Assert.isNotNull(user, "User cannot be null");
+        Assert.isNotNull(studyStart, "studyStart cannot be null");
+
+        var stmt = "UPDATE users SET study_start_date = ? WHERE email = ?";
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setObject(1, studyStart);
+            statement.setString(2, user.getEmail().asString());
+            if (statement.executeUpdate() != 1) {
+                throw new UserDoesNotExist(user, "While updating study start date");
+            }
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to update study start date for user: " + user);
+        }
+    }
+
+    // TODO Write more proper repository methods to update the database.
 
     @Override
     public void update(Project project){}
@@ -392,6 +442,76 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     }
 
     @Override
+    public List<Project> getAllProjectsRelatedToStudyLine(int studyLineId) {
+        List<Project> projects = new ArrayList<>();
+        var stmt = """
+                SELECT id, title, description
+                FROM projects
+                WHERE study_line_id = ?
+                """;
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, studyLineId);
+            try (var resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Project project = new Project(
+                            resultSet.getString("title"),
+                            resultSet.getString("description"));
+                    project.setProjectID(resultSet.getInt("id"));
+                    projects.add(project);
+                }
+            } catch (Project.InvalidProject e) {
+                throw new RuntimeException(e);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return projects;
+    }
+
+    @Override
+    public List<Project> getAllProjectsRelatedToStudyLineAndUser(int studyLineId, User user) {
+        List<Project> projects = new ArrayList<>();
+        int userId = getUserIdByEmail(user.getEmail());
+        var stmt = """
+                SELECT p.id, p.title, p.description
+                FROM projects p
+                WHERE p.study_line_id = ?
+                    AND (
+                        EXISTS (
+                            SELECT 1
+                            FROM project_students ps
+                            WHERE ps.project_id = p.id AND ps.user_id = ?
+                        )
+                        OR
+                        EXISTS (
+                            SELECT 1
+                            FROM project_advisors pad
+                            WHERE pad.project_id = p.id AND pad.user_id = ?
+                        )
+                    );
+                """;
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, studyLineId);
+            statement.setInt(2, userId);
+            statement.setInt(3, userId);
+            try (var resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Project project = new Project(
+                            resultSet.getString("title"),
+                            resultSet.getString("description"));
+                    project.setProjectID(resultSet.getInt("id"));
+                    projects.add(project);
+                }
+            } catch (Project.InvalidProject e) {
+                throw new RuntimeException(e);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return projects;
+    }
+
+    @Override
     public List<Project> getAllProjects() throws Project.InvalidProject {
         List<Project> projects = new ArrayList<>();
         var stmt = """
@@ -502,6 +622,28 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     }
 
     @Override
+    public String getStudyLineNameById(int studyLineId) {
+        var stmt = """
+                    SELECT name
+                    FROM study_lines
+                    WHERE id = ?
+                    """;
+
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, studyLineId);
+
+            var resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                return resultSet.getString("name");
+            }
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to check study line name, study line: " + studyLineId);
+        }
+        return "";
+    }
+
+    @Override
     public boolean canManageStudyLine(User user, int studyLineId) {
         int userId = getUserIdByEmail(user.getEmail());
         var stmt = """
@@ -511,6 +653,28 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
                     WHERE slm.user_id = ? AND slm.study_line_id = ?
                     AND (r.name = 'student' OR r.name = 'study leader')
                     
+                    """;
+
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, userId);
+            statement.setInt(2, studyLineId);
+
+            try (var resultSet = statement.executeQuery()) {
+                return resultSet.next();
+            }
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e,
+                    "Failed to check study line membership for user: " + user + ", study line: " + studyLineId);
+        }
+    }
+
+    @Override
+    public boolean canViewStudyLine(User user, int studyLineId) {
+        int userId = getUserIdByEmail(user.getEmail());
+        var stmt = """
+                    SELECT 1
+                    FROM study_line_memberships
+                    WHERE user_id = ? AND study_line_id = ?
                     """;
 
         try (var statement = getConnection().prepareStatement(stmt)) {
@@ -721,8 +885,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
                         resultSet.getString("email"),
                         resultSet.getString("name"),
                         currUser.roles(),
-                        currUser.studyLine()
-                ));
+                        currUser.studyLine()));
 
             }
             return users;
@@ -1026,6 +1189,116 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
             throw Log.giveUp(logger, e, "Could not remove user from study line");
         }
 
+    }
+
+    @Override
+    public List<Project> getAllAdvisorProjects(User advisor){
+        List<Project> projects = new ArrayList<>();
+        int userId = getUserIdByEmail(advisor.getEmail());
+        var stmt = """
+                SELECT p.id, p.title, p.description, sl.name
+                FROM projects p JOIN project_advisors pa ON p.id = pa.project_id
+                    JOIN study_lines sl on p.study_line_id = sl.id
+                WHERE pa.user_id = ?
+                """;
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, userId);
+            try (var resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Project project = new Project(
+                            resultSet.getString("title"),
+                            resultSet.getString("description"));
+                    project.setProjectID(resultSet.getInt("id"));
+                    String studyLineName = resultSet.getString("name");
+                    if (studyLineName != null) {
+                        project.setStudyLine(studyLineName);
+                    }
+                    projects.add(project);
+
+                }
+            } catch (Project.InvalidProject e){
+                throw Log.giveUp(logger, e, "Failed to create projects from database. invalid project");
+            }
+        }catch (SQLException e){
+            throw Log.giveUp(logger, e, "Failed to fetch projects");
+        }
+
+        return projects;
+    }
+
+    @Override
+    public int getCountOfAdvisorProjects(User advisor){
+
+        var stmt = """
+                SELECT COUNT(*)
+                FROM project_advisors pa JOIN projects p 
+                    ON pa.project_id = p.id 
+                WHERE user_id = ? AND p.STATUS = 'DRAFT'
+                """;
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            int userId = getUserIdByEmail(advisor.getEmail());
+            statement.setInt(1,userId);
+            try (var resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1);
+                }
+            }
+        } catch (SQLException e){
+            throw Log.giveUp(logger, e, "Failed to fetch advisor/project relation");
+        }
+        return 0;
+    }
+
+    @Override
+    public void StartProject(User advisor, Project project){
+        var stmt = """
+                UPDATE projects
+                SET status = 'PUBLISHED'
+                WHERE project_id = ?
+                """;
+        if (project.getStatus() == Project.Status.DRAFT) {
+            try (var statement = getConnection().prepareStatement(stmt)) {
+                project.setStatus(Project.Status.STARTED);
+            } catch (SQLException e) {
+                throw Log.giveUp(logger, e, "Failed to publish project");
+            }
+        } else {
+            throw new ProjectAlreadyFinished("Project already published");
+        }
+    }
+
+    @Override
+    public int getMaxWorkLoad(User user){
+        var stmt = "SELECT max_workload FROM users WHERE id = ?";
+        try (var statement = getConnection().prepareStatement(stmt)){
+            int userId = getUserIdByEmail(user.getEmail());
+            statement.setInt(1,userId);
+            try (var rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e){
+            throw Log.giveUp(logger, e, "Failed to fetch maximum workload");
+        }
+        return 0;
+    }
+
+    @Override
+    public void updateMaxWorkLoad(User user, int newMaxLoad) {
+        var stmt = """
+                UPDATE users
+                SET max_workload = ?
+                WHERE id = ?
+                """;
+        try (var statement = getConnection().prepareStatement(stmt)){
+            int userid = getUserIdByEmail(user.getEmail());
+            statement.setInt(1,newMaxLoad);
+            statement.setInt(2,userid);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to update maximum workload");
+        }
     }
 
     @Override

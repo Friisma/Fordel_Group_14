@@ -1,0 +1,64 @@
+<article th:fragment="studentProgressCard(studentProgress)">
+    <header style="display:flex;justify-content:space-between;align-items:center;gap:1rem;">
+        <h2 style="margin:0;">Student Progress</h2>
+        <button type="button" class="secondary" data-target="student-progress-modal" onclick="toggleModal(event)">
+            Edit start date
+        </button>
+    </header>
+
+    <div th:if="${!studentProgress.isGraduated()}">
+        <p style="margin-bottom:0.5rem;">Start date: <strong
+                th:text="${#temporals.format(studentProgress.studyStart(), 'dd MMM yyyy')}">01 Sep 2026</strong></p>
+
+        <div style="margin-bottom:1rem;">
+            <p style="margin-bottom:0.25rem;">Current semester: <strong
+                    th:text="${studentProgress.currentSemesterLabel()}">1st semester</strong></p>
+            <progress id="semester-progress" th:value="${studentProgress.semesterProgress()}" max="100"></progress>
+        </div>
+
+        <div style="margin-bottom:1rem;">
+            <p style="margin-bottom:0.25rem;" th:if="!${studentProgress.isInternshipDone()}">Internship in: <strong
+                    th:text="${studentProgress.internshipCountdown()}">2
+                    years</strong></p>
+            <p style="margin-bottom:0.25rem;" th:if="${studentProgress.isInternshipDone()}"><strong>Your internship is
+                    here!</strong></p>
+            <progress id="internship-progress" th:value="${studentProgress.internshipProgress()}" max="100"></progress>
+        </div>
+
+        <div style="margin-bottom:0;">
+            <p style="margin-bottom:0.25rem;" th:if="!${studentProgress.isProjectDone()}">Project in: <strong
+                    th:text="${studentProgress.projectCountdown()}">3 years</strong></p>
+            <p style="margin-bottom:0.25rem;" th:if="${studentProgress.isProjectDone()}"><strong>Your final project is
+                    here!</strong></p>
+            <progress id="project-progress" th:value="${studentProgress.projectProgress()}" max="100"></progress>
+        </div>
+    </div>
+
+    <div th:if="${studentProgress.isGraduated()}" style="text-align:center;padding:0.5rem 0;">
+        <img th:src="@{/images/graduated.png}" alt="Graduation cap" style="width:300px;margin-bottom:1rem;">
+        <h3 style="color:var(--form-element-valid-border-color);margin:0;">Congratulations, you've graduated!</h3>
+        <p style="margin-top:0.5rem;color:var(--muted-color);">You have completed your entire education.</p>
+    </div>
+
+    <div th:if="${!studentProgress.hasStudyStart()}">
+        <p style="margin-bottom:0;">Set your study start date to see your internship and project progress.</p>
+    </div>
+
+    <dialog id="student-progress-modal">
+        <article>
+            <header>
+                <button aria-label="Close" rel="prev" data-target="student-progress-modal"
+                    onclick="toggleModal(event)"></button>
+                <h3>Update study start date</h3>
+            </header>
+
+            <form action="/user/update-study-start" method="post">
+                <label for="study-start-date">Start date</label>
+                <input id="study-start-date" type="date" name="studyStart"
+                    th:value="${studentProgress.studyStart() != null ? #temporals.format(studentProgress.studyStart(), 'yyyy-MM-dd') : ''}"
+                    required>
+                <button type="submit">Save</button>
+            </form>
+        </article>
+    </dialog>
+</article>

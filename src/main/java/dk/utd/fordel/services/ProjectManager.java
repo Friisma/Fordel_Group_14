@@ -17,11 +17,21 @@ public class ProjectManager {
 
         List<Project> getAllProjectsRelatedToUser(User user) throws Project.InvalidProject;
 
+        List<Project> getAllProjectsRelatedToStudyLine(int studyLineId);
+
+        List<Project> getAllProjectsRelatedToStudyLineAndUser(int studyLineId, User user);
+
         boolean canViewProject(User user, int projectId);
 
         String getProjectCreatorEmail(int projectId);
 
         void kickMemberFromProject(int projectId, User member);
+
+        List<Project> getAllAdvisorProjects(User advisor);
+
+        int getCountOfAdvisorProjects(User advisor);
+
+        void StartProject(User advisor,Project project);
 
         void update(Project project) throws ProjectDoesNotExist;
 
@@ -45,6 +55,14 @@ public class ProjectManager {
         return projectRepository.getAllProjectsRelatedToUser(user);
     }
 
+    public List<Project> getAllProjectsRelatedToStudyLine(int studyLineId) {
+        return projectRepository.getAllProjectsRelatedToStudyLine(studyLineId);
+    }
+
+    public List<Project> getAllProjectsRelatedToStudyLineAndUser(int studyLineId, User user) {
+        return projectRepository.getAllProjectsRelatedToStudyLineAndUser(studyLineId, user);
+    }
+
     public boolean canViewProject(User user, int projectId) {
         return projectRepository.canViewProject(user, projectId);
     }
@@ -63,6 +81,19 @@ public class ProjectManager {
 
     public List<Project> getAllProjects() throws Project.InvalidProject {
         return projectRepository.getAllProjects();
+    }
+
+    public List<Project> getAllAdvisorProjects(User advisor) throws Project.InvalidProject {
+        return projectRepository.getAllAdvisorProjects(advisor);
+    }
+
+    public int getCountOfAdvisedProjects(User user){
+        return projectRepository.getCountOfAdvisorProjects(user);
+    }
+
+    public void StartProject(User advisor, Project project){
+        projectRepository.StartProject(advisor,project);
+
     }
 
 }
