@@ -34,6 +34,10 @@ public class CreateProject {
         this.userManager = userManager;
     }
 
+    /**
+     * GetMapping for the create-project side.
+     *
+     */
     @GetMapping("/create-project")
     public String getCreateProject(Model model) {
         model.addAttribute("title", "Opret projekt");
@@ -45,6 +49,11 @@ public class CreateProject {
                 null, null));
         return "create-project";
     }
+
+    /**
+     * Post method for creating a project.
+     *
+     */
 
     @PostMapping("/create-project")
     public String postCreateProject(Model model,
@@ -111,10 +120,10 @@ public class CreateProject {
         if(!isValid){
             model.addAttribute("title", "Opret projekt");
             model.addAttribute("project_name", new Field(
-                    "text", "project_name", "Navn på projekt",
+                    "text", "project_name", "Project name",
                     "", projectNameMessage));
             model.addAttribute("project_description", new Field(
-                    "text", "project_description", "Din beskrivelse",
+                    "text", "project_description", "Description",
                     "", projectDescriptionMessage));
 
             return "create-project";

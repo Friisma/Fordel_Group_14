@@ -243,6 +243,13 @@ public class ProjectController {
         return "project";
     }
 
+    /**
+     * Post method for updating a project.
+     * A project can only be edited by students if they are in DRAFT mode.
+     *
+     * @return a redirect back to the project if successfully.
+     * a flash attribute will popup with the result of the update.
+     */
     @PostMapping("/project/{id}/updateProject")
     public String updateProject(@PathVariable int id,
                                 @RequestParam("newTitle") String newTitle,
@@ -449,6 +456,12 @@ public class ProjectController {
 
         return "redirect:/project/" + id;
     }
+
+    /**
+     * GetMapping for the advisor-dashboard site.
+     *
+     * @return a path to the advisor dashboard site.
+     */
     @GetMapping("/advisor-dashboard")
     public String getAllAdviserProjects(Model model, HttpSession session) throws Project.InvalidProject {
         if (session.getAttribute("auth") == null) {
