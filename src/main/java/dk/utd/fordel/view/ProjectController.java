@@ -1,11 +1,8 @@
 package dk.utd.fordel.view;
 
 import dk.utd.fordel.domain.*;
-import dk.utd.fordel.services.Authenticator;
+import dk.utd.fordel.services.*;
 import dk.utd.fordel.services.Authenticator.Auth;
-import dk.utd.fordel.services.ProjectManager;
-import dk.utd.fordel.services.UserManager;
-import dk.utd.fordel.services.InvitationManager;
 import dk.utd.fordel.services.rights.RightsContext;
 import dk.utd.fordel.services.rights.RightsService;
 import dk.utd.fordel.utils.Log;
@@ -228,8 +225,9 @@ public class ProjectController {
 
             if (project.getStatus() == Project.Status.DRAFT && rightsService.canEditPage(rights)){
                 model.addAttribute("canEditPage", true);
+            } else if (project.getStatus() == Project.Status.STARTED && rightsService.canEditStartedProject(rights)){
+                model.addAttribute("canEditPage", isAssignedAdvisor);
             }
-
         } catch (UnitOfWork.UnitOfWorkException e) {
             throw new RuntimeException("Could not open project access transaction", e);
         }
@@ -301,7 +299,7 @@ public class ProjectController {
                     case STUDENT -> "Student";
                     case ADVISOR -> "Advisor";
                     case TEACHER -> "Teacher";
-                    case STUDY_LEADER -> "Study Leader";
+                    case STUDY_LEADER -> "Study_Leader";
                     case ADMINISTRATOR -> "Administrator";
                 })
                 .collect(Collectors.joining(", "));

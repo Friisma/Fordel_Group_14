@@ -22,8 +22,12 @@ public class UserManager {
         void delete(User user) throws UserDoesNotExist;
 
         int getUserIdByEmail(Email email);
+
         int getMaxWorkLoad(User user);
+
         void updateMaxWorkLoad(User user, int newMaxLoad);
+
+        Roles determineStudyLineSpecificRole(User user, String studyLineName);
 
         LocalDateTime getPasswordChangedAt(User user) throws UserDoesNotExist;
 
@@ -120,6 +124,10 @@ public class UserManager {
 
     public void updateMaxWorkLoad(User user, int newMaxLoad){
         userRepository.updateMaxWorkLoad(user,newMaxLoad);
+    }
+
+    public Roles determineStudyLineSpecificRole(User user, String studyLineName){
+        return userRepository.determineStudyLineSpecificRole(user,studyLineName);
     }
 
     public List<UserRepository.UserInfo> getAllStudentsRelatedToStudyLine(int studyLineId) {

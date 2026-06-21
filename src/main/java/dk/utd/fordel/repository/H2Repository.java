@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.management.relation.Role;
 import javax.sql.DataSource;
 
 import dk.utd.fordel.domain.*;
@@ -902,9 +903,34 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
                 roles.add(Roles.valueOf(roleName.toUpperCase().replace(" ", "_")));
             }
         } catch (SQLException e) {
-            Log.giveUp(logger, e, "Failed to read user: " + user);
+            throw Log.giveUp(logger, e, "Failed to read user: " + user);
         }
         return roles;
+    }
+
+    public Roles determineStudyLineSpecificRole(User user, String studyLineName){
+        var stmt = """
+                SELECT r.name
+                FROM study_line_memberships slm
+                JOIN roles r ON slm.role_id = r.id
+                WHERE slm.study_line_id = ?
+                AND slm.user_id = ?
+                """;
+
+        int studyLineId = getStudyLineIdByName(studyLineName);
+        int userid = getUserIdByEmail(user.getEmail());
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, studyLineId);
+            statement.setInt(2, userid);
+            try (var rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return Roles.valueOf(rs.getString(1).toUpperCase());
+                }
+            }
+        } catch (SQLException e){
+            throw Log.giveUp(logger, e, "Failed to read role: " + user);
+        }
+        return null;
     }
 
     /**
