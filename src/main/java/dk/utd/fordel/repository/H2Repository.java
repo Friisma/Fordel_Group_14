@@ -951,27 +951,17 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
 
     @Override
     public void assignStudyLine(User user, String studyLineName) {
-        var deleteStmt = """
-            DELETE FROM study_line_students
-            WHERE user_id = (SELECT id FROM users WHERE email = ?)
+        var stmt = """
+            MERGE INTO study_line_memberships (user_id, study_line_id, role_id)
+            KEY (user_id, study_line_id, role_id)
+            SELECT u.id, sl.id, r.id
+            FROM users u, study_lines sl, roles r
+            WHERE u.email = ?
+            AND sl.name = ?
+            AND r.name = 'student'
             """;
 
-        try (var statement = getConnection().prepareStatement(deleteStmt)) {
-            statement.setString(1, user.getEmail().asString());
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw Log.giveUp(logger, e, "Failed to remove old study line from user");
-        }
-
-        var insertStmt = """
-            INSERT INTO study_line_students (user_id, study_line_id)
-            VALUES (
-                (SELECT id FROM users WHERE email = ?),
-                (SELECT id FROM study_lines WHERE name = ?)
-            )
-            """;
-
-        try (var statement = getConnection().prepareStatement(insertStmt)) {
+        try (var statement = getConnection().prepareStatement(stmt)) {
             statement.setString(1, user.getEmail().asString());
             statement.setString(2, studyLineName);
             statement.executeUpdate();
