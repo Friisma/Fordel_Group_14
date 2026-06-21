@@ -140,7 +140,14 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         List<Roles> roles = getUserRoles(user);
 
         String studyLine = "";
-        var stmt3 = "SELECT sl.name FROM study_lines sl JOIN study_line_students sls ON sl.id = sls.study_line_id WHERE sls.user_id = ?";
+        var stmt3 = """
+                  SELECT sl.name
+                  FROM study_lines sl
+                  JOIN study_line_memberships slm ON sl.id = slm.study_line_id
+                  JOIN roles r ON slm.role_id = r.id
+                  WHERE slm.user_id = ?
+                  AND r.name = 'student'
+                  """;
         try (var statement = getConnection().prepareStatement(stmt3)) {
             statement.setInt(1, userId);
             var resultSet = statement.executeQuery();
