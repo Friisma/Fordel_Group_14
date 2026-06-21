@@ -45,43 +45,43 @@ public class H2RepositoryTest {
 
     @Test
     void creating_a_project_with_an_existing_name_should_fail()
-            throws ProjectTitleAlreadyInUse, UnitOfWorkException, Project.InvalidProject, EmailAlreadyInUse, StudyLineAlreadyExists {
+            throws ProjectTitleAlreadyInUse, UnitOfWorkException, Project.InvalidProject, EmailAlreadyInUse,
+            StudyLineAlreadyExists {
         Email email = new Email("test", "test");
         User user = new User(email);
         StudyLine studyLine = new StudyLine("onlyForTest");
 
+        User.Data data = new User.Data("name", new ArrayList<>(), "line", LocalDate.of(2001, 1, 1));
+        Project project = new Project("test", "test");
 
-        User.Data data = new User.Data("name",new ArrayList<>(),"line", LocalDate.of(2001,1,1));
-        Project project = new Project("test","test");
-
-
-        try (var ignored = h2Repository.begin()){
+        try (var ignored = h2Repository.begin()) {
             h2Repository.create(studyLine);
             h2Repository.create(user, data);
+            h2Repository.assignStudyLine(user, studyLine.getLineName());
 
             int userId = h2Repository.getUserIdByEmail(user.getEmail());
 
-            h2Repository.create(project,user,userId);
+            h2Repository.create(project, user, userId);
             assertThrows(ProjectTitleAlreadyInUse.class,
-                    () -> h2Repository.create(project,user,userId));
+                    () -> h2Repository.create(project, user, userId));
         }
     }
+
     @Test
     void creatingAProjectWithAStudyLine()
-    throws UserDoesNotExist, EmailAlreadyInUse, UnitOfWorkException, StudyLineAlreadyExists, Project.InvalidProject {
+            throws UserDoesNotExist, EmailAlreadyInUse, UnitOfWorkException, StudyLineAlreadyExists,
+            Project.InvalidProject {
         StudyLine studyLine = new StudyLine("testing");
-        Email email = new Email("test","test");
+        Email email = new Email("test", "test");
         User user = new User(email);
         Project project = new Project("test1", "test1");
-
 
         try (var ignored = h2Repository.begin()) {
             h2Repository.create(studyLine);
             h2Repository.create(user, new User.Data("Peter", List.of(), "testing", null));
             int userid = h2Repository.getUserIdByEmail(email);
-            h2Repository.create(project, user,"testing", userid);
+            h2Repository.create(project, user, "testing", userid);
         }
-
 
     }
 
@@ -143,7 +143,8 @@ public class H2RepositoryTest {
         var user = User.of("known@user.dk");
         try (var uow = h2Repository.begin()) {
             h2Repository.create(user, new User.Data("Peter", List.of(), null, null));
-            assertThrows(EmailAlreadyInUse.class, () -> h2Repository.create(user, new User.Data("Peter", List.of(), null, null)));
+            assertThrows(EmailAlreadyInUse.class,
+                    () -> h2Repository.create(user, new User.Data("Peter", List.of(), null, null)));
         }
 
         // This is okay because the previous transaction was not committed.
@@ -155,7 +156,8 @@ public class H2RepositoryTest {
         // Since the transaction was commited, trying to create the same user again
         // fails
         try (var uow = h2Repository.begin()) {
-            assertThrows(EmailAlreadyInUse.class, () -> h2Repository.create(user, new User.Data("Peter", List.of(), null, null)));
+            assertThrows(EmailAlreadyInUse.class,
+                    () -> h2Repository.create(user, new User.Data("Peter", List.of(), null, null)));
         }
 
         // But now we need to cleanup the database
