@@ -216,6 +216,11 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
 
     //TODO temporary fix for getting id from user table. this should maybe be changed when the domain is more complete
 
+    /**
+     * Helper method for being sure that the user id is coherent with the DB.
+     * @param email of user
+     * @return true id of user.
+     */
     public int getUserIdByEmail(Email email) {
         String stmt = "SELECT id FROM users WHERE email = ?";
 
@@ -279,6 +284,10 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
 
     // TODO Write more proper repository methods to update the database.
 
+    /**
+     * Updates project title and description
+     * @param project being updated.
+     */
     @Override
     public void update(Project project){
         var stmt = """
@@ -320,6 +329,13 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         project.setStatus(Project.Status.OPEN_FOR_STUDENTS);
     }
 
+    /**
+     * Creates a project with the users current studyline.
+     * @param project to be created
+     * @param userId id of user whose creating project
+     * @param studyLineId id of studyline the project is created with
+     * @throws ProjectTitleAlreadyInUse
+     */
     private void createProjectWithStudyLine(Project project, int userId, int studyLineId)
             throws ProjectTitleAlreadyInUse {
         var stmt = "INSERT INTO projects (title, description, study_line_id) VALUES (?, ?, ?)";
@@ -401,6 +417,10 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
+    /**
+     * Gets all studylines as objects
+     * @return a list of studyline objects
+     */
     @Override
     public List<StudyLine> getAllStudyLineObjects() {
         var stmt = "SELECT name FROM study_lines";
@@ -526,6 +546,10 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         return projects;
     }
 
+    /**
+     * Gets all projects for the advisor-projects view.
+     * @return a list of all projects
+     */
     @Override
     public List<Project> getAllProjects() throws Project.InvalidProject {
         List<Project> projects = new ArrayList<>();
@@ -1231,6 +1255,11 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
+    /**
+     * gets all projects being advised by a user.
+     * @param advisor (current user)
+     * @return list of projects
+     */
     @Override
     public List<Project> getAllAdvisorProjects(User advisor){
         List<Project> projects = new ArrayList<>();
@@ -1279,6 +1308,11 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         return countOfAdvicedProjects < maxWorkLoad;
     }
 
+    /**
+     * gets count of started projects an advisor is advising.
+     * @param advisor
+     * @return
+     */
     @Override
     public int getCountOfAdvisorProjects(User advisor){
 
@@ -1302,6 +1336,10 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         return 0;
     }
 
+    /**
+     * Changes the state of a project to "start"
+     * @param projectId id of project to start
+     */
     @Override
     public void startProject(int projectId) throws ProjectAlreadyFinished {
         var stmt = """
@@ -1320,6 +1358,11 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
+    /**
+     *
+     * @param user whose max load we are getting
+     * @return max load of user
+     */
     @Override
     public int getMaxWorkLoad(User user){
         var stmt = "SELECT max_workload FROM users WHERE id = ?";
@@ -1337,6 +1380,12 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         return 0;
     }
 
+
+    /**
+     * Updates the maxWorkLoad for the advisor. Used for the advisor dashboard
+     * @param user whose workload is updated
+     * @param newMaxLoad new max load
+     */
     @Override
     public void updateMaxWorkLoad(User user, int newMaxLoad) {
         var stmt = """
