@@ -1,17 +1,12 @@
 <header>
-  <nav class="container header-nav">
-    <ul>
+  <nav class="container header-nav" aria-label="Primary">
+    <a href="/" class="header-brand">Fordel</a>
+
+    <ul class="header-links">
       <li><a href="/display" class="secondary">About</a></li>
-      <li th:if="${rights.hasPermission(T(dk.utd.fordel.services.rights.Permission).VIEW_USER)}">
+      <li th:if="${rights != null && rights.hasPermission(T(dk.utd.fordel.services.rights.Permission).VIEW_USER)}">
         <a href="/users" class="secondary">Users</a>
       </li>
-    </ul>
-
-    <ul>
-      <li><strong><a href="/" class="secondary">Fordel</a></strong></li>
-    </ul>
-
-    <ul>
       <li th:if="${userData != null && userData.roles().contains(T(dk.utd.fordel.domain.Roles).STUDY_LEADER)}">
         <a href="/create-study-line" class="secondary">Create Study Line</a>
       </li>
@@ -19,29 +14,36 @@
         <a href="/adminpage" class="secondary">Admin Page</a>
       </li>
       <li th:if="${userData != null && userData.roles().contains(T(dk.utd.fordel.domain.Roles).ADVISOR)}">
-        <a href="/advisor-dashboard" class="secondary"> Advisor dashboard </a>
-
-        <a href="/advisor-projects-view" class="secondary"> Potential advisor projects </a>
+        <a href="/advisor-dashboard" class="secondary">Advisor dashboard</a>
       </li>
-      <li>
-        <a th:if="${session.auth == null || session.auth.user == null}" href="/login" class="secondary">
-          <svg width="1rem" height="1rem" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M8 7C9.65685 7 11 5.65685 11 4C11 2.34315 9.65685 1 8 1C6.34315 1 5 2.34315 5 4C5 5.65685 6.34315 7 8 7Z"
-              fill="#969eaf"></path>
-            <path d="M14 12C14 10.3431 12.6569 9 11 9H5C3.34315 9 2 10.3431 2 12V15H14V12Z" fill="#969eaf"></path>
-          </svg></a>
-
-        <a th:if="${session.auth != null && session.auth.user != null}" href="#" data-target="modal-user-settings"
-          class="secondary" onclick="toggleModal(event)">
-          <svg width="1rem" height="1rem" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M8 7C9.65685 7 11 5.65685 11 4C11 2.34315 9.65685 1 8 1C6.34315 1 5 2.34315 5 4C5 5.65685 6.34315 7 8 7Z"
-              fill="#969eaf"></path>
-            <path d="M14 12C14 10.3431 12.6569 9 11 9H5C3.34315 9 2 10.3431 2 12V15H14V12Z" fill="#969eaf"></path>
-          </svg></a>
+      <li th:if="${userData != null && userData.roles().contains(T(dk.utd.fordel.domain.Roles).ADVISOR)}">
+        <a href="/advisor-projects-view" class="secondary">Potential advisor projects</a>
       </li>
     </ul>
+
+    <div class="header-actions">
+      <a th:if="${session.auth == null || session.auth.user == null}" href="/login" class="secondary header-icon-link"
+        aria-label="Sign in">
+        <svg width="1rem" height="1rem" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true" focusable="false">
+          <path
+            d="M8 7C9.65685 7 11 5.65685 11 4C11 2.34315 9.65685 1 8 1C6.34315 1 5 2.34315 5 4C5 5.65685 6.34315 7 8 7Z"
+            fill="#969eaf"></path>
+          <path d="M14 12C14 10.3431 12.6569 9 11 9H5C3.34315 9 2 10.3431 2 12V15H14V12Z" fill="#969eaf"></path>
+        </svg>
+      </a>
+
+      <a th:if="${session.auth != null && session.auth.user != null}" href="#" data-target="modal-user-settings"
+        class="secondary header-icon-link" onclick="toggleModal(event)" aria-label="Open user settings">
+        <svg width="1rem" height="1rem" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true" focusable="false">
+          <path
+            d="M8 7C9.65685 7 11 5.65685 11 4C11 2.34315 9.65685 1 8 1C6.34315 1 5 2.34315 5 4C5 5.65685 6.34315 7 8 7Z"
+            fill="#969eaf"></path>
+          <path d="M14 12C14 10.3431 12.6569 9 11 9H5C3.34315 9 2 10.3431 2 12V15H14V12Z" fill="#969eaf"></path>
+        </svg>
+      </a>
+    </div>
 
   </nav>
 
