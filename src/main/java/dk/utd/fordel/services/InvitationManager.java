@@ -2,6 +2,7 @@ package dk.utd.fordel.services;
 
 import dk.utd.fordel.domain.AdvisorAlreadyInvited;
 import dk.utd.fordel.domain.AdvisorInvitation;
+import dk.utd.fordel.domain.StudentInvitation;
 import dk.utd.fordel.domain.Project;
 import dk.utd.fordel.domain.User;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,11 @@ public class InvitationManager {
 
         void update(AdvisorInvitation advisorInvitation) throws AdvisorAlreadyInvited;
 
+        void updateStudentInvitation(StudentInvitation studentInvitation);
+
         List<AdvisorInvitation> getAllInvitesReceived(User invited);
+
+        List<StudentInvitation> getAllStudentInvitesReceived(User invited);
 
         List<InviteView> getInvitesForProject(int projectId);
 
@@ -51,8 +56,16 @@ public class InvitationManager {
         invitationRepository.update(advisorInvitation);
     }
 
+    public void updateStudentInvitation(StudentInvitation studentInvitation) {
+        invitationRepository.updateStudentInvitation(studentInvitation);
+    }
+
     public List<AdvisorInvitation> getAllInvitesReceived(User invited) {
         return invitationRepository.getAllInvitesReceived(invited);
+    }
+
+    public List<StudentInvitation> getAllStudentInvitesReceived(User invited) {
+        return invitationRepository.getAllStudentInvitesReceived(invited);
     }
 
     public static record InviteView(String name, String email, String status, String statusClass) {

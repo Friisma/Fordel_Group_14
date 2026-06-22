@@ -1083,6 +1083,35 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     }
 
     @Override
+    public List<StudentInvitation> getAllStudentInvitesReceived(User invited) {
+        int userId = getUserIdByEmail(invited.getEmail());
+        List<StudentInvitation> invitations = new ArrayList<StudentInvitation>();
+        var stmt = """
+                SELECT student_id, project_id, status
+                FROM student_invitations
+                WHERE student_id = (?)
+                """;
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, userId);
+            var resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                var invitation = new StudentInvitation(
+                        resultSet.getInt("student_id"),
+                        resultSet.getInt("project_id"));
+                String status = resultSet.getString("status");
+                if (status.equals("accepted"))
+                    invitation.accept();
+                if (status.equals("declined"))
+                    invitation.decline();
+                invitations.add(invitation);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return invitations;
+    }
+
+    @Override
     public List<dk.utd.fordel.services.InvitationManager.AdvisorInviteView> getInvitesReceivedForAdvisor(
             int advisorId) {
         List<dk.utd.fordel.services.InvitationManager.AdvisorInviteView> views = new ArrayList<>();
@@ -1210,6 +1239,46 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
             }
         } catch (SQLException e) {
             throw Log.giveUp(logger, e, "Failed to update advisor invitations table");
+        }
+    }
+
+    @Override
+    public void updateStudentInvitation(StudentInvitation studentInvitation) {
+        String status = studentInvitation.getStatusAsString();
+        int studentId = studentInvitation.getStudentId();
+        int projectId = studentInvitation.getProjectId();
+        var stmt = """
+                UPDATE student_invitations SET status = (?)
+                WHERE student_id = (?)
+                AND project_id = (?)
+                """;
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setString(1, status);
+            statement.setInt(2, studentId);
+            statement.setInt(3, projectId);
+            statement.executeUpdate();
+
+            if ("accepted".equals(status)) {
+                var studentStmt = "INSERT INTO project_students (user_id, project_id) VALUES (?, ?)";
+                try (var studentInsert = getConnection().prepareStatement(studentStmt)) {
+                    studentInsert.setInt(1, studentId);
+                    studentInsert.setInt(2, projectId);
+                    studentInsert.executeUpdate();
+                } catch (SQLException e) {
+                    if (e.getErrorCode() != 23505) {
+                        throw e;
+                    }
+                }
+            } else if ("declined".equals(status)) {
+                var removeStmt = "DELETE FROM project_students WHERE user_id = ? AND project_id = ?";
+                try (var remove = getConnection().prepareStatement(removeStmt)) {
+                    remove.setInt(1, studentId);
+                    remove.setInt(2, projectId);
+                    remove.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to update student invitations table");
         }
     }
 

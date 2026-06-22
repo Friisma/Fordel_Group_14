@@ -42,7 +42,7 @@
     <section id="advisors" th:if="${sectionVisibility.advisorsVisible}">
       <hr>
       <details open="">
-        <summary>Invitations to Projects</summary>
+        <summary>Advisor Invitations</summary>
         <div th:if="${rights.isAdvisor()}">
           <div class="card">
             <div th:if="${advisorInvitations != null and #lists.isEmpty(advisorInvitations) == false}">
@@ -58,6 +58,24 @@
         </div>
         <div th:if="${!rights.isAdvisor()}">
           <span th:text="${advisorsMessage}">Advisors Section (not done)</span>
+        </div>
+      </details>
+    </section>
+
+    <section id="student-invitations" th:if="${rights != null && rights.isStudent()}">
+      <hr>
+      <details open="">
+        <summary>Student Invitations</summary>
+        <div class="card">
+          <div th:if="${studentInvitations != null and #lists.isEmpty(studentInvitations) == false}">
+            <th:block th:each="inv : ${studentInvitations}">
+              <article th:replace="~{fragments/student-invitation-card :: studentInvitation(invitation=${inv})}">
+              </article>
+            </th:block>
+          </div>
+          <div th:if="${studentInvitations == null or #lists.isEmpty(studentInvitations)}">
+            <p>No invitations</p>
+          </div>
         </div>
       </details>
     </section>

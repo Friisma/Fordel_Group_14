@@ -1,0 +1,25 @@
+<article th:fragment="studentInvitation(invitation)">
+    <div class="invitation-header">
+        <h3 class="font-normal" th:text="${invitation.name}">Project</h3>
+        <span class="badge" th:classappend="' ' + ${invitation.statusClass}"
+            th:text="${invitation.status}">Status</span>
+    </div>
+
+    <div style="margin-top:0.5rem; display:flex; gap:0.5rem; justify-content:flex-end;"
+        th:if="${invitation.statusClass == 'pending'}">
+        <form th:action="@{/student-invitations/{projectId}/accept(projectId=${invitation.projectId})}" method="post"
+            style="margin:0;">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <button type="submit" class="btn-accept">Accept</button>
+        </form>
+        <form th:action="@{/student-invitations/{projectId}/decline(projectId=${invitation.projectId})}" method="post"
+            style="margin:0;">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <button type="submit" class="btn-decline">Decline</button>
+        </form>
+    </div>
+
+    <div style="margin-top:0.5rem; text-align:right; opacity:0.8;" th:if="${invitation.statusClass != 'pending'}">
+        Invitation already handled
+    </div>
+</article>
