@@ -13,6 +13,8 @@ public class InvitationManager {
     public static interface InvitationRepository {
         void create(User invited, Project project);
 
+        void createStudentInvitation(User invited, Project project);
+
         void delete();
 
         void update(AdvisorInvitation advisorInvitation) throws AdvisorAlreadyInvited;
@@ -20,6 +22,9 @@ public class InvitationManager {
         List<AdvisorInvitation> getAllInvitesReceived(User invited);
 
         List<InviteView> getInvitesForProject(int projectId);
+
+        List<StudentInviteView> getStudentInvitesForProject(int projectId);
+
         List<AdvisorInviteView> getInvitesReceivedForAdvisor(int advisorId);
     }
 
@@ -32,6 +37,10 @@ public class InvitationManager {
     public void createInvitaion(User invited, Project project) {
 
         invitationRepository.create(invited, project);
+    }
+
+    public void createStudentInvitation(User invited, Project project) {
+        invitationRepository.createStudentInvitation(invited, project);
     }
 
     public void deleteInvitation() {
@@ -49,11 +58,20 @@ public class InvitationManager {
     public static record InviteView(String name, String email, String status, String statusClass) {
     }
 
+    public static record StudentInviteView(String name, String email, String status, String statusClass) {
+    }
+
     public List<InviteView> getInvitesForProject(int projectId) {
         return invitationRepository.getInvitesForProject(projectId);
     }
 
-    public static record AdvisorInviteView(String projectTitle, String inviterName, String status, String statusClass, int projectId) {}
+    public List<StudentInviteView> getStudentInvitesForProject(int projectId) {
+        return invitationRepository.getStudentInvitesForProject(projectId);
+    }
+
+    public static record AdvisorInviteView(String projectTitle, String inviterName, String status, String statusClass,
+            int projectId) {
+    }
 
     public List<AdvisorInviteView> getInvitesReceivedForAdvisor(int advisorId) {
         return invitationRepository.getInvitesReceivedForAdvisor(advisorId);

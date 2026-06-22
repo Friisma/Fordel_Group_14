@@ -1,0 +1,40 @@
+<dialog id="modal-invite-student" th:fragment="inviteStudentModal(availableStudents)">
+    <article>
+        <header>
+            <button aria-label="Close" rel="prev" data-target="modal-invite-student"
+                onclick="toggleModal(event)"></button>
+            <h3>Invite student to project</h3>
+        </header>
+
+        <form id="invite-student-form" action="#" method="post"
+            th:onsubmit="|document.getElementById('invite-student-form').action = document.getElementById('invite-student-form').action|">
+            <input type="hidden" id="modal-project-id-input-student" name="projectId" value="" />
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+            <div style="display:flex;gap:1rem;align-items:flex-end;">
+                <div style="flex-grow:1;">
+                    <label for="student-select">Select student</label>
+                    <select id="student-select" name="studentEmail" required>
+                        <option value="" disabled selected>Select student</option>
+                        <option th:each="student : ${availableStudents}" th:value="${student.email()}"
+                            th:text="|${student.name()} (${student.email()})|">Student</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="primary" style="width:auto;">Send invitation</button>
+            </div>
+        </form>
+    </article>
+
+    <script>
+        function openInviteStudentModal(event, buttonElement) {
+            const projectId = buttonElement.getAttribute('data-project-id');
+            document.getElementById('modal-project-id-input-student').value = projectId;
+            const form = document.getElementById('invite-student-form');
+            if (form) {
+                form.action = '/project/' + encodeURIComponent(projectId) + '/invite-student';
+            }
+            toggleModal(event);
+        }
+    </script>
+</dialog>

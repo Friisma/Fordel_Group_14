@@ -53,11 +53,24 @@
                 <details open>
                     <summary>Invitations</summary>
                     <div class="card">
-                        <p>Student invitations will appear here.</p>
-                        <button data-target="modal-invite-advisor" th:attr="data-project-id=${projectId}" type="button"
-                            class="primary" onclick="openInviteModal(event, this)">Invite Advisor to Project</button>
+                        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+                            <button data-target="modal-invite-advisor" th:attr="data-project-id=${projectId}"
+                                type="button" class="primary" onclick="openInviteModal(event, this)">Invite Advisor to
+                                Project</button>
+                            <button data-target="modal-invite-student" th:attr="data-project-id=${projectId}"
+                                type="button" class="primary" onclick="openInviteStudentModal(event, this)">Invite
+                                Student to Project</button>
+                        </div>
+                        <h3 class="font-normal">Advisor invitations</h3>
                         <div class="project-invitations">
                             <th:block th:each="inv : ${projectInvitations}">
+                                <article th:replace="~{fragments/invitation-card :: invitationCard(invitation=${inv})}">
+                                </article>
+                            </th:block>
+                        </div>
+                        <h3 class="font-normal" style="margin-top:1rem;">Student invitations</h3>
+                        <div class="project-invitations">
+                            <th:block th:each="inv : ${projectStudentInvitations}">
                                 <article th:replace="~{fragments/invitation-card :: invitationCard(invitation=${inv})}">
                                 </article>
                             </th:block>
@@ -74,9 +87,8 @@
             </button>
         </div>
 
-        <form th:if="${canStartProject}" method="post"
-              th:action="@{'/project/' + ${projectId} + '/start_project'}"
-              style="display:inline-block;">
+        <form th:if="${canStartProject}" method="post" th:action="@{'/project/' + ${projectId} + '/start_project'}"
+            style="display:inline-block;">
             <button class="primary" type="submit">Start Project</button>
         </form>
     </main>
@@ -85,7 +97,11 @@
     <!-- Include invite advisor modal fragment -->
     <div th:replace="~{fragments/invite-advisor-modal :: inviteAdvisorModal(availableAdvisors=${availableAdvisors})}">
     </div>
-        <div th:replace="~{fragments/edit-project-modal :: editProjectModal(project=${project}, projectId=${projectId}, title=${title})}"></div>
+    <div th:replace="~{fragments/invite-student-modal :: inviteStudentModal(availableStudents=${availableStudents})}">
+    </div>
+    <div
+        th:replace="~{fragments/edit-project-modal :: editProjectModal(project=${project}, projectId=${projectId}, title=${title})}">
+    </div>
 </body>
 
 </html>

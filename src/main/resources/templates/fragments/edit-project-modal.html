@@ -1,7 +1,8 @@
 <dialog th:fragment="editProjectModal(project, projectId, title)" id="modal-edit-project">
   <article>
     <header>
-      <button aria-label="Close" rel="prev" onclick="toggleModal(event)"></button>
+      <button aria-label="Close" rel="prev" data-target="modal-edit-project" type="button"
+        onclick="toggleModal(event)"></button>
       <p><strong>Edit Project</strong></p>
     </header>
     <form method="post" th:action="@{'/project/' + ${projectId} + '/updateProject'}">
@@ -10,7 +11,8 @@
       </label>
 
       <label for="edit-project-description">Description
-        <textarea id="edit-project-description" name="newDescription" th:text="${project.description}" required></textarea>
+        <textarea id="edit-project-description" name="newDescription" th:text="${project.description}"
+          required></textarea>
       </label>
 
       <footer>
