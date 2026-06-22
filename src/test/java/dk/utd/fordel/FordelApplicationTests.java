@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @SpringBootTest
@@ -85,7 +86,6 @@ class FordelApplicationTests {
 		assertTrue(res.getResponse().getContentAsString().contains("Email already in use"));
 	}
 
-
 	@Test
 	void we_can_open_create_study_line_page() throws Exception {
 		MvcResult res = mvc.perform(get("/create-study-line"))
@@ -98,16 +98,240 @@ class FordelApplicationTests {
 	@Test
 	void we_cannot_create_the_same_study_line_twice() throws Exception {
 		mvc.perform(post("/create-study-line")
-						.param("lineName", "Software Technology"))
+				.param("lineName", "Software Technology"))
 				.andExpect(status().isFound())
 				.andExpect(redirectedUrl("/"));
 
 		MvcResult res = mvc.perform(post("/create-study-line")
-						.param("lineName", "Software Technology"))
+				.param("lineName", "Software Technology"))
 				.andExpect(status().isOk())
 				.andReturn();
 
 		assertTrue(res.getResponse().getContentAsString().contains("Study line already exists"));
+	}
+
+	@Test
+	void when_login_credentials_are_invalid_then_we_stay_on_login_with_error() throws Exception {
+		MvcResult res = mvc.perform(post("/login")
+				.param("email", "admin@test.dk")
+				.param("password", "wrong-password"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("login"))
+				.andExpect(content().string(containsString("Du har indtastet forkert password eller email")))
+				.andReturn();
+
+		assertTrue(res.getResponse().getContentAsString().contains("Du har indtastet forkert password eller email"));
+	}
+
+	@Test
+	void when_login_email_is_invalid_then_we_stay_on_login_with_email_error() throws Exception {
+		mvc.perform(post("/login")
+				.param("email", "invalid-email")
+				.param("password", "password"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("login"))
+				.andExpect(content().string(containsString("should have @ sign")));
+	}
+
+	@Test
+	void when_create_user_email_is_invalid_then_we_stay_on_create_user_with_email_error() throws Exception {
+		mvc.perform(post("/create-user")
+				.param("name", "Invalid Email User")
+				.param("email", "invalid-email")
+				.param("password", "password"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("create-user"))
+				.andExpect(content().string(containsString("should have @ sign")));
+	}
+
+	@Test
+	void when_create_user_name_is_empty_then_we_stay_on_create_user_with_name_error() throws Exception {
+		mvc.perform(post("/create-user")
+				.param("name", "")
+				.param("email", "empty-name@test.dk")
+				.param("password", "password"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("create-user"))
+				.andExpect(content().string(containsString("Username cannot be empty")));
+	}
+
+	@Test
+	void when_create_user_password_is_empty_then_we_stay_on_create_user() throws Exception {
+		mvc.perform(post("/create-user")
+				.param("name", "Empty Password User")
+				.param("email", "empty-password@test.dk")
+				.param("password", ""))
+				.andExpect(status().isOk())
+				.andExpect(view().name("create-user"));
+	}
+
+	@Test
+	void when_password_is_expired_then_protected_pages_redirect_to_password_expired() throws Exception {
+		MvcResult loginRes = mvc.perform(post("/login")
+				.param("email", "expired@test.dk")
+				.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		MockHttpSession expiredSession = (MockHttpSession) loginRes.getRequest().getSession();
+		assertNotNull(expiredSession);
+
+		mvc.perform(get("/")
+				.session(expiredSession))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/password-expired"));
+
+		mvc.perform(get("/update-password")
+				.session(expiredSession))
+				.andExpect(status().isOk())
+				.andExpect(content().string(containsString("Update Password")));
+	}
+
+	@Test
+	void when_password_is_expired_then_allowlisted_routes_still_work() throws Exception {
+		MvcResult loginRes = mvc.perform(post("/login")
+				.param("email", "expired@test.dk")
+				.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		MockHttpSession expiredSession = (MockHttpSession) loginRes.getRequest().getSession();
+		assertNotNull(expiredSession);
+
+		mvc.perform(get("/login")
+				.session(expiredSession))
+				.andExpect(status().isOk())
+				.andExpect(view().name("login"));
+
+		mvc.perform(get("/password-expired")
+				.session(expiredSession))
+				.andExpect(status().isOk())
+				.andExpect(content().string(containsString("Password Expired!")));
+
+		mvc.perform(get("/logout")
+				.session(expiredSession))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/login"));
+	}
+
+	@Test
+	void when_expired_user_changes_password_then_user_can_access_homepage() throws Exception {
+		MvcResult loginRes = mvc.perform(post("/login")
+				.param("email", "expired@test.dk")
+				.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		MockHttpSession expiredSession = (MockHttpSession) loginRes.getRequest().getSession();
+		assertNotNull(expiredSession);
+
+		mvc.perform(get("/")
+				.session(expiredSession))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/password-expired"));
+
+		mvc.perform(post("/change-password")
+				.session(expiredSession)
+				.param("currentPassword", "password")
+				.param("newPassword", "renewed-password")
+				.param("confirmNewPassword", "renewed-password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"));
+
+		mvc.perform(get("/")
+				.session(expiredSession))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	void when_password_is_changed_then_old_password_fails_and_new_password_works() throws Exception {
+		MvcResult createUserRes = mvc.perform(post("/create-user")
+				.param("name", "Password Flow User")
+				.param("email", "password-flow@test.dk")
+				.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		MockHttpSession userSession = (MockHttpSession) createUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(post("/change-password")
+				.session(userSession)
+				.param("currentPassword", "password")
+				.param("newPassword", "new-password")
+				.param("confirmNewPassword", "new-password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"));
+
+		mvc.perform(post("/login")
+				.param("email", "password-flow@test.dk")
+				.param("password", "password"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("login"))
+				.andExpect(content().string(containsString("Du har indtastet forkert password eller email")));
+
+		mvc.perform(post("/login")
+				.param("email", "password-flow@test.dk")
+				.param("password", "new-password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"));
+	}
+
+	@Test
+	void when_update_password_is_requested_without_login_then_redirect_to_login() throws Exception {
+		mvc.perform(get("/update-password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/login"));
+	}
+
+	@Test
+	void when_change_password_confirmation_does_not_match_then_show_validation_error() throws Exception {
+		MvcResult createUserRes = mvc.perform(post("/create-user")
+				.param("name", "Mismatch Password User")
+				.param("email", "mismatch-password@test.dk")
+				.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		MockHttpSession userSession = (MockHttpSession) createUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(post("/change-password")
+				.session(userSession)
+				.param("currentPassword", "password")
+				.param("newPassword", "new-password")
+				.param("confirmNewPassword", "different-password"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("update-password"))
+				.andExpect(content().string(containsString("Passwords do not match")));
+	}
+
+	@Test
+	void when_current_password_is_wrong_then_change_password_fails() throws Exception {
+		MvcResult createUserRes = mvc.perform(post("/create-user")
+				.param("name", "Wrong Current Password User")
+				.param("email", "wrong-current-password@test.dk")
+				.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		MockHttpSession userSession = (MockHttpSession) createUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(post("/change-password")
+				.session(userSession)
+				.param("currentPassword", "wrong-password")
+				.param("newPassword", "new-password")
+				.param("confirmNewPassword", "new-password"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("update-password"))
+				.andExpect(content().string(containsString("Current password is incorrect")));
 	}
 
 }

@@ -13,8 +13,11 @@ import dk.utd.fordel.domain.UserDoesNotExist;
 import dk.utd.fordel.services.Authenticator;
 import dk.utd.fordel.services.Authenticator.Auth;
 import dk.utd.fordel.services.Authenticator.BadCredentials;
+import dk.utd.fordel.services.UserManager;
 import dk.utd.fordel.utils.UnitOfWork;
 import dk.utd.fordel.utils.UnitOfWork.UnitOfWorkException;
+
+import java.time.LocalDateTime;
 
 @Controller
 public class UpdatePasswordController {
@@ -27,10 +30,12 @@ public class UpdatePasswordController {
 
         private final UnitOfWork unitOfWork;
         private final Authenticator authenticator;
+        private final UserManager userManager;
 
-        public UpdatePasswordController(UnitOfWork unitOfWork, Authenticator authenticator) {
+        public UpdatePasswordController(UnitOfWork unitOfWork, Authenticator authenticator, UserManager userManager) {
                 this.unitOfWork = unitOfWork;
                 this.authenticator = authenticator;
+                this.userManager = userManager;
         }
 
         @GetMapping("/update-password")
@@ -72,6 +77,7 @@ public class UpdatePasswordController {
                 try (var uow = unitOfWork.begin()) {
                         authenticator.authenticate(auth.user(), currentPassword);
                         authenticator.register(auth.user(), newPassword);
+                        userManager.setPasswordChangedAt(auth.user(), LocalDateTime.now());
                         uow.commit();
                 } catch (BadCredentials e) {
                         addPasswordFields(model, currentPassword, newPassword, confirmNewPassword, null);
