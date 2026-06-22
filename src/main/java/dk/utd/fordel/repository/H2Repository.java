@@ -436,8 +436,9 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     public List<Project> getAllProjectsRelatedToStudyLine(int studyLineId) {
         List<Project> projects = new ArrayList<>();
         var stmt = """
-                SELECT id, title, description
-                FROM projects
+                SELECT p.id, p.title, p.description, sl.name AS study_line_name
+                FROM projects p
+                LEFT JOIN study_lines sl ON p.study_line_id = sl.id
                 WHERE study_line_id = ?
                 """;
         try (var statement = getConnection().prepareStatement(stmt)) {
@@ -448,6 +449,10 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
                             resultSet.getString("title"),
                             resultSet.getString("description"));
                     project.setProjectID(resultSet.getInt("id"));
+                    String studyLineName = resultSet.getString("study_line_name");
+                    if (studyLineName != null) {
+                        project.setStudyLine(studyLineName);
+                    }
                     projects.add(project);
                 }
             } catch (Project.InvalidProject e) {
@@ -464,8 +469,9 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         List<Project> projects = new ArrayList<>();
         int userId = getUserIdByEmail(user.getEmail());
         var stmt = """
-                SELECT p.id, p.title, p.description
+                SELECT p.id, p.title, p.description, sl.name AS study_line_name
                 FROM projects p
+                LEFT JOIN study_lines sl ON p.study_line_id = sl.id
                 WHERE p.study_line_id = ?
                     AND (
                         EXISTS (
@@ -491,6 +497,10 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
                             resultSet.getString("title"),
                             resultSet.getString("description"));
                     project.setProjectID(resultSet.getInt("id"));
+                    String studyLineName = resultSet.getString("study_line_name");
+                    if (studyLineName != null) {
+                        project.setStudyLine(studyLineName);
+                    }
                     projects.add(project);
                 }
             } catch (Project.InvalidProject e) {
