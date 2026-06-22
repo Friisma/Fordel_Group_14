@@ -5,6 +5,7 @@ import dk.utd.fordel.domain.User;
 import dk.utd.fordel.domain.UserDoesNotExist;
 import dk.utd.fordel.domain.Project;
 import dk.utd.fordel.domain.AdvisorInvitation;
+import dk.utd.fordel.domain.StudentInvitation;
 import dk.utd.fordel.services.ProjectManager;
 import dk.utd.fordel.services.InvitationManager;
 import dk.utd.fordel.services.UserManager;
@@ -135,6 +136,30 @@ public class HomepageController {
                 model.addAttribute("advisorInvitations", java.util.List.of());
             }
         }
+
+        if (rights != null && rights.isStudent()) {
+            if (authObject instanceof Auth auth) {
+                try (var uow = unitOfWork.begin()) {
+                    try {
+                        var inviteViews = invitationManager.getAllStudentInvitesReceived(auth.user());
+                        var inviteCards = inviteViews.stream().map(inv -> new InvitationCard(
+                                "Project " + inv.getProjectId(),
+                                inv.getStatusAsString(),
+                                inv.getStatusAsString(),
+                                String.valueOf(inv.getProjectId()),
+                                "")).toList();
+                        model.addAttribute("studentInvitations", inviteCards);
+                    } catch (Exception e) {
+                        model.addAttribute("studentInvitations", java.util.List.of());
+                    }
+                    uow.commit();
+                } catch (UnitOfWork.UnitOfWorkException e) {
+                    model.addAttribute("studentInvitations", java.util.List.of());
+                }
+            } else {
+                model.addAttribute("studentInvitations", java.util.List.of());
+            }
+        }
         return "home";
     }
 
@@ -148,6 +173,18 @@ public class HomepageController {
     public String declineInvitation(@PathVariable int projectId, HttpSession session,
             RedirectAttributes redirectAttributes) {
         return handleInvitationDecision(projectId, session, redirectAttributes, false);
+    }
+
+    @PostMapping("/student-invitations/{projectId}/accept")
+    public String acceptStudentInvitation(@PathVariable int projectId, HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        return handleStudentInvitationDecision(projectId, session, redirectAttributes, true);
+    }
+
+    @PostMapping("/student-invitations/{projectId}/decline")
+    public String declineStudentInvitation(@PathVariable int projectId, HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        return handleStudentInvitationDecision(projectId, session, redirectAttributes, false);
     }
 
     private String handleInvitationDecision(int projectId, HttpSession session, RedirectAttributes redirectAttributes,
@@ -194,6 +231,55 @@ public class HomepageController {
             }
         } catch (UnitOfWork.UnitOfWorkException e) {
             throw new RuntimeException("Could not update invitation status", e);
+        }
+
+        return "redirect:/";
+    }
+
+    private String handleStudentInvitationDecision(int projectId, HttpSession session,
+            RedirectAttributes redirectAttributes, boolean accept) {
+        Object authObject = session.getAttribute("auth");
+        if (!(authObject instanceof Auth auth)) {
+            return "redirect:/login";
+        }
+
+        Object userData = session.getAttribute("userData");
+        RightsContext rights = rightsService.from(userData instanceof User.Data data ? data : null);
+        if (rights == null || !rights.isStudent()) {
+            return "redirect:/forbidden";
+        }
+
+        try (var uow = unitOfWork.begin()) {
+            var invites = invitationManager.getAllStudentInvitesReceived(auth.user());
+            StudentInvitation target = null;
+            for (var inv : invites) {
+                if (inv.getProjectId() == projectId) {
+                    target = inv;
+                    break;
+                }
+            }
+
+            if (target == null) {
+                redirectAttributes.addFlashAttribute("error", "Invitation not found");
+                return "redirect:/";
+            }
+
+            try {
+                if (accept) {
+                    target.accept();
+                    redirectAttributes.addFlashAttribute("message", "Invitation accepted");
+                } else {
+                    target.decline();
+                    redirectAttributes.addFlashAttribute("message", "Invitation declined");
+                }
+                invitationManager.updateStudentInvitation(target);
+                uow.commit();
+            } catch (RuntimeException e) {
+                uow.rollback();
+                redirectAttributes.addFlashAttribute("error", "Invitation already handled");
+            }
+        } catch (UnitOfWork.UnitOfWorkException e) {
+            throw new RuntimeException("Could not update student invitation status", e);
         }
 
         return "redirect:/";

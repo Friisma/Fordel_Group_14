@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import jakarta.servlet.http.HttpSession;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -104,10 +102,11 @@ public class ProjectController {
         try (var uow = unitOfWork.begin()) {
             Authenticator.Auth auth = (Authenticator.Auth) session.getAttribute("auth");
             User user = auth.user();
-            if (!userManager.checkMaxWorkLoad(user)){throw new AdvisorReachedMaxWorkLoad(
-                    "Advisor reached max workload");
+            if (!userManager.checkMaxWorkLoad(user)) {
+                throw new AdvisorReachedMaxWorkLoad(
+                        "Advisor reached max workload");
             }
-            Project project = new Project(projectName,projectDescription);
+            Project project = new Project(projectName, projectDescription);
             project.setProjectID(projectId);
             projectManager.assignAdvisor(project, user);
             uow.commit();
@@ -116,7 +115,7 @@ public class ProjectController {
             throw Log.giveUp(logger, e, "Failed to assign advisor");
         } catch (Project.InvalidProject e) {
             throw Log.giveUp(logger, e, "Could not assign advisor - invalid project" + projectName);
-        } catch (AdvisorAlreadyAdvises | AdvisorReachedMaxWorkLoad e){
+        } catch (AdvisorAlreadyAdvises | AdvisorReachedMaxWorkLoad e) {
             try (var uow = unitOfWork.begin()) {
                 model.addAttribute("errorMessage", e.getMessage());
                 model.addAttribute("projects", projectManager.getAllProjects());
@@ -169,7 +168,7 @@ public class ProjectController {
                 String creatorEmail = projectManager.getProjectCreatorEmail(id);
                 model.addAttribute("projectCreatorEmail", creatorEmail);
                 var allUsers = userManager.getAllUsers();
-                 members = allUsers.stream()
+                members = allUsers.stream()
                         .filter(u -> {
                             try {
                                 return projectManager.canViewProject(User.of(u.email()), id);
@@ -203,6 +202,24 @@ public class ProjectController {
             } catch (Exception e) {
                 model.addAttribute("availableAdvisors", java.util.List.of());
             }
+            try {
+                var allUsers = userManager.getAllUsers();
+                String currentEmail = auth.user().getEmail().asString();
+                var students = allUsers.stream()
+                        .filter(u -> u.roles().contains(Roles.STUDENT))
+                        .filter(u -> !currentEmail.equalsIgnoreCase(u.email()))
+                        .filter(u -> {
+                            try {
+                                return !projectManager.canViewProject(User.of(u.email()), id);
+                            } catch (dk.utd.fordel.domain.Email.InvalidEmail e) {
+                                return false;
+                            }
+                        })
+                        .toList();
+                model.addAttribute("availableStudents", students);
+            } catch (Exception e) {
+                model.addAttribute("availableStudents", java.util.List.of());
+            }
             // load invitations for this project (to show in the student/advisor sections)
             try {
                 var inviteViews = invitationManager.getInvitesForProject(id);
@@ -218,13 +235,21 @@ public class ProjectController {
                 String current = auth.user().getEmail().asString();
                 var advisorOwnInvites = normalized.stream().filter(iv -> iv.email().equalsIgnoreCase(current)).toList();
                 model.addAttribute("advisorInvitations", advisorOwnInvites);
+                var studentInvites = invitationManager.getStudentInvitesForProject(id).stream().map(iv -> {
+                    String s = iv.status();
+                    String cap = s == null || s.isEmpty() ? s : (Character.toUpperCase(s.charAt(0)) + s.substring(1));
+                    return new dk.utd.fordel.services.InvitationManager.StudentInviteView(iv.name(), iv.email(), cap,
+                            iv.statusClass());
+                }).toList();
+                model.addAttribute("projectStudentInvitations", studentInvites);
             } catch (Exception e) {
                 model.addAttribute("projectInvitations", java.util.List.of());
                 model.addAttribute("advisorInvitations", java.util.List.of());
+                model.addAttribute("projectStudentInvitations", java.util.List.of());
             }
             uow.commit();
 
-            //Adding a button for advisors to start project
+            // Adding a button for advisors to start project
             String currentEmail = auth.user().getEmail().asString();
             boolean isAssignedAdvisor = members.stream()
                     .anyMatch(m -> m.email().equalsIgnoreCase(currentEmail) && m.roles().contains(Roles.ADVISOR));
@@ -232,20 +257,17 @@ public class ProjectController {
             boolean canStart = rightsService.canStartProject(rights) && isAssignedAdvisor && isDraft;
             model.addAttribute("canStartProject", canStart);
 
-            if (project.getStatus() == Project.Status.DRAFT && rightsService.canEditPage(rights)){
+            if (project != null && project.getStatus() == Project.Status.DRAFT && rightsService.canEditPage(rights)) {
                 model.addAttribute("canEditPage", true);
-            } else if (project.getStatus() == Project.Status.STARTED && rightsService.canEditStartedProject(rights)){
+            } else if (project != null && project.getStatus() == Project.Status.STARTED
+                    && rightsService.canEditStartedProject(rights)) {
                 model.addAttribute("canEditPage", isAssignedAdvisor);
             }
         } catch (UnitOfWork.UnitOfWorkException e) {
             throw new RuntimeException("Could not open project access transaction", e);
         }
 
-        if (project != null) {
-            model.addAttribute("title", project.getProjectName());
-        } else {
-            model.addAttribute("title", "Project " + id);
-        }
+        model.addAttribute("title", project != null ? project.getProjectName() : "Project " + id);
         model.addAttribute("projectId", id);
         return "project";
     }
@@ -255,17 +277,16 @@ public class ProjectController {
      * A project can only be edited by students if they are in DRAFT mode.
      *
      * @return a redirect back to the project if successfully.
-     * a flash attribute will popup with the result of the update.
+     *         a flash attribute will popup with the result of the update.
      */
     @PostMapping("/project/{id}/updateProject")
     public String updateProject(@PathVariable int id,
-                                @RequestParam("newTitle") String newTitle,
-                                @RequestParam("newDescription") String newDescription,
-                                HttpSession session,
-                                Model model, RedirectAttributes redirectAttributes
-    ){
+            @RequestParam("newTitle") String newTitle,
+            @RequestParam("newDescription") String newDescription,
+            HttpSession session,
+            Model model, RedirectAttributes redirectAttributes) {
         Object authObject = session.getAttribute("auth");
-        if (!(authObject instanceof Auth auth)) {
+        if (!(authObject instanceof Auth)) {
             return "redirect:/login";
         }
 
@@ -275,11 +296,11 @@ public class ProjectController {
             return "redirect:/forbidden";
         }
 
-        try (var uow = unitOfWork.begin()){
+        try (var uow = unitOfWork.begin()) {
             Project project = new Project(newTitle, newDescription);
             project.setProjectID(id);
 
-            if (newTitle.isEmpty() || newDescription.isEmpty()){
+            if (newTitle.isEmpty() || newDescription.isEmpty()) {
                 redirectAttributes.addFlashAttribute("error", "Project needs a title and description");
                 uow.rollback();
                 return "redirect:/project/" + id;
@@ -288,10 +309,10 @@ public class ProjectController {
             projectManager.update(project);
             redirectAttributes.addFlashAttribute("message", "Project edited successfully");
             uow.commit();
-        } catch (UnitOfWork.UnitOfWorkException e){
+        } catch (UnitOfWork.UnitOfWorkException e) {
             redirectAttributes.addFlashAttribute("error", "Failed to update project");
 
-        } catch (Project.InvalidProject | ProjectDoesNotExist e){
+        } catch (Project.InvalidProject | ProjectDoesNotExist e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/project/" + id;
         }
@@ -435,7 +456,7 @@ public class ProjectController {
                     redirectAttributes.addFlashAttribute("error", "Advisor already invited");
                     return "redirect:/project/" + id;
                 }
-                if (!maxWorkLoadNotReached){
+                if (!maxWorkLoadNotReached) {
                     uow.rollback();
                     redirectAttributes.addFlashAttribute("error", "Advisor reached max workload");
                     return "redirect:/project/" + id;
@@ -455,6 +476,88 @@ public class ProjectController {
                 } catch (Exception ignore) {
                 }
                 redirectAttributes.addFlashAttribute("error", "Invalid advisor email");
+            }
+
+        } catch (UnitOfWork.UnitOfWorkException e) {
+            throw new RuntimeException("Could not open project transaction", e);
+        }
+
+        return "redirect:/project/" + id;
+    }
+
+    @PostMapping("/project/{id}/invite-student")
+    public String inviteStudent(@PathVariable int id,
+            @RequestParam("studentEmail") String studentEmail,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        Object authObject = session.getAttribute("auth");
+        if (!(authObject instanceof Auth auth)) {
+            return "redirect:/login";
+        }
+
+        Object userData = session.getAttribute("userData");
+        RightsContext rights = rightsService.from(userData instanceof User.Data data ? data : null);
+        if (!rightsService.canViewProject(rights)) {
+            return "redirect:/forbidden";
+        }
+
+        try (var uow = unitOfWork.begin()) {
+            if (!projectManager.canViewProject(auth.user(), id)) {
+                return "redirect:/forbidden";
+            }
+
+            Project project = null;
+            try {
+                var projects = projectManager.getAllProjectsRelatedToUser(auth.user());
+                for (var p : projects) {
+                    if (p.getProjectID() == id) {
+                        project = p;
+                        break;
+                    }
+                }
+            } catch (Project.InvalidProject e) {
+                // fall through
+            }
+
+            if (project == null) {
+                redirectAttributes.addFlashAttribute("error", "Project not found");
+                return "redirect:/project/" + id;
+            }
+
+            try {
+                var invited = User.of(studentEmail);
+                var existingInvites = invitationManager.getStudentInvitesForProject(id);
+                boolean alreadyInvited = existingInvites.stream()
+                        .anyMatch(iv -> iv.email() != null && iv.email().equalsIgnoreCase(studentEmail));
+                if (alreadyInvited) {
+                    uow.rollback();
+                    redirectAttributes.addFlashAttribute("error", "Student already invited");
+                    return "redirect:/project/" + id;
+                }
+                if (projectManager.canViewProject(invited, id)) {
+                    uow.rollback();
+                    redirectAttributes.addFlashAttribute("error", "Student already in project");
+                    return "redirect:/project/" + id;
+                }
+
+                if (!userManager.getUserRoles(invited).contains(Roles.STUDENT)) {
+                    uow.rollback();
+                    redirectAttributes.addFlashAttribute("error", "Student not found");
+                    return "redirect:/project/" + id;
+                }
+
+                invitationManager.createStudentInvitation(invited, project);
+                uow.commit();
+                redirectAttributes.addFlashAttribute("message", "Student invitation sent");
+            } catch (dk.utd.fordel.domain.Email.InvalidEmail invalidEmail) {
+                try {
+                    uow.rollback();
+                } catch (Exception ignore) {
+                }
+                redirectAttributes.addFlashAttribute("error", "Invalid student email");
+            } catch (StudentAlreadyInvited ex) {
+                uow.rollback();
+                redirectAttributes.addFlashAttribute("error", "Student already invited");
             }
 
         } catch (UnitOfWork.UnitOfWorkException e) {
@@ -507,9 +610,9 @@ public class ProjectController {
     }
 
     @PostMapping("/project/{id}/start_project")
-    public String startProject( HttpSession session,
-                               @PathVariable int id,
-                               RedirectAttributes redirectAttributes){
+    public String startProject(HttpSession session,
+            @PathVariable int id,
+            RedirectAttributes redirectAttributes) {
         if (session.getAttribute("auth") == null) {
             return "redirect:/login";
         }
@@ -521,10 +624,10 @@ public class ProjectController {
         try (var uow = unitOfWork.begin()) {
             projectManager.startProject(id);
             uow.commit();
-        } catch (ProjectAlreadyFinished e){
+        } catch (ProjectAlreadyFinished e) {
             redirectAttributes.addFlashAttribute("error", "Project already started");
 
-        } catch (UnitOfWork.UnitOfWorkException e){
+        } catch (UnitOfWork.UnitOfWorkException e) {
             redirectAttributes.addFlashAttribute("error", "Failed to invite ");
         }
         return "redirect:/project/" + id;
@@ -546,7 +649,7 @@ public class ProjectController {
             User user = auth.user();
 
             int currentCount = projectManager.getCountOfAdvisedProjects(user);
-            if (maxWorkLoad < currentCount){
+            if (maxWorkLoad < currentCount) {
                 throw new AdvisorReachedMaxWorkLoad("Advisor Reached max workload");
             }
             userManager.updateMaxWorkLoad(
@@ -554,8 +657,8 @@ public class ProjectController {
             uow.commit();
         } catch (UnitOfWork.UnitOfWorkException e) {
             model.addAttribute("projects", placeholderProjects());
-        } catch (AdvisorReachedMaxWorkLoad e){
-            model.addAttribute("error",e.getMessage());
+        } catch (AdvisorReachedMaxWorkLoad e) {
+            model.addAttribute("error", e.getMessage());
         }
         try {
             return getAllAdviserProjects(model, session);
