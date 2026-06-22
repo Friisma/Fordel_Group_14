@@ -1,5 +1,9 @@
 package dk.utd.fordel;
 
+import dk.utd.fordel.domain.Project;
+import dk.utd.fordel.domain.User;
+import dk.utd.fordel.services.ProjectManager;
+import dk.utd.fordel.utils.UnitOfWork;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -10,6 +14,8 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+
+import java.util.List;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -26,6 +32,12 @@ class FordelApplicationTests {
 
 	@Autowired
 	MockMvc mvc;
+
+	@Autowired
+	ProjectManager projectManager;
+
+	@Autowired
+	UnitOfWork unitOfWork;
 
 	@Test
 	void context_loads() {
@@ -334,4 +346,202 @@ class FordelApplicationTests {
 				.andExpect(content().string(containsString("Current password is incorrect")));
 	}
 
+	@Test
+	void we_can_create_a_project_and_view_it_on_the_project_page() throws Exception {
+		MvcResult loginUserRes = mvc.perform(post("/login")
+						.param("email", "student@test.dk")
+						.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		MockHttpSession userSession = (MockHttpSession) loginUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(post("/create-project")
+						.session(userSession)
+						.param("project_name", "Test project")
+						.param("project_description", "This is a test project")
+						.param("study_line", "Test Study Line"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"));
+
+		int projectId;
+		try (var uow = unitOfWork.begin()) {
+			User student = User.of("student@test.dk");
+			var studentProjects = projectManager.getAllProjectsRelatedToUser(student);
+
+			Project createdProject = studentProjects.stream()
+					.filter(p -> p.getProjectName().equals("Test project"))
+					.findFirst()
+					.orElseThrow(() -> new AssertionError("Project was not found"));
+
+			projectId = createdProject.getProjectID();
+			uow.commit();
+		}
+
+		mvc.perform(get("/project/" + projectId)
+						.session(userSession))
+				.andExpect(status().isOk())
+				.andExpect(content().string(containsString("Test project")));
+	}
+
+	@Test
+	void when_create_project_with_empty_title_then_stay_on_page_with_error() throws Exception {
+		MvcResult loginUserRes = mvc.perform(post("/login")
+						.param("email", "student@test.dk")
+						.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		MockHttpSession userSession = (MockHttpSession) loginUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(post("/create-project")
+						.session(userSession)
+						.param("project_name", "")
+						.param("project_description", "This is a test project")
+						.param("study_line", "Test Study Line"))
+				.andExpect(view().name("create-project"))
+				.andExpect(content().string(containsString("Cant create project")));
+
+	}
+
+	@Test
+	void when_project_is_draft_creator_can_edit_it() throws Exception {
+		MvcResult loginUserRes = mvc.perform(post("/login")
+						.param("email", "student@test.dk")
+						.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		MockHttpSession userSession = (MockHttpSession) loginUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(post("/create-project")
+						.session(userSession)
+						.param("project_name", "Test project")
+						.param("project_description", "This is a test project")
+						.param("study_line", "Test Study Line"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"));
+
+
+		int projectId;
+		try (var uow = unitOfWork.begin()) {
+			User student = User.of("student@test.dk");
+			var studentProjects = projectManager.getAllProjectsRelatedToUser(student);
+
+			Project createdProject = studentProjects.stream()
+					.filter(p -> p.getProjectName().equals("Test project"))
+					.findFirst()
+					.orElseThrow(() -> new AssertionError("Project was not found"));
+
+			projectId = createdProject.getProjectID();
+			uow.commit();
+		}
+
+		mvc.perform(post("/project/" + projectId + "/updateProject")
+						.session(userSession)
+						.param("id", String.valueOf(projectId))
+						.param("newTitle", "Test project still")
+						.param("newDescription", "This is still a test project"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/project/" + projectId));
+
+		mvc.perform(get("/project/" + projectId)
+						.session(userSession))
+				.andExpect(status().isOk())
+				.andExpect(content().string(containsString("Test project still")));
+	}
+
+	@Test
+	void when_non_member_accesses_project_then_forbidden() throws Exception {
+		MvcResult loginUserRes = mvc.perform(post("/login")
+						.param("email", "student@test.dk")
+						.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		MockHttpSession userSession = (MockHttpSession) loginUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(post("/create-project")
+						.session(userSession)
+						.param("project_name", "Test project")
+						.param("project_description", "This is a test project")
+						.param("study_line", "Test Study Line"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"));
+
+
+		int projectId;
+		try (var uow = unitOfWork.begin()) {
+			User student = User.of("student@test.dk");
+			var studentProjects = projectManager.getAllProjectsRelatedToUser(student);
+
+			Project createdProject = studentProjects.stream()
+					.filter(p -> p.getProjectName().equals("Test project"))
+					.findFirst()
+					.orElseThrow(() -> new AssertionError("Project was not found"));
+
+			projectId = createdProject.getProjectID();
+			uow.commit();
+		}
+
+		loginUserRes = mvc.perform(post("/login")
+						.param("email", "advisor@test.dk")
+						.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		userSession = (MockHttpSession) loginUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(get("/project/" + projectId)
+						.session(userSession))
+				.andExpect(redirectedUrl("/forbidden"));
+	}
+
+	@Test
+	void admin_can_delete_user() throws Exception {
+		mvc.perform(post("/create-user")
+						.param("name", "User to delete")
+						.param("email", "deleteuser@test.dk")
+						.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"));
+
+		MvcResult loginUserRes = mvc.perform(post("/login")
+						.param("email", "admin@test.dk")
+						.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		MockHttpSession userSession = (MockHttpSession) loginUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(post("/adminpage/delete-user")
+						.session(userSession)
+						.param("email", "deleteuser@test.dk"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/adminpage"));
+
+		mvc.perform(post("/login")
+						.param("email", "deleteuser@test.dk")
+						.param("password", "password"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("login"))
+				.andExpect(model().attributeExists("error_password"));
+	}
+
+	@Test
+	void admin_can_grant_and_remove_roles_from_users() throws Exception {
+
+	}
 }
