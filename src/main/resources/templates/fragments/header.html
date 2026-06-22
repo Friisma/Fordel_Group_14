@@ -2,6 +2,9 @@
   <nav class="container header-nav">
     <ul>
       <li><a href="/display" class="secondary">About</a></li>
+      <li th:if="${rights.hasPermission(T(dk.utd.fordel.services.rights.Permission).VIEW_USER)}">
+        <a href="/users" class="secondary">Users</a>
+      </li>
     </ul>
 
     <ul>

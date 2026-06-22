@@ -1,7 +1,9 @@
-<article th:fragment="memberCard(member, projectId)">
+<article th:fragment="memberCard(member, projectId)" th:attr="data-user-name=${member.name},data-user-email=${member.email}">
     <div class="member-card-content">
         <div class="invitation-header">
-            <h3 class="font-normal" th:text="${member.name}">Member Name</h3>
+            <a class="member-card-link" th:href="@{/user/{id}(id=${member.id})}">
+                <h3 class="font-normal member-card-name" th:text="${member.name}">Member Name</h3>
+            </a>
             <span class="badge role" th:text="${member.rolesDisplay}">Role</span>
         </div>
 

@@ -1,9 +1,11 @@
 package dk.utd.fordel.view;
 
 import dk.utd.fordel.domain.Email;
+import dk.utd.fordel.domain.Project;
 import dk.utd.fordel.domain.Roles;
 import dk.utd.fordel.domain.User;
 import dk.utd.fordel.domain.UserDoesNotExist;
+import dk.utd.fordel.services.ProjectManager;
 import dk.utd.fordel.services.UserManager;
 import dk.utd.fordel.services.StudyLineManager;
 import dk.utd.fordel.services.rights.RightsContext;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import dk.utd.fordel.utils.Log;
 import dk.utd.fordel.utils.UnitOfWork;
@@ -23,18 +26,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Controller
 public class UserController {
     private static final Logger logger = Log.getLogger(UserController.class);
 
     private final UserManager userManager;
+    private final ProjectManager projectManager;
     private final RightsService rightsService;
     private final UnitOfWork unitOfWork;
     private final StudyLineManager studyLineManager;
 
-    public UserController(UserManager userManager, RightsService rightsService, UnitOfWork unitOfWork, StudyLineManager studyLineManager) {
+    public UserController(UserManager userManager, ProjectManager projectManager, RightsService rightsService,
+            UnitOfWork unitOfWork, StudyLineManager studyLineManager) {
         this.userManager = userManager;
+        this.projectManager = projectManager;
         this.rightsService = rightsService;
         this.unitOfWork = unitOfWork;
         this.studyLineManager = studyLineManager;
@@ -66,10 +73,108 @@ public class UserController {
         return "adminpage";
     }
 
+    @GetMapping("/users")
+    public String getUsers(HttpSession session, Model model) {
+        if (session.getAttribute("auth") == null) {
+            return "redirect:/login";
+        }
+
+        Object userData = session.getAttribute("userData");
+        RightsContext rights = rightsService.from(userData instanceof User.Data data ? data : null);
+        if (!rightsService.canViewStudent(rights)) {
+            return "redirect:/forbidden";
+        }
+
+        try (var uow = unitOfWork.begin()) {
+            var usersList = userManager.getAllUsers().stream()
+                    .map(user -> new UserCard(
+                            user.id(),
+                            user.name(),
+                            user.roles(),
+                            user.email(),
+                            null,
+                            false))
+                    .toList();
+
+            model.addAttribute("title", "Users");
+            model.addAttribute("users", usersList);
+            uow.commit();
+        } catch (UnitOfWorkException e) {
+            throw Log.giveUp(logger, e, "Could not load users");
+        }
+
+        return "users";
+    }
+
+    @GetMapping("/user/{id}")
+    public String getUser(@PathVariable int id, HttpSession session, Model model) {
+        if (session.getAttribute("auth") == null) {
+            return "redirect:/login";
+        }
+
+        Object userData = session.getAttribute("userData");
+        RightsContext rights = rightsService.from(userData instanceof User.Data data ? data : null);
+        if (!rightsService.canViewStudent(rights)) {
+            return "redirect:/forbidden";
+        }
+
+        boolean canViewProjects = rightsService.canViewStudentProjects(rights);
+        model.addAttribute("projectsVisible", canViewProjects);
+        boolean canEditStudent = rightsService.canEditStudent(rights);
+        model.addAttribute("canEditStudent", canEditStudent);
+
+        try (var uow = unitOfWork.begin()) {
+            var user = userManager.getAllUsers().stream()
+                    .filter(userInfo -> String.valueOf(id).equals(userInfo.id()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (user == null) {
+                return "redirect:/error";
+            }
+
+            model.addAttribute("title", "User " + id);
+            model.addAttribute("userId", id);
+            model.addAttribute("userName", user.name());
+            model.addAttribute("userEmail", user.email());
+            model.addAttribute("userRoles", user.roles());
+            model.addAttribute("userStudyLine", user.studyLine());
+
+            if (canEditStudent) {
+                model.addAttribute("studyLines", studyLineManager.getAllStudyLines());
+            }
+
+            if (canViewProjects) {
+                try {
+                    var targetUser = User.of(user.email());
+                    var userProjects = projectManager.getAllProjectsRelatedToUser(targetUser);
+                    model.addAttribute("projects", userProjects.stream().map(UserController::toProjectCard).toList());
+                } catch (Project.InvalidProject | Email.InvalidEmail e) {
+                    model.addAttribute("projects", List.of());
+                }
+            }
+
+            uow.commit();
+        } catch (UnitOfWorkException e) {
+            throw Log.giveUp(logger, e, "Could not load user");
+        }
+
+        return "user";
+    }
+
+    private static ProjectCard toProjectCard(Project project) {
+        return new ProjectCard(
+                String.valueOf(project.getProjectID()),
+                project.getProjectName(),
+                project.getDescription() != null ? project.getDescription() : "",
+                project.getStudyLine() != null ? project.getStudyLine() : "",
+                project.getStatus().toString());
+    }
+
     @PostMapping("/adminpage/remove-role")
     public String removeRole(HttpSession session,
-                            @RequestParam("email") String email,
-                            @RequestParam("role") String roleString) {
+            @RequestParam("email") String email,
+            @RequestParam("role") String roleString) {
         if (session.getAttribute("auth") == null) {
             return "redirect:/login";
         }
@@ -100,8 +205,8 @@ public class UserController {
 
     @PostMapping("/adminpage/assign-study-line")
     public String assignStudyLine(HttpSession session,
-                                  @RequestParam("email") String email,
-                                  @RequestParam("studyLine") String studyLineName) {
+            @RequestParam("email") String email,
+            @RequestParam("studyLine") String studyLineName) {
         if (session.getAttribute("auth") == null) {
             return "redirect:/login";
         }
@@ -271,13 +376,13 @@ public class UserController {
 
     @PostMapping("/adminpage/delete-user")
     public String deleteUser(HttpSession session,
-                             @RequestParam("email") String email) {
+            @RequestParam("email") String email) {
         Object authObj = session.getAttribute("auth");
         if (authObj == null) {
             return "redirect:/login";
         }
 
-        if (!(authObj instanceof dk.utd.fordel.services.Authenticator.Auth auth)) {
+        if (!(authObj instanceof dk.utd.fordel.services.Authenticator.Auth)) {
             return "redirect:/login";
         }
 
@@ -294,5 +399,31 @@ public class UserController {
         }
 
         return "redirect:/adminpage";
+    }
+
+    public record ProjectCard(String id, String title, String description, String studyLine, String status) {
+    }
+
+    public record UserCard(String id, String name, List<Roles> roles, String email, Integer projectId,
+            boolean kickable) {
+        public String rolesDisplay() {
+            if (roles == null || roles.isEmpty()) {
+                return "No role";
+            }
+
+            return roles.stream()
+                    .map(UserController::displayName)
+                    .collect(java.util.stream.Collectors.joining(", "));
+        }
+    }
+
+    private static String displayName(Roles role) {
+        return switch (role) {
+            case STUDENT -> "Student";
+            case ADVISOR -> "Advisor";
+            case TEACHER -> "Teacher";
+            case STUDY_LEADER -> "Study Leader";
+            case ADMINISTRATOR -> "Administrator";
+        };
     }
 }

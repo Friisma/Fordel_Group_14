@@ -1,0 +1,27 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="da">
+
+<head th:replace="~{fragments/head ::head}"></head>
+
+<body>
+    <header th:replace="~{fragments/header ::header}"></header>
+
+    <main class="container">
+        <section>
+            <h1 th:text="${title}">Users</h1>
+            <input type="search" id="search" name="search" placeholder="Search" aria-label="Search users">
+            <p id="users-no-results" hidden>No users found</p>
+            <div class="users-grid">
+                <th:block th:each="user : ${users}">
+                    <article th:replace="~{fragments/member-card :: memberCard(member=${user}, projectId=${null})}">
+                    </article>
+                </th:block>
+            </div>
+        </section>
+    </main>
+
+    <footer th:replace="~{fragments/footer ::footer}"></footer>
+    <script th:src="@{/js/users-search.js}" defer></script>
+</body>
+
+</html>
