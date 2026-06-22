@@ -43,6 +43,8 @@ public class UserManager {
 
         public List<Roles> getUserRoles(User user);
 
+        List<StudyLineManager.StudyLineRepository.StudyLineInfo> getAllStudyLinesRelatedToUser(User user);
+
         boolean checkMaxWorkLoad(User advisor);
 
         public record UserInfo(String id, String email, String name, List<Roles> roles, String studyLine) {
@@ -82,6 +84,10 @@ public class UserManager {
 
     public void deleteUser(User user) throws UserDoesNotExist {
         userRepository.delete(user);
+    }
+
+    public List<StudyLineManager.StudyLineRepository.StudyLineInfo> getAllStudyLinesRelatedToUser(User user) {
+        return userRepository.getAllStudyLinesRelatedToUser(user);
     }
 
     public boolean checkMaxWorkLoad(User advisor){

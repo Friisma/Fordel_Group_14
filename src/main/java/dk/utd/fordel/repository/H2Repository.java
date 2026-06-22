@@ -457,6 +457,31 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     }
 
     @Override
+    public List<StudyLineInfo> getAllStudyLinesRelatedToUser(User user) {
+        List<StudyLineInfo> studyLines = new ArrayList<>();
+        var stmt = """
+                SELECT sl.id, sl.name
+                    FROM study_lines sl
+                    JOIN study_line_memberships slm ON sl.id = slm.study_line_id
+                    JOIN roles r ON slm.role_id = r.id
+                    WHERE slm.user_id = (SELECT id FROM users WHERE email = ?)
+                """;
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setString(1, user.getEmail().asString());
+            try (var resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    studyLines.add(new StudyLineInfo(
+                            resultSet.getInt("id"),
+                            resultSet.getString("name")));
+                }
+            }
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to look up study lines for user");
+        }
+        return studyLines;
+    }
+
+    @Override
     public List<Project> getAllProjectsRelatedToUser(User user) throws Project.InvalidProject {
         List<Project> projects = new ArrayList<>();
         int userId = getUserIdByEmail(user.getEmail());

@@ -1,0 +1,21 @@
+<article th:fragment="studylineCard(studyLine)" th:id="${studyLine.id}">
+    <th:block th:switch="${studyLine.id % 7}">
+        <img th:case="0" th:src="@{/images/forest.png}" alt="study line icon" class="card-banner-img" />
+        <img th:case="1" th:src="@{/images/autumn.png}" alt="study line icon" class="card-banner-img" />
+        <img th:case="2" th:src="@{/images/desert.png}" alt="study line icon" class="card-banner-img" />
+        <img th:case="3" th:src="@{/images/snow.png}" alt="study line icon" class="card-banner-img" />
+        <img th:case="4" th:src="@{/images/field.png}" alt="study line icon" class="card-banner-img" />
+        <img th:case="5" th:src="@{/images/grass-mountain.png}" alt="study line icon" class="card-banner-img" />
+        <img th:case="6" th:src="@{/images/lake.png}" alt="study line icon" class="card-banner-img" />
+        <img th:case="7" th:src="@{/images/ocean-mountain.png}" alt="study line icon" class="card-banner-img" />
+    </th:block>
+    <div class="project-header">
+        <a th:href="@{/studyline/{id}(id=${studyLine.id})}" class="project-link">
+            <h2 th:text="${studyLine.name}">Title</h2>
+        </a>
+
+        <span class="badge role">
+            #<span th:text="${studyLine.id}">1</span>
+        </span>
+    </div>
+</article>
