@@ -2,6 +2,9 @@
   <nav class="container header-nav">
     <ul>
       <li><a href="/display" class="secondary">About</a></li>
+      <li th:if="${rights.hasPermission(T(dk.utd.fordel.services.rights.Permission).VIEW_USER)}">
+        <a href="/users" class="secondary">Users</a>
+      </li>
     </ul>
 
     <ul>
@@ -14,6 +17,11 @@
       </li>
       <li th:if="${userData != null && userData.roles().contains(T(dk.utd.fordel.domain.Roles).ADMINISTRATOR)}">
         <a href="/adminpage" class="secondary">Admin Page</a>
+      </li>
+      <li th:if="${userData != null && userData.roles().contains(T(dk.utd.fordel.domain.Roles).ADVISOR)}">
+        <a href="/advisor-dashboard" class="secondary"> Advisor dashboard </a>
+
+        <a href="/advisor-projects-view" class="secondary"> Potential advisor projects </a>
       </li>
       <li>
         <a th:if="${session.auth == null || session.auth.user == null}" href="/login" class="secondary">

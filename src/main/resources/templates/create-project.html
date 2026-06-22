@@ -11,7 +11,14 @@
             <form action="/create-project" method="post">
                 <label th:replace="~{fragments/field :: field(${project_name})}"></label>
                 <label th:replace="~{fragments/field :: field(${project_description})}"></label>
+                <label for="study_line">
+                    Study line
+                    <select id="study_line" name="study_line">
+                        <option th:each="sl : ${studyLines}" th:value="${sl}" th:text="${sl}"></option>
+                    </select>
+                </label>
                 <button type="submit">Create project</button>
+                <button th:if="${isAdvisor}" type="submit" formaction="/create-advisor-project">Create project as advisor</button>
             </form>
         </section>
     </main>

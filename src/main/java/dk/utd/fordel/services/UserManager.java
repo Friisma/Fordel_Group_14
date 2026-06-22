@@ -22,8 +22,12 @@ public class UserManager {
         void delete(User user) throws UserDoesNotExist;
 
         int getUserIdByEmail(Email email);
+
         int getMaxWorkLoad(User user);
+
         void updateMaxWorkLoad(User user, int newMaxLoad);
+
+        Roles determineStudyLineSpecificRole(User user, String studyLineName);
 
         LocalDateTime getPasswordChangedAt(User user) throws UserDoesNotExist;
 
@@ -35,7 +39,11 @@ public class UserManager {
 
         void assignStudyLine(User user, String studyLineName);
 
+        void assignStudyLineRole(User user, String studLineName, Roles roleToGrant);
+
         public List<Roles> getUserRoles(User user);
+
+        boolean checkMaxWorkLoad(User advisor);
 
         public record UserInfo(String id, String email, String name, List<Roles> roles, String studyLine) {
         }
@@ -47,6 +55,7 @@ public class UserManager {
         List<UserInfo> getAllStudentsRelatedToStudyLine(int studyLineId);
 
         List<UserInfo> getAllLeadersRelatedToStudyLine(int studyLineId);
+
     }
 
     private final UserRepository userRepository;
@@ -74,7 +83,11 @@ public class UserManager {
     public void deleteUser(User user) throws UserDoesNotExist {
         userRepository.delete(user);
     }
-    // TODO Maybe find a better solution, once the domain is complete
+
+    public boolean checkMaxWorkLoad(User advisor){
+        return userRepository.checkMaxWorkLoad(advisor);
+    }
+
     public int getUserIdByEmail(Email email) {
         return userRepository.getUserIdByEmail(email);
     }
@@ -97,6 +110,10 @@ public class UserManager {
 
     public void assignStudyLine(User user, String studyLineName) { userRepository.assignStudyLine(user, studyLineName); }
 
+    public void assignStudyLineRole(User user, String studLineName, Roles roleToGrant) {
+        userRepository.assignStudyLineRole(user, studLineName, roleToGrant);
+    }
+
     public List<Roles> getUserRoles(User user) {
         return userRepository.getUserRoles(user);
     }
@@ -113,6 +130,10 @@ public class UserManager {
 
     public void updateMaxWorkLoad(User user, int newMaxLoad){
         userRepository.updateMaxWorkLoad(user,newMaxLoad);
+    }
+
+    public Roles determineStudyLineSpecificRole(User user, String studyLineName){
+        return userRepository.determineStudyLineSpecificRole(user,studyLineName);
     }
 
     public List<UserRepository.UserInfo> getAllStudentsRelatedToStudyLine(int studyLineId) {

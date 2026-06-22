@@ -61,6 +61,10 @@ public class StudyLineController {
             var studyLineAllProjects = projectManager.getAllProjectsRelatedToStudyLine(id);
             model.addAttribute("studyLineAllProjects", studyLineAllProjects.stream().map(ProjectsController::toProjectCard).toList());
 
+            model.addAttribute("sectionVisibility", new SectionVisibility(
+                    rightsService.canManageStudyLine(rights),
+                    rights != null && rights.isAdvisor()));
+
             var studyLineLoggedInUserProjects = projectManager.getAllProjectsRelatedToStudyLineAndUser(id, auth.user());
             model.addAttribute("studyLineLoggedInUserProjects", studyLineLoggedInUserProjects.stream().map(ProjectsController::toProjectCard).toList());
 
@@ -70,6 +74,10 @@ public class StudyLineController {
             throw new RuntimeException(e);
         }
         return "studyline";
+    }
+
+    public record SectionVisibility(boolean projectsVisible, boolean advisorsVisible) {
+
     }
 
     @GetMapping("/studyline/{id}/members")

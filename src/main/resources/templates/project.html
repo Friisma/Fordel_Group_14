@@ -67,12 +67,25 @@
             </th:block>
 
         </section>
+
+        <div th:if="${canEditPage}">
+            <button data-target="modal-edit-project" type="button" class="primary" onclick="toggleModal(event)">
+                Edit Project
+            </button>
+        </div>
+
+        <form th:if="${canStartProject}" method="post"
+              th:action="@{'/project/' + ${projectId} + '/start_project'}"
+              style="display:inline-block;">
+            <button class="primary" type="submit">Start Project</button>
+        </form>
     </main>
 
     <footer th:replace="~{fragments/footer ::footer}"></footer>
     <!-- Include invite advisor modal fragment -->
     <div th:replace="~{fragments/invite-advisor-modal :: inviteAdvisorModal(availableAdvisors=${availableAdvisors})}">
     </div>
+        <div th:replace="~{fragments/edit-project-modal :: editProjectModal(project=${project}, projectId=${projectId}, title=${title})}"></div>
 </body>
 
 </html>

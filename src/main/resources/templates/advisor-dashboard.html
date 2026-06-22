@@ -18,11 +18,14 @@
                 set max work load
             </button>
         </section>
+        <article>
+            <p th:if="${error}" th:text="${error}" style="border-left: 4px solid red;"></p>
+        </article>
     </div>
 </article>
     <hr />
 <section>
-
+<h2>Advised projects</h2>
 <div class="project-grid">
     <th:block th:each="project : ${projects}">
         <article th:replace="~{fragments/project-card :: projectCard(project=${project})}"></article>
