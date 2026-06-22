@@ -48,8 +48,7 @@ public class H2RepositoryTest {
             throws ProjectTitleAlreadyInUse, UnitOfWorkException, Project.InvalidProject, EmailAlreadyInUse, StudyLineAlreadyExists {
         Email email = new Email("test", "test");
         User user = new User(email);
-        StudyLine studyLine = new StudyLine("onlyForTest");
-
+        StudyLine studyLine = new StudyLine("line");
 
         User.Data data = new User.Data("name",new ArrayList<>(),"line", LocalDate.of(2001,1,1));
         Project project = new Project("test","test");
@@ -61,11 +60,14 @@ public class H2RepositoryTest {
 
             int userId = h2Repository.getUserIdByEmail(user.getEmail());
 
-            h2Repository.create(project,user,userId);
+            h2Repository.create(project,user,"line", userId);
+            h2Repository.assignStudyLine(user, studyLine.getLineName());
+
             assertThrows(ProjectTitleAlreadyInUse.class,
-                    () -> h2Repository.create(project,user,userId));
+                    () -> h2Repository.create(project,user,"line", userId));
         }
     }
+
     @Test
     void creatingAProjectWithAStudyLine()
     throws UserDoesNotExist, EmailAlreadyInUse, UnitOfWorkException, StudyLineAlreadyExists, Project.InvalidProject {
@@ -84,6 +86,161 @@ public class H2RepositoryTest {
 
 
     }
+
+    @Test
+    void adviserCantBeAssignedAsAdviserAgain() throws EmailAlreadyInUse, UnitOfWorkException, Project.InvalidProject, StudyLineAlreadyExists {
+        Email email = new Email("test", "test");
+        User user = new User(email);
+        Project project = new Project("test","test");
+        StudyLine studyLine = new StudyLine("testing");
+        try (var ignored = h2Repository.begin()){
+            h2Repository.create(studyLine);
+            h2Repository.create(user, new User.Data("Peter", List.of(), "testing", null));
+            h2Repository.assignStudyLine(user,studyLine.getLineName());
+            h2Repository.create(project,user, h2Repository.getUserIdByEmail(user.getEmail()));
+
+
+            h2Repository.assignAdvisor(user,project);
+            assertThrows(AdvisorAlreadyAdvises.class,
+                    () -> h2Repository.assignAdvisor(user,project));
+
+        }
+    }
+
+    @Test
+    void invitingTwiceShouldFail() throws EmailAlreadyInUse, UnitOfWorkException, Project.InvalidProject, StudyLineAlreadyExists{
+        Email email = new Email("test", "test");
+        User user = new User(email);
+
+        Email emailAdvisor = new Email("test2", "test2");
+        User advisor = new User(emailAdvisor);
+
+        Project project = new Project("test","test");
+        StudyLine studyLine = new StudyLine("testing");
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(studyLine);
+            h2Repository.create(user, new User.Data("Peter", List.of(), "testing", null));
+            h2Repository.create(advisor, new User.Data("PeterAdvisor", List.of(), "testing", null));
+
+            h2Repository.assignStudyLine(user, studyLine.getLineName());
+            h2Repository.create(project, user, h2Repository.getUserIdByEmail(user.getEmail()));
+
+            //creates project invitation
+            h2Repository.create(advisor,project);
+            assertThrows(AdvisorAlreadyInvited.class,
+                    () -> h2Repository.create(advisor,project));
+        }
+    }
+
+    @Test void cannotAssignAdvisorMoreThanItsMaxWorkLoad() throws EmailAlreadyInUse, UnitOfWorkException, Project.InvalidProject, StudyLineAlreadyExists {
+        Email email = new Email("test", "test");
+        User user = new User(email);
+
+        Email emailAdvisor = new Email("test2", "test2");
+        User advisor = new User(emailAdvisor);
+
+        Project project = new Project("test", "test");
+        Project project2 = new Project("test2", "test2");
+        StudyLine studyLine = new StudyLine("testing");
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(studyLine);
+            h2Repository.create(user, new User.Data("Peter", List.of(), "testing", null));
+            h2Repository.create(advisor, new User.Data("PeterAdvisor", List.of(), "testing", null));
+
+            h2Repository.assignStudyLine(user, studyLine.getLineName());
+            h2Repository.create(project, user, h2Repository.getUserIdByEmail(user.getEmail()));
+            h2Repository.create(project2, user, h2Repository.getUserIdByEmail(user.getEmail()));
+
+            h2Repository.updateMaxWorkLoad(advisor, 1);
+
+            h2Repository.assignAdvisor(advisor,project);
+
+            assertThrows(AdvisorReachedMaxWorkLoad.class,
+                    () -> h2Repository.assignAdvisor(advisor, project2));
+
+
+        }
+    }
+
+    @Test
+    void getAllProjects_returnsAllProjects() throws Exception {
+        Email email = new Email("test", "test");
+        User user = new User(email);
+        Project project = new Project("test", "test");
+        StudyLine studyLine = new StudyLine("testing");
+
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(studyLine);
+            h2Repository.create(user, new User.Data("Peter", List.of(), "testing", null));
+
+            h2Repository.assignStudyLine(user, studyLine.getLineName());
+            h2Repository.create(project, user, h2Repository.getUserIdByEmail(user.getEmail()));
+
+            List<Project> projects = h2Repository.getAllProjects();
+
+            assertEquals(project.getProjectName(), projects.getFirst().getProjectName());
+            assertEquals(project.getDescription(), projects.getFirst().getDescription());
+        }
+    }
+
+    @Test
+    void startingProject() throws Exception {
+        Email email = new Email("test", "test");
+        User user = new User(email);
+        Project project = new Project("test", "test");
+        StudyLine studyLine = new StudyLine("testing");
+
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(studyLine);
+            h2Repository.create(user, new User.Data("Peter", List.of(), "testing", null));
+
+            h2Repository.assignStudyLine(user, studyLine.getLineName());
+            h2Repository.create(project, user, h2Repository.getUserIdByEmail(user.getEmail()));
+            h2Repository.startProject(project.getProjectID());
+            List<Project> projects = h2Repository.getAllProjectsRelatedToUser(user);
+            //need to re-fetch from DB.
+            Project projectTest = projects.getFirst();
+
+            assertEquals(Project.Status.STARTED ,projectTest.getStatus());
+        }
+    }
+
+    @Test
+    void updatingProject() throws Exception {
+        Email email = new Email("test", "test");
+        User user = new User(email);
+        Project project = new Project("test", "test");
+        StudyLine studyLine = new StudyLine("testing");
+
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(studyLine);
+            h2Repository.create(user, new User.Data("Peter", List.of(), "testing", null));
+
+            h2Repository.assignStudyLine(user, studyLine.getLineName());
+            h2Repository.create(project, user, h2Repository.getUserIdByEmail(user.getEmail()));
+            project.setProjectName("other test");
+            h2Repository.update(project);
+
+            List<Project> projects = h2Repository.getAllProjectsRelatedToUser(user);
+            //need to re-fetch from DB.
+            Project projectTest = projects.getFirst();
+
+            assertEquals("other test", project.getProjectName());
+
+        }
+    }
+
+    @Test
+    void updatingNoProjectFails() throws Exception {
+        Project project = new Project("test", "test");
+        try (var ignored = h2Repository.begin()) {
+            assertThrows(ProjectDoesNotExist.class,
+                    () -> h2Repository.update(project));
+        }
+
+    }
+
+
 
     @Test
     void setting_the_password_for_a_non_existent_user_should_fail() throws InvalidEmail, UnitOfWorkException {

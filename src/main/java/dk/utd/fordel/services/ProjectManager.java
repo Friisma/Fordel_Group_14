@@ -13,7 +13,6 @@ public class ProjectManager {
 
         void create(Project project, User user, String studyLineName, int userId) throws ProjectTitleAlreadyInUse;
 
-        Project read(Project project) throws ProjectDoesNotExist;
 
         List<Project> getAllProjectsRelatedToUser(User user) throws Project.InvalidProject;
 
@@ -31,9 +30,11 @@ public class ProjectManager {
 
         int getCountOfAdvisorProjects(User advisor);
 
-        void StartProject(User advisor,Project project);
+        void startProject(int pId) throws ProjectAlreadyFinished;
 
         void update(Project project) throws ProjectDoesNotExist;
+
+        void advisorCreation(Project project, String studyLineName, int userId);
 
         void delete(Project project) throws ProjectDoesNotExist;
         List<Project> getAllProjects() throws Project.InvalidProject;
@@ -91,9 +92,17 @@ public class ProjectManager {
         return projectRepository.getCountOfAdvisorProjects(user);
     }
 
-    public void StartProject(User advisor, Project project){
-        projectRepository.StartProject(advisor,project);
+    public void startProject(int pId) throws ProjectAlreadyFinished{
+        projectRepository.startProject(pId);
 
+    }
+
+    public void update(Project project) throws ProjectDoesNotExist{
+        projectRepository.update(project);
+    }
+
+    public void createAdvisorProject(Project project,String studyLineName, int userId){
+        projectRepository.advisorCreation(project,studyLineName,userId);
     }
 
 }

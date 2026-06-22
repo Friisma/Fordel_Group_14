@@ -7,12 +7,23 @@
 <header th:replace="~{fragments/header ::header}"></header>
 
 <main class="container">
-    <h1 th:text="${studyLineName}">Study line</h1>
-    <form th:action="@{/studyline/{id}/members(id=${studyLineId})}" method="get">
-        <button type="submit">Members</button>
-    </form>
-    <section>
+    <nav>
+        <ul>
+            <li>
+                <h1 th:text="${studyLineName}" style="margin-bottom: 0;">Study line</h1>
+            </li>
+        </ul>
+        <ul>
+            <li>
+                <form th:action="@{/studyline/{id}/members(id=${studyLineId})}" method="get" style="margin-bottom: 0;">
+                    <button type="submit" class="secondary outline">Members</button>
+                </form>
+            </li>
+        </ul>
+    </nav>
+    <section id="allProjects" th:if="${sectionVisibility.projectsVisible}">
         <h2>All projects</h2>
+        <hr>
         <div class="project-grid">
             <th:block th:each="project : ${studyLineAllProjects}">
                 <article th:replace="~{fragments/project-card :: projectCard(project=${project})}"></article>
@@ -22,6 +33,7 @@
 
     <section>
         <h2>My projects</h2>
+        <hr>
         <div class="project-grid">
             <th:block th:each="project : ${studyLineLoggedInUserProjects}">
                 <article th:replace="~{fragments/project-card :: projectCard(project=${project})}"></article>
