@@ -30,6 +30,7 @@ public class InvitationManager {
     }
 
     public void createInvitaion(User invited, Project project) {
+
         invitationRepository.create(invited, project);
     }
 

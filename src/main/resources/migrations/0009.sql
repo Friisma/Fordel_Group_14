@@ -1,0 +1,1 @@
+ALTER TABLE project_advisors ADD CONSTRAINT uq_project_advisor UNIQUE (user_id, project_id);

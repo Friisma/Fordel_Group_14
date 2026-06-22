@@ -17,6 +17,7 @@ public class StudyLineManager {
         String getStudyLineNameById(int studyLineId);
         boolean canViewStudyLine(User user, int studyLineId);
         boolean canManageStudyLine(User user, int studyLineId);
+        
 
         void addStudent(User user, int studyLineId);
         void addStudyLeader(User user, int studyLineId);
