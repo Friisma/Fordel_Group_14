@@ -39,6 +39,8 @@ public class UserManager {
 
         void assignStudyLine(User user, String studyLineName);
 
+        void assignStudyLineRole(User user, String studLineName, Roles roleToGrant);
+
         public List<Roles> getUserRoles(User user);
 
         boolean checkMaxWorkLoad(User advisor);
@@ -107,6 +109,10 @@ public class UserManager {
     }
 
     public void assignStudyLine(User user, String studyLineName) { userRepository.assignStudyLine(user, studyLineName); }
+
+    public void assignStudyLineRole(User user, String studLineName, Roles roleToGrant) {
+        userRepository.assignStudyLineRole(user, studLineName, roleToGrant);
+    }
 
     public List<Roles> getUserRoles(User user) {
         return userRepository.getUserRoles(user);

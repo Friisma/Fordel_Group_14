@@ -17,7 +17,6 @@
             <th scope="col">Name</th>
             <th scope="col">E-mail</th>
             <th scope="col">Role</th>
-            <th scope="col">Study line</th>
             <th scope="col">Actions</th>
           </tr>
           </thead>
@@ -28,7 +27,6 @@
             <td th:text="${user.name()}">Admin</td>
             <td th:text="${user.email()}">admin@utd.dk</td>
             <td th:text="${#strings.listJoin(user.roles(), ', ')}">Role</td>
-            <td th:text="${user.studyLine()}">Study line</td>
             <td><nav>
               <ul>
                 <li>
@@ -54,10 +52,10 @@
                       </li>
 
                       <li>
-                        <button data-target="modal-assign-study-line"
+                        <button data-target="modal-confirm-admin-user"
                                 th:data-email="${user.email()}"
-                                onclick="openStudyLineModal(event, this)">
-                          Assign study line
+                                onclick="openConfirmAdminUserModal(event, this)">
+                          Assign system admin
                         </button>
                       </li>
 
@@ -104,11 +102,24 @@
               <option value="ADMINISTRATOR">Administrator</option>
             </select>
           </div>
-
-          <button type="submit" style="width: auto;">
-            Assign role
-          </button>
         </div>
+
+        <div style="display: flex; gap: 1rem; align-items: flex-end;">
+          <div style="flex-grow: 1;">
+            <label for="study-line-select">Select a study line</label>
+            <select id="study-line-select" name="studyLine" required>
+              <option value="" disabled selected>Select study line</option>
+              <option th:each="studyLine : ${studyLines}"
+                      th:value="${studyLine}"
+                      th:text="${studyLine}">
+                Study line
+              </option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" style="width: auto;">
+          Assign role
+        </button>
       </form>
     </article>
   </dialog>
@@ -139,38 +150,6 @@
     </article>
   </dialog>
 
-  <!--Modal for assign study line to a user-->
-  <dialog id="modal-assign-study-line">
-    <article>
-      <header>
-        <button aria-label="Close" rel="prev" data-target="modal-assign-study-line" onclick="toggleModal(event)"></button>
-        <h3>Assign study line</h3>
-      </header>
-
-      <form action="/adminpage/assign-study-line" method="post">
-        <input type="hidden" id="study-line-modal-email-input" name="email" value="" />
-
-        <div style="display: flex; gap: 1rem; align-items: flex-end;">
-          <div style="flex-grow: 1;">
-            <label for="study-line-select">Assign user to study line</label>
-            <select id="study-line-select" name="studyLine" required>
-              <option value="" disabled selected>Select study line</option>
-              <option th:each="studyLine : ${studyLines}"
-                      th:value="${studyLine}"
-                      th:text="${studyLine}">
-                Study line
-              </option>
-            </select>
-          </div>
-
-          <button type="submit" style="width: auto;">
-            Assign study line
-          </button>
-        </div>
-      </form>
-    </article>
-  </dialog>
-
   <!--Modal to delete user from system  -->
   <dialog id="modal-confirm-delete-user">
     <article>
@@ -183,6 +162,32 @@
         <input type="hidden" id="confirm-delete-user-email" name="email" value="" />
 
         <p style="text-align: center;">Are you sure you want to delete this user from the system?</p>
+
+        <footer style="display: flex; gap: 10px;">
+          <button type="button" class="secondary" data-target="modal-confirm-delete-user" onclick="toggleModal(event)" style="flex: 1; margin: 0;">
+            Cancel
+          </button>
+
+          <button type="submit" style="flex: 1; margin: 0;">
+            Confirm
+          </button>
+        </footer>
+      </form>
+    </article>
+  </dialog>
+
+  <!--Modal to delete user from system  -->
+  <dialog id="modal-confirm-admin-user">
+    <article>
+      <header>
+        <button aria-label="Close" rel="prev" data-target="modal-confirm-admin-user" onclick="toggleModal(event)"></button>
+        <h3 style="text-align: center; width: 100%; margin: 0;">Assign admin</h3>
+      </header>
+
+      <form th:action="@{/adminpage/grant-admin}" method="post">
+        <input type="hidden" id="confirm-admin-user-email" name="email" value="" />
+
+        <p style="text-align: center;">Are you sure you want to make this user administrator?</p>
 
         <footer style="display: flex; gap: 10px;">
           <button type="button" class="secondary" data-target="modal-confirm-delete-user" onclick="toggleModal(event)" style="flex: 1; margin: 0;">
