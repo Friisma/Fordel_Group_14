@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.management.relation.Role;
 import javax.sql.DataSource;
 
 import dk.utd.fordel.domain.*;
@@ -223,6 +224,11 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
 
     //TODO temporary fix for getting id from user table. this should maybe be changed when the domain is more complete
 
+    /**
+     * Helper method for being sure that the user id is coherent with the DB.
+     * @param email of user
+     * @return true id of user.
+     */
     public int getUserIdByEmail(Email email) {
         String stmt = "SELECT id FROM users WHERE email = ?";
 
@@ -286,8 +292,30 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
 
     // TODO Write more proper repository methods to update the database.
 
+    /**
+     * Updates project title and description
+     * @param project being updated.
+     */
     @Override
-    public void update(Project project){}
+    public void update(Project project) throws ProjectDoesNotExist{
+        var stmt = """
+                UPDATE projects
+                SET title = ?
+                ,description = ?
+                WHERE id = ?
+                """;
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setString(1,project.getProjectName());
+            statement.setString(2,project.getDescription());
+            statement.setInt(3,project.getProjectID());
+            int rowsAffected = statement.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new ProjectDoesNotExist("No project found with id ",project);
+            }
+        } catch (SQLException e){
+            throw Log.giveUp(logger, e, "Failed to update project");
+        }
+    }
 
     @Override
     public void delete(Project project){}
@@ -305,6 +333,20 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         createProjectWithStudyLine(project, userId, studyLineId);
     }
 
+    public void advisorCreation(Project project, String studyLineName, int userId){
+        int studyLineId = getStudyLineIdByName(studyLineName);
+        createProjectWithStudyLine(project ,userId, studyLineId);
+
+        project.setStatus(Project.Status.OPEN_FOR_STUDENTS);
+    }
+
+    /**
+     * Creates a project with the users current studyline.
+     * @param project to be created
+     * @param userId id of user whose creating project
+     * @param studyLineId id of studyline the project is created with
+     * @throws ProjectTitleAlreadyInUse
+     */
     private void createProjectWithStudyLine(Project project, int userId, int studyLineId)
             throws ProjectTitleAlreadyInUse {
         var stmt = "INSERT INTO projects (title, description, study_line_id) VALUES (?, ?, ?)";
@@ -388,6 +430,10 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
+    /**
+     * Gets all studylines as objects
+     * @return a list of studyline objects
+     */
     @Override
     public List<StudyLine> getAllStudyLineObjects() {
         var stmt = "SELECT name FROM study_lines";
@@ -410,7 +456,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         List<Project> projects = new ArrayList<>();
         int userId = getUserIdByEmail(user.getEmail());
         var stmt = """
-                SELECT p.id, p.title, p.description, sl.name AS study_line_name
+                SELECT p.id, p.title, p.description, p.status, sl.name AS study_line_name
                 FROM projects p
                 LEFT JOIN study_lines sl ON p.study_line_id = sl.id
                 WHERE p.id IN (
@@ -427,6 +473,8 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
                     Project project = new Project(
                             resultSet.getString("title"),
                             resultSet.getString("description"));
+                    String status = resultSet.getString("status");
+                    project.setStatus(Project.Status.valueOf(status));
                     project.setProjectID(resultSet.getInt("id"));
                     String studyLineName = resultSet.getString("study_line_name");
                     if (studyLineName != null) {
@@ -511,6 +559,10 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         return projects;
     }
 
+    /**
+     * Gets all projects for the advisor-projects view.
+     * @return a list of all projects
+     */
     @Override
     public List<Project> getAllProjects() throws Project.InvalidProject {
         List<Project> projects = new ArrayList<>();
@@ -611,15 +663,6 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
-    @Override
-    public Project read(Project project) {
-        try {
-            return new Project( "t","");
-        } catch (Project.InvalidProject e) {
-
-        }
-        return null;
-    }
 
     @Override
     public String getStudyLineNameById(int studyLineId) {
@@ -859,9 +902,34 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
                 roles.add(Roles.valueOf(roleName.toUpperCase().replace(" ", "_")));
             }
         } catch (SQLException e) {
-            Log.giveUp(logger, e, "Failed to read user: " + user);
+            throw Log.giveUp(logger, e, "Failed to read user: " + user);
         }
         return roles;
+    }
+
+    public Roles determineStudyLineSpecificRole(User user, String studyLineName){
+        var stmt = """
+                SELECT r.name
+                FROM study_line_memberships slm
+                JOIN roles r ON slm.role_id = r.id
+                WHERE slm.study_line_id = ?
+                AND slm.user_id = ?
+                """;
+
+        int studyLineId = getStudyLineIdByName(studyLineName);
+        int userid = getUserIdByEmail(user.getEmail());
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, studyLineId);
+            statement.setInt(2, userid);
+            try (var rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return Roles.valueOf(rs.getString(1).toUpperCase());
+                }
+            }
+        } catch (SQLException e){
+            throw Log.giveUp(logger, e, "Failed to read role: " + user);
+        }
+        return null;
     }
 
     /**
@@ -932,11 +1000,14 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
             statement.setInt(1, userId);
             statement.setInt(2, projectId);
             statement.executeUpdate();
+
+            if (getCountOfAdvisorProjects(advisor) > getMaxWorkLoad(advisor)){
+                throw new AdvisorReachedMaxWorkLoad("advisor already reached max workload");
+            }
         } catch (SQLException e){
             if (e.getErrorCode() == 23505){
                 throw new AdvisorAlreadyAdvises("Advisor already assigned");
             }
-            throw Log.giveUp(logger, e, "Failed to assign advisor");
         }
     }
 
@@ -1191,12 +1262,17 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
 
     }
 
+    /**
+     * gets all projects being advised by a user.
+     * @param advisor (current user)
+     * @return list of projects
+     */
     @Override
     public List<Project> getAllAdvisorProjects(User advisor){
         List<Project> projects = new ArrayList<>();
         int userId = getUserIdByEmail(advisor.getEmail());
         var stmt = """
-                SELECT p.id, p.title, p.description, sl.name
+                SELECT p.id, p.title, p.description, p.status, sl.name
                 FROM projects p JOIN project_advisors pa ON p.id = pa.project_id
                     JOIN study_lines sl on p.study_line_id = sl.id
                 WHERE pa.user_id = ?
@@ -1209,6 +1285,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
                             resultSet.getString("title"),
                             resultSet.getString("description"));
                     project.setProjectID(resultSet.getInt("id"));
+                    project.setStatus(Project.Status.valueOf(resultSet.getString("status")));
                     String studyLineName = resultSet.getString("name");
                     if (studyLineName != null) {
                         project.setStudyLine(studyLineName);
@@ -1226,14 +1303,31 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         return projects;
     }
 
+    /**
+     *
+     * @param advisor getting checked
+     * @return boolean. True if the advisor advises fewer projects than the max set for the user
+     */
+    public boolean checkMaxWorkLoad(User advisor){
+        int countOfAdvicedProjects = getCountOfAdvisorProjects(advisor);
+        int maxWorkLoad = getMaxWorkLoad(advisor);
+
+        return countOfAdvicedProjects < maxWorkLoad;
+    }
+
+    /**
+     * gets count of started projects an advisor is advising.
+     * @param advisor
+     * @return
+     */
     @Override
     public int getCountOfAdvisorProjects(User advisor){
 
         var stmt = """
                 SELECT COUNT(*)
-                FROM project_advisors pa JOIN projects p 
+                FROM project_advisors pa JOIN projects p
                     ON pa.project_id = p.id 
-                WHERE user_id = ? AND p.STATUS = 'DRAFT'
+                WHERE user_id = ?
                 """;
         try (var statement = getConnection().prepareStatement(stmt)) {
             int userId = getUserIdByEmail(advisor.getEmail());
@@ -1249,24 +1343,33 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         return 0;
     }
 
+    /**
+     * Changes the state of a project to "start"
+     * @param projectId id of project to start
+     */
     @Override
-    public void StartProject(User advisor, Project project){
+    public void startProject(int projectId) throws ProjectAlreadyFinished {
         var stmt = """
-                UPDATE projects
-                SET status = 'PUBLISHED'
-                WHERE project_id = ?
-                """;
-        if (project.getStatus() == Project.Status.DRAFT) {
-            try (var statement = getConnection().prepareStatement(stmt)) {
-                project.setStatus(Project.Status.STARTED);
-            } catch (SQLException e) {
-                throw Log.giveUp(logger, e, "Failed to publish project");
+            UPDATE projects
+            SET status = 'STARTED'
+            WHERE id = ? AND status = 'DRAFT'
+            """;
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setInt(1, projectId);
+            int rowsAffected = statement.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new ProjectAlreadyFinished("Project already started or does not exist");
             }
-        } else {
-            throw new ProjectAlreadyFinished("Project already published");
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to start project: " + projectId);
         }
     }
 
+    /**
+     *
+     * @param user whose max load we are getting
+     * @return max load of user
+     */
     @Override
     public int getMaxWorkLoad(User user){
         var stmt = "SELECT max_workload FROM users WHERE id = ?";
@@ -1284,6 +1387,12 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         return 0;
     }
 
+
+    /**
+     * Updates the maxWorkLoad for the advisor. Used for the advisor dashboard
+     * @param user whose workload is updated
+     * @param newMaxLoad new max load
+     */
     @Override
     public void updateMaxWorkLoad(User user, int newMaxLoad) {
         var stmt = """
