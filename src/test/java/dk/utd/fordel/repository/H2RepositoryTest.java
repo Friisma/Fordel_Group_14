@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.util.AssertionErrors.assertNull;
 
 import dk.utd.fordel.domain.*;
 import org.junit.jupiter.api.BeforeAll;
@@ -21,6 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 public class H2RepositoryTest {
@@ -236,6 +238,91 @@ public class H2RepositoryTest {
                     () -> h2Repository.update(project));
         }
 
+    }
+
+    @Test
+    void get_projects_only_related_to_a_study_line_and_related_to_both() throws Exception{
+        Email email = new Email("test", "test");
+        User user = new User(email);
+        Project project = new Project("test", "test");
+        Project project1 = new Project("test1", "test2");
+        StudyLine studyLine = new StudyLine("testing");
+        StudyLine studyLine1 = new StudyLine("Advanced testing");
+
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(studyLine);
+            h2Repository.create(studyLine1);
+
+            h2Repository.create(user, new User.Data("Peter", List.of(), "testing", null));
+
+            h2Repository.assignStudyLine(user, studyLine.getLineName());
+            h2Repository.create(project, user, h2Repository.getUserIdByEmail(user.getEmail()));
+            //Assign en anden linje
+            h2Repository.assignStudyLine(user, studyLine1.getLineName());
+            h2Repository.create(project1,user,studyLine1.getLineName(), h2Repository.getUserIdByEmail(user.getEmail()));
+
+            List<Project> projects = h2Repository.getAllProjectsRelatedToStudyLine(3);
+            Project projectTest = projects.getFirst();
+
+            assertEquals("test1", projectTest.getProjectName());
+
+            List<Project> projects1 = h2Repository.getAllProjectsRelatedToStudyLineAndUser(2,user);
+            Project projectTest1 = projects1.getFirst();
+
+            assertEquals("test", projectTest1.getProjectName());
+        }
+    }
+
+    @Test
+    void get_appropriate_creator_email() throws Exception{
+        Email email = new Email("test", "test");
+        User user = new User(email);
+        Project project = new Project("test", "test");
+        StudyLine studyLine = new StudyLine("testing");
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(studyLine);
+            h2Repository.create(user, new User.Data("Peter", List.of(), "testing", null));
+            h2Repository.assignStudyLine(user, studyLine.getLineName());
+            h2Repository.create(project, user, h2Repository.getUserIdByEmail(user.getEmail()));
+            String creatorEmail = h2Repository.getProjectCreatorEmail(project.getProjectID());
+
+            assertEquals("test@test",creatorEmail);
+
+            String creatorEmailFail = h2Repository.getProjectCreatorEmail(100);
+
+            assertNull("is null: ",creatorEmailFail);
+        }
+    }
+
+    @Test
+    void kick_member_from_project_actually_kicks_member() throws Exception {
+        Email email = new Email("test", "test");
+        User user = new User(email);
+
+        Email email2 = new Email("test2", "test2");
+        User user2 = new User(email2);
+
+        Project project = new Project("test", "test");
+        StudyLine studyLine = new StudyLine("testing");
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(studyLine);
+
+            h2Repository.create(user, new User.Data("Peter", List.of(), "testing", null));
+            h2Repository.create(user2, new User.Data("Peter", List.of(), "testing", null));
+
+            h2Repository.assignStudyLine(user, studyLine.getLineName());
+            h2Repository.create(project, user, h2Repository.getUserIdByEmail(user.getEmail()));
+
+            h2Repository.assignAdvisor(user2,project);
+
+            //member gets kicked
+            h2Repository.kickMemberFromProject(project.getProjectID(),user2);
+            List<Project> projects = h2Repository.getAllAdvisorProjects(user2);
+
+            //There should be nothing to get here since member is kicked:
+            assertThrows(NoSuchElementException.class,
+                    () -> projects.getFirst());
+        }
     }
 
     @Test

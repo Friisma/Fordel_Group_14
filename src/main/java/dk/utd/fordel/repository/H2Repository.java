@@ -219,9 +219,6 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
-    // TODO temporary fix for getting id from user table. this should maybe be
-    // changed when the domain is more complete
-
     /**
      * Helper method for being sure that the user id is coherent with the DB.
      * 
@@ -436,7 +433,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     }
 
     /**
-     * Gets all studylines as objects
+     * Gets all studylines as objects - maybe delete
      * 
      * @return a list of studyline objects
      */
