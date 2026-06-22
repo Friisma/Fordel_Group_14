@@ -34,6 +34,8 @@ public class ProjectManager {
 
         void update(Project project) throws ProjectDoesNotExist;
 
+        void advisorCreation(Project project, String studyLineName, int userId);
+
         void delete(Project project) throws ProjectDoesNotExist;
         List<Project> getAllProjects() throws Project.InvalidProject;
         void assignAdvisor(User advisor,Project project) throws AdvisorAlreadyAdvises;
@@ -97,6 +99,10 @@ public class ProjectManager {
 
     public void update(Project project) throws ProjectDoesNotExist{
         projectRepository.update(project);
+    }
+
+    public void createAdvisorProject(Project project,String studyLineName, int userId){
+        projectRepository.advisorCreation(project,studyLineName,userId);
     }
 
 }
