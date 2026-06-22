@@ -8,7 +8,12 @@
 <main class="container">
     <section id="manage-study-line-students">
         <h1>List of students on study line</h1>
-        <button>Add Students</button>
+
+        <form th:action="@{/studyline/{id}/manage/add-student(id=${studyLineId})}" method="post">
+            <input type="email" name="emailToAdd" placeholder="Student email" required>
+            <button type="submit">Add Student</button>
+        </form>
+
         <table>
             <thead>
             <tr>
