@@ -10,16 +10,33 @@
         <h1>List of students on study line</h1>
 
         <form th:action="@{/studyline/{id}/manage/add-student(id=${studyLineId})}" method="post">
-            <input type="email" name="emailToAdd" placeholder="Student email" required>
-            <button type="submit">Add Student</button>
+            <div style="display:flex;gap:1rem;align-items:flex-end;">
+                <div style="flex-grow:1;">
+                    <label for="student-select">Select student</label>
+                    <select id="student-select" name="emailToAdd" required>
+                        <option value="" disabled selected>Select student</option>
+                        <option th:each="student : ${availableStudents}"
+                                th:value="${student.email()}"
+                                th:text="|${student.name()} (${student.email()})|">
+                            Student
+                        </option>
+                    </select>
+                </div>
+
+                <button type="submit" class="primary" style="width:auto;">Add Student</button>
+            </div>
         </form>
 
         <table>
+            <colgroup>
+                <col style="width: 30%;">
+                <col style="width: 40%;">
+                <col style="width: 30%;">
+            </colgroup>
             <thead>
             <tr>
                 <th scope="col">Name</th>
                 <th scope="col">Email</th>
-                <th scope="col">Role</th>
                 <th scope="col">Actions</th>
             </tr>
             </thead>
@@ -28,7 +45,6 @@
             <tr th:each="user : ${studyLineStudents}">
                 <td th:text="${user.name()}">Name</td>
                 <td th:text="${user.email()}">Email</td>
-                <td th:text="${#strings.listJoin(user.roles(), ', ')}">Role</td>
                 <td> <!--Action dropdown button-->
                     <nav>
                         <ul>
@@ -63,14 +79,63 @@
         </table>
     </section>
 
-    <section id="manage-study-line-leaders">
-        <h1>List of leaders on study line</h1>
+    <section id="manage-study-line-advisors">
+        <h1>List of advisors on study line</h1>
         <table>
+            <colgroup>
+                <col style="width: 30%;">
+                <col style="width: 40%;">
+                <col style="width: 30%;">
+            </colgroup>
             <thead>
             <tr>
                 <th scope="col">Name</th>
                 <th scope="col">Email</th>
-                <th scope="col">Role</th>
+                <th scope="col">Actions</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="user : ${studyLineAdvisors}">
+                <td th:text="${user.name()}">Name</td>
+                <td th:text="${user.email()}">Email</td>
+                <td> <!--Action dropdown button-->
+                    <nav>
+                        <ul>
+                            <li>
+                                <details class="dropdown">
+                                    <summary role="button" class="secondary">Action</summary>
+                                    <ul>
+                                        <!--Contact user -->
+                                        <li>
+                                            <!--SKAL ÆNDRES SÅ DEN TAGER USERS MAIL -->
+                                            <button onclick="window.location.href='mailto:test@utd.dk';">
+                                                Contact
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </details>
+                            </li>
+                        </ul>
+                    </nav>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="manage-study-line-leaders">
+        <h1>List of leaders on study line</h1>
+        <table>
+            <colgroup>
+                <col style="width: 30%;">
+                <col style="width: 40%;">
+                <col style="width: 30%;">
+            </colgroup>
+            <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
                 <th scope="col">Actions</th>
             </tr>
             </thead>
@@ -79,7 +144,6 @@
             <tr th:each="user : ${studyLineLeaders}">
                 <td th:text="${user.name()}">Name</td>
                 <td th:text="${user.email()}">Email</td>
-                <td th:text="${#strings.listJoin(user.roles(), ', ')}">Role</td>
                 <td> <!--Action dropdown button-->
                     <nav>
                         <ul>
