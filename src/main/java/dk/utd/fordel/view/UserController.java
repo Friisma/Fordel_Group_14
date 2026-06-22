@@ -20,6 +20,7 @@ import dk.utd.fordel.utils.UnitOfWork.UnitOfWorkException;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 
@@ -127,6 +128,7 @@ public class UserController {
     @PostMapping("/adminpage/grant-role")
     public String grantRole(HttpSession session,
             @RequestParam("email") String email,
+            @RequestParam("studyLine") String studyLine,
             @RequestParam("role") String roleString) {
         if (session.getAttribute("auth") == null) {
             return "redirect:/login";
@@ -143,7 +145,42 @@ public class UserController {
             User user = User.of(email);
             Roles roleToGrant = Roles.valueOf(roleString);
 
-            userManager.grantRole(user, roleToGrant);
+            userManager.assignStudyLineRole(user, studyLine, roleToGrant);
+
+            uow.commit();
+
+        } catch (Email.InvalidEmail e) {
+            throw Log.giveUp(logger, e, "Invalid user");
+        } catch (UnitOfWorkException e) {
+            throw Log.giveUp(logger, e, "Could not grant user role");
+        }
+
+        return "redirect:/adminpage";
+    }
+
+    @PostMapping("/adminpage/grant-admin")
+    public String grantRole(HttpSession session,
+                            @RequestParam("email") String email,
+                            RedirectAttributes redirectAttributes) {
+        if (session.getAttribute("auth") == null) {
+            return "redirect:/login";
+        }
+
+        Object userData = session.getAttribute("userData");
+        RightsContext rights = rightsService.from(userData instanceof User.Data data ? data : null);
+        if (!rightsService.canGrantRoles(rights)) {
+            return "redirect:/forbidden";
+        }
+
+        try (var uow = unitOfWork.begin()) {
+
+            User user = User.of(email);
+            if (userManager.getUserRoles(user).contains(Roles.ADMINISTRATOR)) {
+                redirectAttributes.addFlashAttribute("error", "User is already administrator");
+                uow.rollback();
+                return "redirect:/adminpage";
+            }
+            userManager.grantRole(user, Roles.ADMINISTRATOR);
 
             uow.commit();
 

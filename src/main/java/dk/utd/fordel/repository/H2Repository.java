@@ -1218,6 +1218,28 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     }
 
     @Override
+    public void assignStudyLineRole(User user, String studyLineName, Roles roleToGrant) {
+        var stmt = """
+            MERGE INTO study_line_memberships (user_id, study_line_id, role_id)
+            KEY (user_id, study_line_id, role_id)
+            SELECT u.id, sl.id, r.id
+            FROM users u, study_lines sl, roles r
+            WHERE u.email = ?
+            AND sl.name = ?
+            AND r.name = ?
+            """;
+
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setString(1, user.getEmail().asString());
+            statement.setString(2, studyLineName);
+            statement.setString(3, roleToGrant.name().toLowerCase().replace("_", " "));
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to assign study line to user");
+        }
+    }
+
+    @Override
     public void addStudent(User user, int studyLineId) {
         var stmt = """
                 MERGE INTO study_line_memberships (user_id, study_line_id, role_id)

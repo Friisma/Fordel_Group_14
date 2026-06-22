@@ -21,7 +21,6 @@ public class RightsService {
 
         permissions.add(Permission.VIEW_HOME);
         permissions.add(Permission.EDIT_OWN_PROFILE);
-        permissions.add(Permission.MANAGE_STUDY_LINE);
         permissions.add(Permission.CAN_EDIT_PROJECT);
         permissions.add(Permission.VIEW_STUDY_LINE);
 
