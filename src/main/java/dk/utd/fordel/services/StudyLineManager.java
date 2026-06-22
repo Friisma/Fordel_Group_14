@@ -17,7 +17,7 @@ public class StudyLineManager {
         String getStudyLineNameById(int studyLineId);
         boolean canViewStudyLine(User user, int studyLineId);
         boolean canManageStudyLine(User user, int studyLineId);
-        
+        int getStudyLineIdByStudylineName(String studyLine);
 
         void addStudent(User user, int studyLineId);
         void addStudyLeader(User user, int studyLineId);
@@ -40,6 +40,10 @@ public class StudyLineManager {
 
     public String getStudyLineNameById(int studyLineId) {
         return studyLineRepository.getStudyLineNameById(studyLineId);
+    }
+
+    public int getStudyLineIdByStudylineName(String studyLine){
+        return studyLineRepository.getStudyLineIdByStudylineName(studyLine);
     }
 
     public boolean canViewStudyLine(User user, int studyLineId) {

@@ -1,13 +1,12 @@
 package dk.utd.fordel.repository;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.util.AssertionErrors.assertNull;
 
 import dk.utd.fordel.domain.*;
+import dk.utd.fordel.services.UserManager;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 
@@ -69,7 +68,7 @@ public class H2RepositoryTest {
     }
 
     @Test
-    void creatingAProjectWithAStudyLine()
+    void creating_a_project_with_a_study_line()
             throws UserDoesNotExist, EmailAlreadyInUse, UnitOfWorkException, StudyLineAlreadyExists,
             Project.InvalidProject {
         StudyLine studyLine = new StudyLine("testing");
@@ -87,7 +86,7 @@ public class H2RepositoryTest {
     }
 
     @Test
-    void adviserCantBeAssignedAsAdviserAgain()
+    void adviser_cant_be_assigned_as_adviser_again()
             throws EmailAlreadyInUse, UnitOfWorkException, Project.InvalidProject, StudyLineAlreadyExists {
         Email email = new Email("test", "test");
         User user = new User(email);
@@ -107,7 +106,7 @@ public class H2RepositoryTest {
     }
 
     @Test
-    void invitingTwiceShouldFail()
+    void inviting_twice_should_fail()
             throws EmailAlreadyInUse, UnitOfWorkException, Project.InvalidProject, StudyLineAlreadyExists {
         Email email = new Email("test", "test");
         User user = new User(email);
@@ -133,7 +132,7 @@ public class H2RepositoryTest {
     }
 
     @Test
-    void cannotAssignAdvisorMoreThanItsMaxWorkLoad()
+    void cannot_assign_advisor_more_than_its_max_work_load()
             throws EmailAlreadyInUse, UnitOfWorkException, Project.InvalidProject, StudyLineAlreadyExists {
         Email email = new Email("test", "test");
         User user = new User(email);
@@ -261,17 +260,20 @@ public class H2RepositoryTest {
             h2Repository.assignStudyLine(user, studyLine1.getLineName());
             h2Repository.create(project1,user,studyLine1.getLineName(), h2Repository.getUserIdByEmail(user.getEmail()));
 
-            List<Project> projects = h2Repository.getAllProjectsRelatedToStudyLine(3);
+            List<Project> projects = h2Repository.getAllProjectsRelatedToStudyLine(4);
             Project projectTest = projects.getFirst();
 
-            assertEquals("test1", projectTest.getProjectName());
+            assertEquals("test", projectTest.getProjectName());
 
-            List<Project> projects1 = h2Repository.getAllProjectsRelatedToStudyLineAndUser(2,user);
+            int studyLineID = h2Repository.getStudyLineIdByStudylineName(studyLine1.getLineName());
+
+            List<Project> projects1 = h2Repository.getAllProjectsRelatedToStudyLineAndUser(studyLineID,user);
             Project projectTest1 = projects1.getFirst();
 
-            assertEquals("test", projectTest1.getProjectName());
+            assertEquals("test1", projectTest1.getProjectName());
         }
     }
+
 
     @Test
     void get_appropriate_creator_email() throws Exception{
@@ -324,6 +326,179 @@ public class H2RepositoryTest {
                     () -> projects.getFirst());
         }
     }
+
+    @Test
+    void gets_appropriate_studyLine_name_by_id() throws Exception{
+        StudyLine studyline = new StudyLine("testing");
+
+        try (var ignored = h2Repository.begin()){
+            h2Repository.create(studyline);
+
+            String trueStudyLineName = h2Repository.getStudyLineNameById(2);
+            assertEquals(studyline.getLineName(), trueStudyLineName);
+
+        }
+
+    }
+
+    @Test
+    void appropriate_user_can_manage_study_line_and_view() throws Exception{
+        StudyLine studyline = new StudyLine("testing");
+        Email email = new Email("test", "test");
+        User user = new User(email);
+
+        try (var ignored = h2Repository.begin()){
+            h2Repository.create(studyline);
+            h2Repository.create(user, new User.Data("Peter", List.of(), "testing", null));
+            h2Repository.assignStudyLineRole(user,studyline.getLineName(),Roles.STUDY_LEADER);
+            h2Repository.addStudyLeader(user,1);
+
+            assertTrue(h2Repository.canManageStudyLine(user,1));
+            assertTrue(h2Repository.canViewStudyLine(user,1));
+        }
+    }
+
+    @Test
+    void get_all_appropriateUsers() throws Exception {
+        StudyLine studyline = new StudyLine("testing");
+        Email email = new Email("test", "test");
+        User user = new User(email);
+
+        Email email2 = new Email("test2", "test2");
+        User user2 = new User(email2);
+
+        Email email3 = new Email("test3", "test3");
+        User user3 = new User(email3);
+
+
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(studyline);
+            h2Repository.create(user, new User.Data("Peter", List.of(), "testing", null));
+            h2Repository.create(user2, new User.Data("Peter", List.of(), "testing", null));
+            h2Repository.create(user3, new User.Data("Peter", List.of(), "testing", null));
+
+            h2Repository.assignStudyLine(user, studyline.getLineName());
+            h2Repository.assignStudyLine(user2, studyline.getLineName());
+            h2Repository.assignStudyLine(user3, studyline.getLineName());
+
+            List<UserManager.UserRepository.UserInfo> userinfos = h2Repository.getAllUsersRelatedToStudyLine(3);
+
+            assertEquals(user3.getEmail().asString(),userinfos.get(2).email());
+        }
+
+    }
+
+    @Test
+    void get_no_study_line_should_fail() throws Exception{
+        try (var ignored = h2Repository.begin()) {
+            assertThrows(NoSuchElementException.class,
+                    () -> h2Repository.getStudyLineIdByStudylineName("noLine"));
+        }
+    }
+
+    @Test
+    void get_all_appropriate_students_of_a_line() throws Exception {
+        StudyLine studyline = new StudyLine("testing");
+        Email email = new Email("test", "test");
+        User user = new User(email);
+
+        Email email2 = new Email("test2", "test2");
+        User user2 = new User(email2);
+
+        Email email3 = new Email("test3", "test3");
+        User user3 = new User(email3);
+
+
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(studyline);
+            h2Repository.create(user, new User.Data("Peter", List.of(), "testing", null));
+            h2Repository.create(user2, new User.Data("Peter", List.of(), "testing", null));
+            h2Repository.create(user3, new User.Data("Peter", List.of(), "testing", null));
+
+            h2Repository.assignStudyLineRole(user, studyline.getLineName(), Roles.STUDY_LEADER);
+            h2Repository.assignStudyLineRole(user2, studyline.getLineName(), Roles.STUDENT);
+
+            int studylineID = h2Repository.getStudyLineIdByStudylineName(studyline.getLineName());
+
+            List<UserManager.UserRepository.UserInfo> userInfosStudent = h2Repository.getAllStudentsRelatedToStudyLine(studylineID);
+            List<UserManager.UserRepository.UserInfo> userInfosLeaders = h2Repository.getAllLeadersRelatedToStudyLine(studylineID);
+
+            assertEquals(user2.getEmail().asString(),userInfosStudent.getFirst().email());
+            assertEquals(user.getEmail().asString(),userInfosLeaders.getFirst().email());
+        }
+    }
+
+    @Test
+    void grant_remove_role_tests() throws Exception{
+        StudyLine studyline = new StudyLine("testing");
+        Email email = new Email("test", "test");
+        User user = new User(email);
+
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(studyline);
+            h2Repository.create(user, new User.Data("Peter", List.of(), "testing", null));
+
+            h2Repository.grantRole(user, Roles.STUDENT);
+            h2Repository.grantRole(user, Roles.ADMINISTRATOR);
+            h2Repository.removeRole(user, Roles.ADMINISTRATOR);
+
+            List<Roles> roles = h2Repository.getUserRoles(user);
+
+            assertFalse(roles.contains(Roles.ADMINISTRATOR));
+            assertTrue(roles.contains(Roles.STUDENT));
+            //Adding StudyLine Specific roles.
+
+            h2Repository.assignStudyLineRole(user, studyline.getLineName(), Roles.ADVISOR);
+            int studyLineId = h2Repository.getStudyLineIdByStudylineName(studyline.getLineName());
+
+            Roles userRole = h2Repository.determineStudyLineSpecificRole(user, studyline.getLineName());
+
+            assertEquals(Roles.ADVISOR,userRole);
+        }
+    }
+
+    @Test
+    void getAllUsers_doesNotThrow() throws Exception {
+        try (var ignored = h2Repository.begin()) {
+            assertDoesNotThrow(() -> h2Repository.getAllUsers());
+        }
+    }
+
+    @Test
+    void remove_user_from_study_line() throws Exception{
+        StudyLine studyline = new StudyLine("testing");
+        Email email = new Email("test", "test");
+        User user = new User(email);
+
+        Email email2 = new Email("test2", "test2");
+        User user2 = new User(email2);
+
+        Email email3 = new Email("test3", "test3");
+        User user3 = new User(email3);
+
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(studyline);
+            h2Repository.create(user, new User.Data("Peter", List.of(), "testing", null));
+            h2Repository.create(user2, new User.Data("Peter", List.of(), "testing", null));
+            h2Repository.create(user3, new User.Data("Peter", List.of(), "testing", null));
+
+            h2Repository.assignStudyLine(user, studyline.getLineName());
+            h2Repository.assignStudyLine(user2, studyline.getLineName());
+
+            int lineId = h2Repository.getStudyLineIdByStudylineName(studyline.getLineName());
+
+            h2Repository.removeUser(user, lineId);
+
+            List<UserManager.UserRepository.UserInfo> users = h2Repository.getAllUsersRelatedToStudyLine(lineId);
+
+            int uid = h2Repository.getUserIdByEmail(email);
+
+            UserManager.UserRepository.UserInfo userInfo = new UserManager.UserRepository.UserInfo(String.valueOf(uid),email.asString(), "Peter", null, null);
+
+            assertFalse(users.contains(userInfo));
+        }
+    }
+
 
     @Test
     void setting_the_password_for_a_non_existent_user_should_fail() throws InvalidEmail, UnitOfWorkException {
@@ -406,5 +581,6 @@ public class H2RepositoryTest {
             uow.commit();
         }
     }
+
 
 }

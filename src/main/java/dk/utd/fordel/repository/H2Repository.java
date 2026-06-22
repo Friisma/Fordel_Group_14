@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import javax.sql.DataSource;
 
 import dk.utd.fordel.domain.*;
@@ -745,6 +746,22 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
+    public int getStudyLineIdByStudylineName(String studyLine){
+        var stmt = "SELECT id FROM study_lines WHERE name = ?";
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setString(1,studyLine);
+            try (var resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1);
+                }
+                throw new NoSuchElementException("No such studyline");
+            }
+        } catch (SQLException e){
+            throw new NoSuchElementException("No such studyline");
+        }
+
+    }
+
     @Override
     public List<UserInfo> getAllUsersRelatedToStudyLine(int studyLineId) {
         List<UserInfo> studyLineUsers = new ArrayList<>();
@@ -939,7 +956,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
                 }
             }
         } catch (SQLException e) {
-            throw Log.giveUp(logger, e, "Failed to read role: " + user);
+            throw new NoSuchElementException("No Roles");
         }
         return null;
     }
