@@ -333,11 +333,14 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         createProjectWithStudyLine(project, userId, studyLineId);
     }
 
+    @Override
     public void advisorCreation(Project project, String studyLineName, int userId){
         int studyLineId = getStudyLineIdByName(studyLineName);
         createProjectWithStudyLine(project ,userId, studyLineId);
+        kickMemberFromProject(project.getProjectID(),getUserByUserId(userId));
+        assignAdvisor(getUserByUserId(userId),project);
 
-        project.setStatus(Project.Status.OPEN_FOR_STUDENTS);
+        project.setStatus(Project.Status.DRAFT);
     }
 
     /**

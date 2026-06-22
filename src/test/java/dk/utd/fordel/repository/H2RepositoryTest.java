@@ -62,7 +62,7 @@ public class H2RepositoryTest {
 
             h2Repository.create(project,user,"line", userId);
             h2Repository.assignStudyLine(user, studyLine.getLineName());
-            h2Repository.create(project,user,userId);
+
             assertThrows(ProjectTitleAlreadyInUse.class,
                     () -> h2Repository.create(project,user,"line", userId));
         }
