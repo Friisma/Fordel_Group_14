@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import dk.utd.fordel.domain.*;
-import org.bouncycastle.asn1.x509.UserNotice;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.jdbc.DataSourceBuilder;
@@ -86,34 +85,35 @@ public class H2RepositoryTest {
     }
 
     @Test
-    void adviserCantBeAssignedAsAdviserAgain() throws EmailAlreadyInUse, UnitOfWorkException, Project.InvalidProject, StudyLineAlreadyExists {
+    void adviserCantBeAssignedAsAdviserAgain()
+            throws EmailAlreadyInUse, UnitOfWorkException, Project.InvalidProject, StudyLineAlreadyExists {
         Email email = new Email("test", "test");
         User user = new User(email);
-        Project project = new Project("test","test");
+        Project project = new Project("test", "test");
         StudyLine studyLine = new StudyLine("testing");
-        try (var ignored = h2Repository.begin()){
+        try (var ignored = h2Repository.begin()) {
             h2Repository.create(studyLine);
             h2Repository.create(user, new User.Data("Peter", List.of(), "testing", null));
-            h2Repository.assignStudyLine(user,studyLine.getLineName());
-            h2Repository.create(project,user, h2Repository.getUserIdByEmail(user.getEmail()));
+            h2Repository.assignStudyLine(user, studyLine.getLineName());
+            h2Repository.create(project, user, h2Repository.getUserIdByEmail(user.getEmail()));
 
-
-            h2Repository.assignAdvisor(user,project);
+            h2Repository.assignAdvisor(user, project);
             assertThrows(AdvisorAlreadyAdvises.class,
-                    () -> h2Repository.assignAdvisor(user,project));
+                    () -> h2Repository.assignAdvisor(user, project));
 
         }
     }
 
     @Test
-    void invitingTwiceShouldFail() throws EmailAlreadyInUse, UnitOfWorkException, Project.InvalidProject, StudyLineAlreadyExists{
+    void invitingTwiceShouldFail()
+            throws EmailAlreadyInUse, UnitOfWorkException, Project.InvalidProject, StudyLineAlreadyExists {
         Email email = new Email("test", "test");
         User user = new User(email);
 
         Email emailAdvisor = new Email("test2", "test2");
         User advisor = new User(emailAdvisor);
 
-        Project project = new Project("test","test");
+        Project project = new Project("test", "test");
         StudyLine studyLine = new StudyLine("testing");
         try (var ignored = h2Repository.begin()) {
             h2Repository.create(studyLine);
@@ -123,14 +123,16 @@ public class H2RepositoryTest {
             h2Repository.assignStudyLine(user, studyLine.getLineName());
             h2Repository.create(project, user, h2Repository.getUserIdByEmail(user.getEmail()));
 
-            //creates project invitation
-            h2Repository.create(advisor,project);
+            // creates project invitation
+            h2Repository.create(advisor, project);
             assertThrows(AdvisorAlreadyInvited.class,
-                    () -> h2Repository.create(advisor,project));
+                    () -> h2Repository.create(advisor, project));
         }
     }
 
-    @Test void cannotAssignAdvisorMoreThanItsMaxWorkLoad() throws EmailAlreadyInUse, UnitOfWorkException, Project.InvalidProject, StudyLineAlreadyExists {
+    @Test
+    void cannotAssignAdvisorMoreThanItsMaxWorkLoad()
+            throws EmailAlreadyInUse, UnitOfWorkException, Project.InvalidProject, StudyLineAlreadyExists {
         Email email = new Email("test", "test");
         User user = new User(email);
 
@@ -151,11 +153,10 @@ public class H2RepositoryTest {
 
             h2Repository.updateMaxWorkLoad(advisor, 1);
 
-            h2Repository.assignAdvisor(advisor,project);
+            h2Repository.assignAdvisor(advisor, project);
 
             assertThrows(AdvisorReachedMaxWorkLoad.class,
                     () -> h2Repository.assignAdvisor(advisor, project2));
-
 
         }
     }
@@ -196,10 +197,10 @@ public class H2RepositoryTest {
             h2Repository.create(project, user, h2Repository.getUserIdByEmail(user.getEmail()));
             h2Repository.startProject(project.getProjectID());
             List<Project> projects = h2Repository.getAllProjectsRelatedToUser(user);
-            //need to re-fetch from DB.
+            // need to re-fetch from DB.
             Project projectTest = projects.getFirst();
 
-            assertEquals(Project.Status.STARTED ,projectTest.getStatus());
+            assertEquals(Project.Status.STARTED, projectTest.getStatus());
         }
     }
 
@@ -220,10 +221,9 @@ public class H2RepositoryTest {
             h2Repository.update(project);
 
             List<Project> projects = h2Repository.getAllProjectsRelatedToUser(user);
-            //need to re-fetch from DB.
             Project projectTest = projects.getFirst();
 
-            assertEquals("other test", project.getProjectName());
+            assertEquals("other test", projectTest.getProjectName());
 
         }
     }
@@ -237,8 +237,6 @@ public class H2RepositoryTest {
         }
 
     }
-
-
 
     @Test
     void setting_the_password_for_a_non_existent_user_should_fail() throws InvalidEmail, UnitOfWorkException {

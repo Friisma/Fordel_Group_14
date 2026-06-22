@@ -249,13 +249,19 @@ public class HomepageController {
     }
 
     private static String displayName(Roles role) {
-        return switch (role) {
-            case STUDENT -> "Student";
-            case ADVISOR -> "Advisor";
-            case TEACHER -> "Teacher";
-            case STUDY_LEADER -> "Study Leader";
-            case ADMINISTRATOR -> "Administrator";
-        };
+        if (role == Roles.STUDENT) {
+            return "Student";
+        }
+        if (role == Roles.ADVISOR) {
+            return "Advisor";
+        }
+        if (role == Roles.TEACHER) {
+            return "Teacher";
+        }
+        if (role == Roles.STUDY_LEADER) {
+            return "Study Leader";
+        }
+        return "Administrator";
     }
 
     public record ProjectCard(String id, String title, String description, String studyLine, String status) {
