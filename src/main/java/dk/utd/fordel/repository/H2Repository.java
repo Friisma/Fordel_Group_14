@@ -290,7 +290,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
      * @param project being updated.
      */
     @Override
-    public void update(Project project){
+    public void update(Project project) throws ProjectDoesNotExist{
         var stmt = """
                 UPDATE projects
                 SET title = ?
@@ -301,7 +301,10 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
             statement.setString(1,project.getProjectName());
             statement.setString(2,project.getDescription());
             statement.setInt(3,project.getProjectID());
-            statement.executeUpdate();
+            int rowsAffected = statement.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new ProjectDoesNotExist("No project found with id ",project);
+            }
         } catch (SQLException e){
             throw Log.giveUp(logger, e, "Failed to update project");
         }
@@ -651,15 +654,6 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
-    @Override
-    public Project read(Project project) {
-        try {
-            return new Project( "t","");
-        } catch (Project.InvalidProject e) {
-
-        }
-        return null;
-    }
 
     @Override
     public String getStudyLineNameById(int studyLineId) {
@@ -1001,11 +995,14 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
             statement.setInt(1, userId);
             statement.setInt(2, projectId);
             statement.executeUpdate();
+
+            if (getCountOfAdvisorProjects(advisor) > getMaxWorkLoad(advisor)){
+                throw new AdvisorReachedMaxWorkLoad("advisor already reached max workload");
+            }
         } catch (SQLException e){
             if (e.getErrorCode() == 23505){
                 throw new AdvisorAlreadyAdvises("Advisor already assigned");
             }
-            throw Log.giveUp(logger, e, "Failed to assign advisor");
         }
     }
 
@@ -1344,9 +1341,9 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
 
         var stmt = """
                 SELECT COUNT(*)
-                FROM project_advisors pa JOIN projects p 
+                FROM project_advisors pa JOIN projects p
                     ON pa.project_id = p.id 
-                WHERE user_id = ? AND p.STATUS = 'STARTED'
+                WHERE user_id = ?
                 """;
         try (var statement = getConnection().prepareStatement(stmt)) {
             int userId = getUserIdByEmail(advisor.getEmail());

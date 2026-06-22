@@ -13,7 +13,6 @@ public class ProjectManager {
 
         void create(Project project, User user, String studyLineName, int userId) throws ProjectTitleAlreadyInUse;
 
-        Project read(Project project) throws ProjectDoesNotExist;
 
         List<Project> getAllProjectsRelatedToUser(User user) throws Project.InvalidProject;
 
