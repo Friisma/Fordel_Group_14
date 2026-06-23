@@ -13,7 +13,6 @@ public class StudyLineManager {
     public static interface StudyLineRepository {
         void create(StudyLine studyLine) throws StudyLineAlreadyExists;
         List<String> getAllStudyLines();
-        List<StudyLine> getAllStudyLineObjects();
         String getStudyLineNameById(int studyLineId);
         boolean canViewStudyLine(User user, int studyLineId);
         boolean canManageStudyLine(User user, int studyLineId);

@@ -287,7 +287,6 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
-    // TODO Write more proper repository methods to update the database.
 
     /**
      * Updates project title and description
@@ -433,26 +432,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
-    /**
-     * Gets all studylines as objects - maybe delete
-     * 
-     * @return a list of studyline objects
-     */
-    @Override
-    public List<StudyLine> getAllStudyLineObjects() {
-        var stmt = "SELECT name FROM study_lines";
-        List<StudyLine> studyLines = new ArrayList<>();
-        try (var statement = getConnection().prepareStatement(stmt);
-                var resultSet = statement.executeQuery()) {
-            while (resultSet.next()) {
-                studyLines.add(new StudyLine(
-                        resultSet.getString("name")));
-            }
-        } catch (SQLException e) {
-            throw Log.giveUp(logger, e, "Failed to fetch study lines");
-        }
-        return studyLines;
-    }
+
 
     @Override
     public List<Project> getAllProjectsRelatedToUser(User user) throws Project.InvalidProject {

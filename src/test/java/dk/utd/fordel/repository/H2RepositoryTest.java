@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.util.AssertionErrors.assertNull;
 
 import dk.utd.fordel.domain.*;
+import dk.utd.fordel.services.InvitationManager;
 import dk.utd.fordel.services.UserManager;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -260,7 +261,8 @@ public class H2RepositoryTest {
             h2Repository.assignStudyLine(user, studyLine1.getLineName());
             h2Repository.create(project1,user,studyLine1.getLineName(), h2Repository.getUserIdByEmail(user.getEmail()));
 
-            List<Project> projects = h2Repository.getAllProjectsRelatedToStudyLine(4);
+            int studyLineId = h2Repository.getStudyLineIdByStudylineName(studyLine.getLineName());
+            List<Project> projects = h2Repository.getAllProjectsRelatedToStudyLine(studyLineId);
             Project projectTest = projects.getFirst();
 
             assertEquals("test", projectTest.getProjectName());
@@ -271,6 +273,270 @@ public class H2RepositoryTest {
             Project projectTest1 = projects1.getFirst();
 
             assertEquals("test1", projectTest1.getProjectName());
+        }
+    }
+
+    @Test
+    void get_only_advising_projects() throws Exception {
+        Email email = new Email("test", "test");
+        User user = new User(email);
+        Project project = new Project("testNy", "testNy");
+        Project project1 = new Project("test2","test2");
+        StudyLine studyLine = new StudyLine("testing");
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(studyLine);
+            h2Repository.create(user, new User.Data("Peter", List.of(), "testing", null));
+            h2Repository.assignStudyLine(user, studyLine.getLineName());
+            h2Repository.updateMaxWorkLoad(user, 10);
+            h2Repository.advisorCreation(project, studyLine.getLineName(), h2Repository.getUserIdByEmail(email));
+            System.out.println("advisor projects: " + h2Repository.getAllAdvisorProjects(user));
+            System.out.println("project id: " + project.getProjectID());
+            h2Repository.create(project1,user, h2Repository.getUserIdByEmail(email));
+
+            assertFalse(h2Repository.getAllAdvisorProjects(user).contains(project1));
+            assertEquals(project.getProjectID(), h2Repository.getAllAdvisorProjects(user).getFirst().getProjectID());
+
+        }
+    }
+    @Test
+    void get_all_invites_received_for_advisor() throws Exception {
+        Email emailStudent = new Email("test", "test");
+        User student = new User(emailStudent);
+
+        Email emailAdvisor = new Email("test2", "test2");
+        User advisor = new User(emailAdvisor);
+
+        Project project = new Project("test", "test");
+        StudyLine studyLine = new StudyLine("testing");
+
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(studyLine);
+            h2Repository.create(student, new User.Data("Peter", List.of(), "testing", null));
+            h2Repository.create(advisor, new User.Data("PeterAdvisor", List.of(), "testing", null));
+
+            h2Repository.assignStudyLine(student, studyLine.getLineName());
+            h2Repository.create(project, student, h2Repository.getUserIdByEmail(student.getEmail()));
+
+            h2Repository.create(advisor, project);
+
+            int advisorId = h2Repository.getUserIdByEmail(advisor.getEmail());
+            List<InvitationManager.AdvisorInviteView> invites = h2Repository.getInvitesReceivedForAdvisor(advisorId);
+
+            assertEquals(1, invites.size());
+            assertEquals(project.getProjectName(), invites.getFirst().projectTitle());
+        }
+    }
+
+    @Test
+    void get_invites_for_project() throws Exception {
+        Email emailStudent = new Email("test", "test");
+        User student = new User(emailStudent);
+
+        Email emailAdvisor = new Email("test2", "test2");
+        User advisor = new User(emailAdvisor);
+
+        Project project = new Project("test", "test");
+        StudyLine studyLine = new StudyLine("testing");
+
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(studyLine);
+            h2Repository.create(student, new User.Data("Peter", List.of(), "testing", null));
+            h2Repository.create(advisor, new User.Data("PeterAdvisor", List.of(), "testing", null));
+
+            h2Repository.assignStudyLine(student, studyLine.getLineName());
+            h2Repository.create(project, student, h2Repository.getUserIdByEmail(student.getEmail()));
+
+            h2Repository.create(advisor, project);
+
+            List<InvitationManager.InviteView> invites = h2Repository.getInvitesForProject(project.getProjectID());
+
+            assertEquals(1, invites.size());
+            assertEquals(advisor.getEmail().asString(), invites.getFirst().email());
+        }
+    }
+
+    @Test
+    void accepting_invitation_adds_advisor_to_project() throws Exception {
+        Email emailStudent = new Email("test", "test");
+        User student = new User(emailStudent);
+
+        Email emailAdvisor = new Email("test2", "test2");
+        User advisor = new User(emailAdvisor);
+
+        Project project = new Project("test", "test");
+        StudyLine studyLine = new StudyLine("testing");
+
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(studyLine);
+            h2Repository.create(student, new User.Data("Peter", List.of(), "testing", null));
+            h2Repository.create(advisor, new User.Data("PeterAdvisor", List.of(), "testing", null));
+
+            h2Repository.assignStudyLine(student, studyLine.getLineName());
+            h2Repository.create(project, student, h2Repository.getUserIdByEmail(student.getEmail()));
+
+            h2Repository.create(advisor, project);
+
+            int advisorId = h2Repository.getUserIdByEmail(advisor.getEmail());
+            AdvisorInvitation invitation = new AdvisorInvitation(advisorId, project.getProjectID());
+            invitation.accept();
+            h2Repository.update(invitation);
+
+            List<Project> advisorProjects = h2Repository.getAllAdvisorProjects(advisor);
+            assertEquals(project.getProjectID(), advisorProjects.getFirst().getProjectID());
+        }
+    }
+
+    @Test
+    void declining_invitation_removes_advisor_from_project() throws Exception {
+        Email emailStudent = new Email("test", "test");
+        User student = new User(emailStudent);
+
+        Email emailAdvisor = new Email("test2", "test2");
+        User advisor = new User(emailAdvisor);
+
+        Project project = new Project("test", "test");
+        StudyLine studyLine = new StudyLine("testing");
+
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(studyLine);
+            h2Repository.create(student, new User.Data("Peter", List.of(), "testing", null));
+            h2Repository.create(advisor, new User.Data("PeterAdvisor", List.of(), "testing", null));
+
+            h2Repository.assignStudyLine(student, studyLine.getLineName());
+            h2Repository.create(project, student, h2Repository.getUserIdByEmail(student.getEmail()));
+
+            h2Repository.create(advisor, project);
+
+            int advisorId = h2Repository.getUserIdByEmail(advisor.getEmail());
+            AdvisorInvitation invitation = new AdvisorInvitation(advisorId, project.getProjectID());
+            invitation.decline();
+            h2Repository.update(invitation);
+
+            List<Project> advisorProjects = h2Repository.getAllAdvisorProjects(advisor);
+            assertThrows(NoSuchElementException.class, advisorProjects::getFirst);
+        }
+    }
+
+    @Test
+    void getAllInvitesReceived_returnsInvitationsForAdvisor() throws Exception {
+        Email email = new Email("test", "test");
+        User user = new User(email);
+
+        Email advisorEmail = new Email("advisor", "advisor");
+        User advisor = new User(advisorEmail);
+
+        Project project = new Project("test", "test");
+        StudyLine studyLine = new StudyLine("testing");
+
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(studyLine);
+            h2Repository.create(user, new User.Data("Peter", List.of(), "testing", null));
+            h2Repository.create(advisor, new User.Data("Advisor", List.of(), "testing", null));
+
+            h2Repository.assignStudyLine(user, studyLine.getLineName());
+            h2Repository.create(project, user, h2Repository.getUserIdByEmail(user.getEmail()));
+
+            h2Repository.create(advisor, project); // creates invitation
+
+            List<AdvisorInvitation> invitations = h2Repository.getAllInvitesReceived(advisor);
+
+            assertEquals(1, invitations.size());
+            assertEquals(h2Repository.getUserIdByEmail(advisorEmail), invitations.getFirst().getAdvisorId());
+        }
+    }
+
+    @Test
+    void getAllStudyLines_returnsAllStudyLines() throws Exception {
+        StudyLine studyLine = new StudyLine("testing");
+        StudyLine studyLine1 = new StudyLine("advanced testing");
+
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(studyLine);
+            h2Repository.create(studyLine1);
+
+            List<String> studyLines = h2Repository.getAllStudyLines();
+
+            assertTrue(studyLines.contains(studyLine.getLineName()));
+            assertTrue(studyLines.contains(studyLine1.getLineName()));
+        }
+    }
+
+    @Test
+    void getPasswordChangedAt_throwsForNonExistentUser() throws Exception {
+        User user = User.of("testing@test.dk");
+        try (var ignored = h2Repository.begin()) {
+            assertThrows(UserDoesNotExist.class, () -> h2Repository.getPasswordChangedAt(user));
+        }
+    }
+
+    @Test
+    void setAndGetPasswordChangedAt_returnsCorrectDateTime() throws Exception {
+        User user = User.of("test@testing.dk");
+        LocalDateTime now = LocalDateTime.now();
+
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(user, new User.Data("Peter", List.of(), null, null));
+            h2Repository.setPasswordChangedAt(user, now);
+
+            LocalDateTime result = h2Repository.getPasswordChangedAt(user);
+            assertNotNull(result);
+            assertEquals(now.toLocalDate(), result.toLocalDate());
+        }
+    }
+
+    @Test
+    void set_password_should_fail_for_non_existing_user() throws Exception {
+        User user = User.of("testing@test.dk");
+        LocalDateTime now = LocalDateTime.now();
+        try (var ignored = h2Repository.begin()) {
+            assertThrows(UserDoesNotExist.class, () -> h2Repository.setPasswordChangedAt(user, now));
+        }
+    }
+
+    @Test
+    void update_user_actually_updates() throws Exception{
+        Email email = new Email("test", "test");
+        User user = new User(email);
+
+
+        StudyLine studyLine = new StudyLine("testing");
+
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(studyLine);
+            h2Repository.create(user, new User.Data("Peter", List.of(), "testing", null));
+            h2Repository.update(user, new User.Data("Peter bastian", List.of(), "testing", null));
+
+            h2Repository.assignStudyLine(user, studyLine.getLineName());
+
+            int studyLineId = h2Repository.getStudyLineIdByStudylineName(studyLine.getLineName());
+            List<UserManager.UserRepository.UserInfo> users = h2Repository.getAllUsersRelatedToStudyLine(studyLineId);
+
+            assertEquals("Peter bastian", users.getFirst().name());
+
+        }
+    }
+
+    @Test
+    void updateStudyStart_updatesCorrectly() throws Exception {
+        Email email = new Email("test", "test");
+        User user = new User(email);
+        LocalDate studyStart = LocalDate.of(2023, 9, 1);
+
+        try (var ignored = h2Repository.begin()) {
+            h2Repository.create(user, new User.Data("Peter", List.of(), null, null));
+            h2Repository.updateStudyStart(user, studyStart);
+
+            User.Data data = h2Repository.read(user);
+            assertEquals(studyStart, data.studyStart());
+        }
+    }
+
+    @Test
+    void updateStudyStart_throwsForNonExistentUser() throws Exception {
+        User user = User.of("nonexistent@test.dk");
+        try (var ignored = h2Repository.begin()) {
+            assertThrows(UserDoesNotExist.class,
+                    () -> h2Repository.updateStudyStart(user, LocalDate.now()));
         }
     }
 
@@ -381,7 +647,9 @@ public class H2RepositoryTest {
             h2Repository.assignStudyLine(user2, studyline.getLineName());
             h2Repository.assignStudyLine(user3, studyline.getLineName());
 
-            List<UserManager.UserRepository.UserInfo> userinfos = h2Repository.getAllUsersRelatedToStudyLine(3);
+            int studyLineID = h2Repository.getStudyLineIdByStudylineName(studyline.getLineName());
+
+            List<UserManager.UserRepository.UserInfo> userinfos = h2Repository.getAllUsersRelatedToStudyLine(studyLineID);
 
             assertEquals(user3.getEmail().asString(),userinfos.get(2).email());
         }
