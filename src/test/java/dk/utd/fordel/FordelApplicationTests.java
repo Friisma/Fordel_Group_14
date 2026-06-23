@@ -544,4 +544,340 @@ class FordelApplicationTests {
 	void admin_can_grant_and_remove_roles_from_users() throws Exception {
 
 	}
+
+	@Test
+	void advisor_can_create_project_and_view_projects() throws Exception {
+		MvcResult loginUserRes = mvc.perform(post("/login")
+						.param("email", "advisor@test.dk")
+						.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		MockHttpSession userSession = (MockHttpSession) loginUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(post("/create-advisor-project")
+						.session(userSession)
+						.param("project_name", "")
+						.param("project_description", "This is a test project")
+						.param("study_line", "Test Study Line"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("create-project"))
+				.andExpect(model().attributeExists("project_name"));
+
+		mvc.perform(post("/create-advisor-project")
+						.session(userSession)
+						.param("project_name", "Test project")
+						.param("project_description", "")
+						.param("study_line", "Test Study Line"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("create-project"))
+				.andExpect(model().attributeExists("project_description"));
+
+		mvc.perform(post("/create-advisor-project")
+						.session(userSession)
+						.param("project_name", "Test project")
+						.param("project_description", "This is a test project")
+						.param("study_line", "Test Study Line"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"));
+
+		mvc.perform(get("/projects")
+						.session(userSession))
+				.andExpect(status().isOk())
+				.andExpect(content().string(containsString("Test project")));
+	}
+
+	@Test
+	void create_project_without_any_title_or_description() throws Exception {
+		MvcResult loginUserRes = mvc.perform(post("/login")
+						.param("email", "advisor@test.dk")
+						.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		MockHttpSession userSession = (MockHttpSession) loginUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(post("/create-project")
+						.session(userSession)
+						.param("project_name", "")
+						.param("project_description", "This is a test project")
+						.param("study_line", "Test Study Line"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("create-project"))
+				.andExpect(model().attributeExists("project_name"));
+
+		mvc.perform(post("/create-project")
+						.session(userSession)
+						.param("project_name", "Test project")
+						.param("project_description", "")
+						.param("study_line", "Test Study Line"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("create-project"))
+				.andExpect(model().attributeExists("project_description"));
+	}
+
+	@Test
+	void view_study_lines_and_view_study_line_page_with_projects() throws Exception {
+		MvcResult loginUserRes = mvc.perform(post("/login")
+						.param("email", "student@test.dk")
+						.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		MockHttpSession userSession = (MockHttpSession) loginUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(get("/studylines")
+						.session(userSession))
+				.andExpect(status().isOk())
+				.andExpect(content().string(containsString("Test Study Line")));
+
+		mvc.perform(post("/create-project")
+						.session(userSession)
+						.param("project_name", "Test project")
+						.param("project_description", "This is a test project")
+						.param("study_line", "Test Study Line"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"));
+
+		mvc.perform(get("/studyline/1")
+						.session(userSession))
+				.andExpect(status().isOk())
+				.andExpect(content().string(containsString("Test Study Line")))
+				.andExpect(content().string(containsString("Test project")));
+
+		mvc.perform(get("/studyline/1/members")
+						.session(userSession))
+				.andExpect(status().isOk())
+				.andExpect(view().name("studyline-members"))
+				.andExpect(model().attributeExists("studyLineMembers"));
+	}
+
+
+	@Test
+	void only_study_leader_can_access_manage_study_line() throws Exception {
+		MvcResult loginUserRes = mvc.perform(post("/login")
+						.param("email", "studyleader@test.dk")
+						.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		MockHttpSession userSession = (MockHttpSession) loginUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(get("/studyline/1/manage")
+						.session(userSession))
+				.andExpect(status().isOk())
+				.andExpect(view().name("manage-study-line"));
+
+		loginUserRes = mvc.perform(post("/login")
+						.param("email", "student@test.dk")
+						.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		userSession = (MockHttpSession) loginUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(get("/studyline/1/manage")
+						.session(userSession))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/forbidden"));
+	}
+
+	@Test
+	void study_leader_can_add_and_remove_users_from_study_line() throws Exception {
+		MvcResult loginUserRes = mvc.perform(post("/login")
+						.param("email", "studyleader@test.dk")
+						.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		MockHttpSession userSession = (MockHttpSession) loginUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(post("/studyline/1/manage/remove-user")
+						.session(userSession)
+						.param("emailToRemove", "student@test.dk"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/studyline/1/manage"));
+
+		loginUserRes = mvc.perform(post("/login")
+						.param("email", "student@test.dk")
+						.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		userSession = (MockHttpSession) loginUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(get("/studyline/1")
+						.session(userSession))
+				.andExpect(redirectedUrl("/forbidden"));
+
+		loginUserRes = mvc.perform(post("/login")
+						.param("email", "studyleader@test.dk")
+						.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		userSession = (MockHttpSession) loginUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(post("/studyline/1/manage/add-student")
+						.session(userSession)
+						.param("emailToAdd", "student@test.dk"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/studyline/1/manage"));
+
+		loginUserRes = mvc.perform(post("/login")
+						.param("email", "student@test.dk")
+						.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		userSession = (MockHttpSession) loginUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(get("/studyline/1")
+						.session(userSession))
+				.andExpect(status().isOk())
+				.andExpect(view().name("studyline"));
+	}
+
+	@Test
+	void only_admin_can_access_admin_page() throws Exception {
+		MvcResult loginUserRes = mvc.perform(post("/login")
+						.param("email", "admin@test.dk")
+						.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		MockHttpSession userSession = (MockHttpSession) loginUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(get("/adminpage")
+						.session(userSession))
+				.andExpect(status().isOk())
+				.andExpect(view().name("adminpage"));
+
+		loginUserRes = mvc.perform(post("/login")
+						.param("email", "student@test.dk")
+						.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		userSession = (MockHttpSession) loginUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(get("/adminpage")
+						.session(userSession))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/forbidden"));
+	}
+
+	@Test
+	void admin_can_grant_admin_and_remove_it() throws Exception {
+		MvcResult loginUserRes = mvc.perform(post("/login")
+						.param("email", "admin@test.dk")
+						.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		MockHttpSession userSession = (MockHttpSession) loginUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(post("/adminpage/grant-admin")
+						.session(userSession)
+						.param("email", "student@test.dk"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/adminpage"));
+
+		loginUserRes = mvc.perform(post("/login")
+						.param("email", "student@test.dk")
+						.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		userSession = (MockHttpSession) loginUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(get("/adminpage")
+						.session(userSession))
+				.andExpect(status().isOk())
+				.andExpect(view().name("adminpage"));
+
+		loginUserRes = mvc.perform(post("/login")
+						.param("email", "admin@test.dk")
+						.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		userSession = (MockHttpSession) loginUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(post("/adminpage/remove-role")
+						.session(userSession)
+						.param("email", "student@test.dk")
+						.param("role", "ADMINISTRATOR"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/adminpage"));
+
+		loginUserRes = mvc.perform(post("/login")
+						.param("email", "student@test.dk")
+						.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		userSession = (MockHttpSession) loginUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(get("/adminpage")
+						.session(userSession))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/forbidden"));
+	}
+
+	@Test
+	void view_users_and_individual_user_pages() throws Exception {
+		MvcResult loginUserRes = mvc.perform(post("/login")
+						.param("email", "student@test.dk")
+						.param("password", "password"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrl("/"))
+				.andReturn();
+
+		MockHttpSession userSession = (MockHttpSession) loginUserRes.getRequest().getSession();
+		assertNotNull(userSession);
+
+		mvc.perform(get("/users")
+						.session(userSession))
+				.andExpect(status().isOk())
+				.andExpect(view().name("users"));
+
+
+		mvc.perform(get("/user/1")
+						.session(userSession))
+				.andExpect(status().isOk())
+				.andExpect(view().name("user"));
+	}
 }
+
+
