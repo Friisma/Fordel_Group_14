@@ -166,6 +166,19 @@ class ProjectControllerPostTests {
     }
 
     @Test
+    void post_invite_advisor_is_forbidden_without_project_view_rights() throws Exception {
+        MockHttpSession session = sessionWith("creator@fordel.dk", Roles.ADVISOR);
+        RedirectAttributes flash = new RedirectAttributesModelMap();
+
+        when(rightsService.canViewProject(any())).thenReturn(false);
+
+        String view = controller.inviteAdvisor(23, "advisor@fordel.dk", session, flash);
+
+        assertEquals("redirect:/forbidden", view);
+        verify(invitationManager, never()).createInvitaion(any(User.class), any(Project.class));
+    }
+
+    @Test
     void post_invite_student_succeeds() throws Exception {
         MockHttpSession session = sessionWith("creator@fordel.dk", Roles.ADVISOR);
         RedirectAttributes flash = new RedirectAttributesModelMap();
@@ -183,6 +196,19 @@ class ProjectControllerPostTests {
         assertEquals("redirect:/project/31", view);
         verify(invitationManager).createStudentInvitation(any(User.class), any(Project.class));
         assertTrue(flash.getFlashAttributes().containsKey("message"));
+    }
+
+    @Test
+    void post_invite_student_is_forbidden_without_project_view_rights() throws Exception {
+        MockHttpSession session = sessionWith("creator@fordel.dk", Roles.ADVISOR);
+        RedirectAttributes flash = new RedirectAttributesModelMap();
+
+        when(rightsService.canViewProject(any())).thenReturn(false);
+
+        String view = controller.inviteStudent(32, "student@fordel.dk", session, flash);
+
+        assertEquals("redirect:/forbidden", view);
+        verify(invitationManager, never()).createStudentInvitation(any(User.class), any(Project.class));
     }
 
     @Test
@@ -233,6 +259,19 @@ class ProjectControllerPostTests {
     }
 
     @Test
+    void post_assign_advisor_is_forbidden_without_view_all_projects_rights() throws Exception {
+        MockHttpSession session = sessionWith("admin@fordel.dk", Roles.ADVISOR);
+        Model model = new ExtendedModelMap();
+
+        when(rightsService.canViewAllProjects(any())).thenReturn(false);
+
+        String view = controller.assignAdvisor(session, model, "p", "d", 51);
+
+        assertEquals("redirect:/forbidden", view);
+        verify(projectManager, never()).assignAdvisor(any(Project.class), any(User.class));
+    }
+
+    @Test
     void post_change_max_work_load_succeeds() throws Exception {
         MockHttpSession session = sessionWith("advisor@fordel.dk", Roles.ADVISOR);
         Model model = new ExtendedModelMap();
@@ -244,5 +283,18 @@ class ProjectControllerPostTests {
 
         assertEquals("advisor-dashboard", view);
         verify(userManager).updateMaxWorkLoad(any(User.class), eq(5));
+    }
+
+    @Test
+    void post_change_max_work_load_is_forbidden_without_dashboard_rights() throws Exception {
+        MockHttpSession session = sessionWith("advisor@fordel.dk", Roles.ADVISOR);
+        Model model = new ExtendedModelMap();
+
+        when(rightsService.canViewAdvisorDashboard(any())).thenReturn(false);
+
+        String view = controller.changeMaxWorkLoad(model, session, 5);
+
+        assertEquals("redirect:/forbidden", view);
+        verify(userManager, never()).updateMaxWorkLoad(any(User.class), eq(5));
     }
 }
