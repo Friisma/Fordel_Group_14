@@ -325,6 +325,7 @@ public class ProjectController {
             return "No role";
         }
         return roles.stream()
+                .filter(java.util.Objects::nonNull)
                 .map(r -> switch (r) {
                     case STUDENT -> "Student";
                     case ADVISOR -> "Advisor";
