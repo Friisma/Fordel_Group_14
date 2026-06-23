@@ -1,8 +1,5 @@
 package dk.utd.fordel.view;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import dk.utd.fordel.domain.AdvisorInvitation;
 import dk.utd.fordel.domain.Roles;
 import dk.utd.fordel.domain.StudentInvitation;
@@ -22,6 +19,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class HomepageControllerInvitationTests {
 
@@ -164,5 +163,32 @@ class HomepageControllerInvitationTests {
         String view = controller.acceptStudentInvitation(61, session, flash);
 
         assertEquals("redirect:/forbidden", view);
+    }
+
+    @Test
+    void projectCard_stores_all_fields() {
+        var card = new HomepageController.ProjectCard("1", "My Project", "desc", "Software Technology", "DRAFT");
+        assertEquals("1", card.id());
+        assertEquals("My Project", card.title());
+        assertEquals("desc", card.description());
+        assertEquals("Software Technology", card.studyLine());
+        assertEquals("DRAFT", card.status());
+    }
+
+    @Test
+    void invitationCard_stores_all_fields() {
+        var card = new HomepageController.InvitationCard("Peter", "Pending", "pending", "42", "Hans");
+        assertEquals("Peter", card.name());
+        assertEquals("Pending", card.status());
+        assertEquals("pending", card.statusClass());
+        assertEquals("42", card.projectId());
+        assertEquals("Hans", card.inviterName());
+    }
+
+    @Test
+    void sectionVisibility_stores_flags() {
+        var visible = new HomepageController.SectionVisibility(true, false);
+        assertTrue(visible.projectsVisible());
+        assertFalse(visible.advisorsVisible());
     }
 }
