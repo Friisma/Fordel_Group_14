@@ -265,8 +265,8 @@ public class UserController {
 
     @PostMapping("/adminpage/grant-admin")
     public String grantRole(HttpSession session,
-                            @RequestParam("email") String email,
-                            RedirectAttributes redirectAttributes) {
+            @RequestParam("email") String email,
+            RedirectAttributes redirectAttributes) {
         if (session.getAttribute("auth") == null) {
             return "redirect:/login";
         }
@@ -380,6 +380,12 @@ public class UserController {
         Object authObj = session.getAttribute("auth");
         if (authObj == null) {
             return "redirect:/login";
+        }
+
+        Object userData = session.getAttribute("userData");
+        RightsContext rights = rightsService.from(userData instanceof User.Data data ? data : null);
+        if (!rightsService.canViewAdminPage(rights)) {
+            return "redirect:/forbidden";
         }
 
         if (!(authObj instanceof dk.utd.fordel.services.Authenticator.Auth)) {
