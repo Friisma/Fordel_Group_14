@@ -1,0 +1,38 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="da">
+
+<head th:replace="~{fragments/head ::head}"></head>
+
+<body>
+    <header th:replace="~{fragments/header ::header}"></header>
+
+    <main class="container">
+        <section>
+            <h1 th:text="${title}"></h1>
+
+            <p>
+                Fordel is the trusted platform used by UTD, the University of Technicality of Denmark.
+            </p>
+            <p>
+                Engineered by highly trained developers and at least one person who read through the documentation.
+            </p>
+            <p>
+                Fordel securely manages university data and delivers a user experience often described as "highly
+                user-friendly",
+                since the user needs to be highly friendly to the application if they want it to work.
+            </p>
+
+            <br>
+
+            <div style="text-align: center;">
+                <img th:src="@{/images/utd-logo.png}" alt="UTD Logo"
+                    style="max-width: 200px; width: 100%; text-align: center;" />
+            </div>
+
+        </section>
+    </main>
+
+    <footer th:replace="~{fragments/footer ::footer}"></footer>
+</body>
+
+</html>
