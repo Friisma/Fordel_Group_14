@@ -49,35 +49,33 @@
         </section>
 
         <section id="invitations" class="invitations-section">
-            <th:block th:if="${rights.isStudent()}">
-                <details open>
-                    <summary>Invitations</summary>
-                    <div class="card">
-                        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
-                            <button data-target="modal-invite-advisor" th:attr="data-project-id=${projectId}"
-                                type="button" class="primary" onclick="openInviteModal(event, this)">Invite Advisor to
-                                Project</button>
-                            <button data-target="modal-invite-student" th:attr="data-project-id=${projectId}"
-                                type="button" class="primary" onclick="openInviteStudentModal(event, this)">Invite
-                                Student to Project</button>
-                        </div>
-                        <h3 class="font-normal">Advisor invitations</h3>
-                        <div class="project-invitations">
-                            <th:block th:each="inv : ${projectInvitations}">
-                                <article th:replace="~{fragments/invitation-card :: invitationCard(invitation=${inv})}">
-                                </article>
-                            </th:block>
-                        </div>
-                        <h3 class="font-normal" style="margin-top:1rem;">Student invitations</h3>
-                        <div class="project-invitations">
-                            <th:block th:each="inv : ${projectStudentInvitations}">
-                                <article th:replace="~{fragments/invitation-card :: invitationCard(invitation=${inv})}">
-                                </article>
-                            </th:block>
-                        </div>
+            <details open>
+                <summary>Invitations</summary>
+                <div class="card">
+                    <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+                        <button data-target="modal-invite-advisor" th:attr="data-project-id=${projectId}" type="button"
+                            class="primary" onclick="openInviteModal(event, this)">Invite Advisor to
+                            Project</button>
+                        <button data-target="modal-invite-student" th:attr="data-project-id=${projectId}" type="button"
+                            class="primary" onclick="openInviteStudentModal(event, this)">Invite
+                            Student to Project</button>
                     </div>
-                </details>
-            </th:block>
+                    <h3 class="font-normal">Advisor invitations</h3>
+                    <div class="project-invitations">
+                        <th:block th:each="inv : ${projectInvitations}">
+                            <article th:replace="~{fragments/invitation-card :: invitationCard(invitation=${inv})}">
+                            </article>
+                        </th:block>
+                    </div>
+                    <h3 class="font-normal" style="margin-top:1rem;">Student invitations</h3>
+                    <div class="project-invitations">
+                        <th:block th:each="inv : ${projectStudentInvitations}">
+                            <article th:replace="~{fragments/invitation-card :: invitationCard(invitation=${inv})}">
+                            </article>
+                        </th:block>
+                    </div>
+                </div>
+            </details>
 
         </section>
 
