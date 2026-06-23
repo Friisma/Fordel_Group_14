@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import javax.sql.DataSource;
 
 import dk.utd.fordel.domain.*;
@@ -219,9 +220,6 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
-    // TODO temporary fix for getting id from user table. this should maybe be
-    // changed when the domain is more complete
-
     /**
      * Helper method for being sure that the user id is coherent with the DB.
      * 
@@ -289,7 +287,6 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
-    // TODO Write more proper repository methods to update the database.
 
     /**
      * Updates project title and description
@@ -435,26 +432,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
-    /**
-     * Gets all studylines as objects
-     * 
-     * @return a list of studyline objects
-     */
-    @Override
-    public List<StudyLine> getAllStudyLineObjects() {
-        var stmt = "SELECT name FROM study_lines";
-        List<StudyLine> studyLines = new ArrayList<>();
-        try (var statement = getConnection().prepareStatement(stmt);
-                var resultSet = statement.executeQuery()) {
-            while (resultSet.next()) {
-                studyLines.add(new StudyLine(
-                        resultSet.getString("name")));
-            }
-        } catch (SQLException e) {
-            throw Log.giveUp(logger, e, "Failed to fetch study lines");
-        }
-        return studyLines;
-    }
+
 
     @Override
     public List<Project> getAllProjectsRelatedToUser(User user) throws Project.InvalidProject {
@@ -754,6 +732,22 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
+    public int getStudyLineIdByStudylineName(String studyLine){
+        var stmt = "SELECT id FROM study_lines WHERE name = ?";
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setString(1,studyLine);
+            try (var resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1);
+                }
+                throw new NoSuchElementException("No such studyline");
+            }
+        } catch (SQLException e){
+            throw new NoSuchElementException("No such studyline");
+        }
+
+    }
+
     @Override
     public List<UserInfo> getAllUsersRelatedToStudyLine(int studyLineId) {
         List<UserInfo> studyLineUsers = new ArrayList<>();
@@ -981,7 +975,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
                 }
             }
         } catch (SQLException e) {
-            throw Log.giveUp(logger, e, "Failed to read role: " + user);
+            throw new NoSuchElementException("No Roles");
         }
         return null;
     }
