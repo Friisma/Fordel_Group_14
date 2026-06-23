@@ -19,6 +19,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Controller
 public class StudyLineController {
     private final RightsService rightsService;
@@ -34,6 +37,33 @@ public class StudyLineController {
         this.unitOfWork = unitOfWork;
         this.userManager = userManager;
         this.projectManager = projectManager;
+    }
+
+    @GetMapping("/studylines")
+    public String getStudyLines(HttpSession session, Model model) {
+        Object authObject = session.getAttribute("auth");
+        if (!(authObject instanceof Authenticator.Auth auth)) {
+            return "redirect:/login";
+        }
+
+        Object userData = session.getAttribute("userData");
+        RightsContext rights = rightsService.from(userData instanceof User.Data data ? data : null);
+        if (!rightsService.canViewStudyLine(rights)) {
+            return "redirect:/forbidden";
+        }
+
+        List<StudyLineManager.StudyLineRepository.StudyLineInfo> studyLines;
+        try (var uow = unitOfWork.begin()) {
+            studyLines = userManager.getAllStudyLinesRelatedToUser(auth.user());
+            model.addAttribute("title", "My study lines");
+            model.addAttribute("studyLines", studyLines);
+
+            uow.commit();
+
+        } catch (UnitOfWork.UnitOfWorkException e) {
+            throw new RuntimeException(e);
+        }
+        return "studylines";
     }
 
     @GetMapping("/studyline/{id}")

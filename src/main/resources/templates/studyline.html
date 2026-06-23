@@ -16,7 +16,12 @@
         <ul>
             <li>
                 <form th:action="@{/studyline/{id}/members(id=${studyLineId})}" method="get" style="margin-bottom: 0;">
-                    <button type="submit" class="secondary outline">Members</button>
+                    <button type="submit" class="primary">Members</button>
+                </form>
+            </li>
+            <li>
+                <form th:action="@{/studyline/{id}/manage(id=${studyLineId})}" method="get" style="margin-bottom: 0;">
+                    <button type="submit" class="primary">Manage</button>
                 </form>
             </li>
         </ul>

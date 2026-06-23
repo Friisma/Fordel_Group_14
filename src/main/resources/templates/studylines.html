@@ -1,0 +1,23 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="da">
+
+<head th:replace="~{fragments/head ::head}"></head>
+
+<body>
+<header th:replace="~{fragments/header ::header}"></header>
+
+<main class="container">
+  <section>
+    <h1 th:text="${title}">Study lines</h1>
+    <div class="project-grid">
+      <th:block th:each="studyLine : ${studyLines}">
+        <article th:replace="~{fragments/studyline-card :: studylineCard(studyLine=${studyLine})}"></article>
+      </th:block>
+    </div>
+  </section>
+</main>
+
+<footer th:replace="~{fragments/footer ::footer}"></footer>
+</body>
+
+</html>

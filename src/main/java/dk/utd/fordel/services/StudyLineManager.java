@@ -21,6 +21,7 @@ public class StudyLineManager {
         void addStudent(User user, int studyLineId);
         void addStudyLeader(User user, int studyLineId);
         void removeUser(User user, int studyLineId);
+        record StudyLineInfo(int id, String name) {};
     }
 
     private final StudyLineRepository studyLineRepository;

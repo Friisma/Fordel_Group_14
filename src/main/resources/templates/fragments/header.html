@@ -4,6 +4,9 @@
 
     <ul class="header-links">
       <li><a href="/display" class="secondary">About</a></li>
+      <li th:if="${userData != null && !userData.roles().isEmpty()}">
+        <a href="/studylines" class="secondary">Study lines</a>
+      </li>
       <li th:if="${rights != null && rights.hasPermission(T(dk.utd.fordel.services.rights.Permission).VIEW_USER)}">
         <a href="/users" class="secondary">Users</a>
       </li>
