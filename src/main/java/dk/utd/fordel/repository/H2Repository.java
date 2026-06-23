@@ -438,7 +438,7 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
     public List<StudyLineInfo> getAllStudyLinesRelatedToUser(User user) {
         List<StudyLineInfo> studyLines = new ArrayList<>();
         var stmt = """
-                SELECT sl.id, sl.name
+                SELECT DISTINCT sl.id, sl.name
                     FROM study_lines sl
                     JOIN study_line_memberships slm ON sl.id = slm.study_line_id
                     JOIN roles r ON slm.role_id = r.id
