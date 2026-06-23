@@ -418,6 +418,7 @@ public class UserController {
             }
 
             return roles.stream()
+                    .filter(java.util.Objects::nonNull)
                     .map(UserController::displayName)
                     .collect(java.util.stream.Collectors.joining(", "));
         }

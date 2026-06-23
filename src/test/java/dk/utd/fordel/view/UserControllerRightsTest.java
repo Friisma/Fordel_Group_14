@@ -1,13 +1,6 @@
 package dk.utd.fordel.view;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 
 import dk.utd.fordel.domain.Email;
 import dk.utd.fordel.domain.Roles;
@@ -17,44 +10,41 @@ import dk.utd.fordel.services.ProjectManager;
 import dk.utd.fordel.services.StudyLineManager;
 import dk.utd.fordel.services.UserManager;
 import dk.utd.fordel.services.rights.RightsService;
-import dk.utd.fordel.utils.UnitOfWork;
+import dk.utd.fordel.testsupport.TestFakes.FakeProjectRepository;
+import dk.utd.fordel.testsupport.TestFakes.FakeStudyLineRepository;
+import dk.utd.fordel.testsupport.TestFakes.FakeUnitOfWork;
+import dk.utd.fordel.testsupport.TestFakes.FakeUserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
 import java.util.List;
 
-@ExtendWith(MockitoExtension.class)
 class UserControllerRightsTest {
 
-    @Mock
-    private UserManager userManager;
-
-    @Mock
-    private ProjectManager projectManager;
-
-    @Mock
-    private StudyLineManager studyLineManager;
-
-    @Mock
-    private UnitOfWork unitOfWork;
-
-    @Mock
-    private UnitOfWork activeUnitOfWork;
-
+    private FakeUserRepository userRepository;
+    private FakeProjectRepository projectRepository;
+    private FakeStudyLineRepository studyLineRepository;
+    private FakeUnitOfWork unitOfWork;
     private RightsService rightsService;
+    private UserManager userManager;
+    private ProjectManager projectManager;
+    private StudyLineManager studyLineManager;
     private UserController controller;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
+        userRepository = new FakeUserRepository();
+        projectRepository = new FakeProjectRepository();
+        studyLineRepository = new FakeStudyLineRepository();
+        unitOfWork = new FakeUnitOfWork();
         rightsService = new RightsService();
+        userManager = new UserManager(userRepository);
+        projectManager = new ProjectManager(projectRepository);
+        studyLineManager = new StudyLineManager(studyLineRepository);
         controller = new UserController(userManager, projectManager, rightsService, unitOfWork, studyLineManager);
-        lenient().when(unitOfWork.begin()).thenReturn(activeUnitOfWork);
     }
 
     @Test
@@ -63,16 +53,16 @@ class UserControllerRightsTest {
                 "admin@fordel.dk");
         Model model = new ExtendedModelMap();
 
-        when(userManager.getAllUsers()).thenReturn(List.of());
-        when(studyLineManager.getAllStudyLines()).thenReturn(List.of("Software Technology"));
+        userRepository.allUsers.clear();
+        studyLineRepository.studyLines.clear();
+        studyLineRepository.studyLines.add("Software Technology");
 
         String view = controller.getAllUsers(model, session);
 
         assertEquals("adminpage", view);
         assertEquals("Admin Dashboard", model.asMap().get("title"));
-        verify(unitOfWork).begin();
-        verify(userManager).getAllUsers();
-        verify(studyLineManager).getAllStudyLines();
+        assertEquals(1, unitOfWork.beginCount);
+        assertEquals(1, unitOfWork.commitCount);
     }
 
     @Test
@@ -83,8 +73,8 @@ class UserControllerRightsTest {
         String view = controller.deleteUser(session, "victim@fordel.dk");
 
         assertEquals("redirect:/forbidden", view);
-        verifyNoInteractions(unitOfWork);
-        verify(userManager, never()).deleteUser(any());
+        assertEquals(0, unitOfWork.beginCount);
+        assertEquals(0, userRepository.deletedUsers.size());
     }
 
     @Test
@@ -95,8 +85,9 @@ class UserControllerRightsTest {
         String view = controller.deleteUser(session, "victim@fordel.dk");
 
         assertEquals("redirect:/adminpage", view);
-        verify(unitOfWork).begin();
-        verify(userManager).deleteUser(eq(user("victim@fordel.dk")));
+        assertEquals(1, unitOfWork.beginCount);
+        assertEquals(1, userRepository.deletedUsers.size());
+        assertEquals(user("victim@fordel.dk"), userRepository.deletedUsers.getFirst());
     }
 
     private static MockHttpSession sessionWith(User.Data data, String email) throws Email.InvalidEmail {

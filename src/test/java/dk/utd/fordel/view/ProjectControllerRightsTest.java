@@ -1,59 +1,50 @@
 package dk.utd.fordel.view;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 
 import dk.utd.fordel.domain.Roles;
 import dk.utd.fordel.domain.User;
-import dk.utd.fordel.services.InvitationManager;
 import dk.utd.fordel.services.ProjectManager;
 import dk.utd.fordel.services.Authenticator;
+import dk.utd.fordel.services.InvitationManager;
 import dk.utd.fordel.services.UserManager;
 import dk.utd.fordel.services.rights.RightsService;
+import dk.utd.fordel.testsupport.TestFakes.FakeInvitationRepository;
+import dk.utd.fordel.testsupport.TestFakes.FakeProjectRepository;
+import dk.utd.fordel.testsupport.TestFakes.FakeUnitOfWork;
+import dk.utd.fordel.testsupport.TestFakes.FakeUserRepository;
 import dk.utd.fordel.utils.UnitOfWork;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 
-import java.util.List;
-
-@ExtendWith(MockitoExtension.class)
 class ProjectControllerRightsTest {
 
-    @Mock
-    private ProjectManager projectManager;
-
-    @Mock
-    private UserManager userManager;
-
-    @Mock
-    private InvitationManager invitationManager;
-
-    @Mock
-    private UnitOfWork unitOfWork;
-
-    @Mock
-    private UnitOfWork activeUnitOfWork;
-
+    private FakeProjectRepository projectRepository;
+    private FakeUserRepository userRepository;
+    private FakeInvitationRepository invitationRepository;
+    private FakeUnitOfWork unitOfWork;
     private RightsService rightsService;
+    private ProjectManager projectManager;
+    private UserManager userManager;
+    private InvitationManager invitationManager;
     private ProjectController controller;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
+        projectRepository = new FakeProjectRepository();
+        userRepository = new FakeUserRepository();
+        invitationRepository = new FakeInvitationRepository();
+        unitOfWork = new FakeUnitOfWork();
         rightsService = new RightsService();
+        projectManager = new ProjectManager(projectRepository);
+        userManager = new UserManager(userRepository);
+        invitationManager = new InvitationManager(invitationRepository);
         controller = new ProjectController(rightsService, projectManager, unitOfWork, userManager, invitationManager);
-        lenient().when(unitOfWork.begin()).thenReturn(activeUnitOfWork);
     }
 
     @Test
@@ -62,17 +53,17 @@ class ProjectControllerRightsTest {
                 "advisor@fordel.dk");
         Model model = new ExtendedModelMap();
 
-        when(userManager.getMaxWorkLoad(any())).thenReturn(3);
-        when(projectManager.getCountOfAdvisedProjects(any())).thenReturn(1);
-        when(projectManager.getAllAdvisorProjects(any())).thenReturn(List.of());
+        userRepository.maxWorkLoads.put("advisor@fordel.dk", 3);
+        projectRepository.countOfAdvisorProjectsReturn = 1;
+        projectRepository.advisorProjects.clear();
 
         String view = controller.getAllAdviserProjects(model, session);
 
         assertEquals("advisor-dashboard", view);
         assertEquals(3, model.asMap().get("maxProjectCount"));
         assertEquals(1, model.asMap().get("projectCount"));
-        verify(unitOfWork).begin();
-        verify(projectManager).getAllAdvisorProjects(any());
+        assertEquals(1, unitOfWork.beginCount);
+        assertEquals(1, unitOfWork.commitCount);
     }
 
     @Test
@@ -83,7 +74,7 @@ class ProjectControllerRightsTest {
         String view = controller.getAllAdviserProjects(new ExtendedModelMap(), session);
 
         assertEquals("redirect:/forbidden", view);
-        verifyNoInteractions(unitOfWork);
+        assertEquals(0, unitOfWork.beginCount);
     }
 
     @Test
@@ -94,8 +85,8 @@ class ProjectControllerRightsTest {
         String view = controller.startProject(session, 7, new RedirectAttributesModelMap());
 
         assertEquals("redirect:/project/7", view);
-        verify(unitOfWork).begin();
-        verify(projectManager).startProject(7);
+        assertEquals(1, unitOfWork.beginCount);
+        assertEquals(7, projectRepository.lastStartedProjectId);
     }
 
     @Test
@@ -106,8 +97,7 @@ class ProjectControllerRightsTest {
         String view = controller.startProject(session, 7, new RedirectAttributesModelMap());
 
         assertEquals("redirect:/forbidden", view);
-        verifyNoInteractions(unitOfWork);
-        verify(projectManager, never()).startProject(any(Integer.class));
+        assertEquals(0, unitOfWork.beginCount);
     }
 
     private static MockHttpSession sessionWith(User.Data data, String email) throws Exception {

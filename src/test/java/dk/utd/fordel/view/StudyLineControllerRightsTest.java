@@ -1,12 +1,6 @@
 package dk.utd.fordel.view;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 
 import dk.utd.fordel.domain.Roles;
 import dk.utd.fordel.domain.User;
@@ -15,44 +9,41 @@ import dk.utd.fordel.services.StudyLineManager;
 import dk.utd.fordel.services.UserManager;
 import dk.utd.fordel.services.Authenticator;
 import dk.utd.fordel.services.rights.RightsService;
-import dk.utd.fordel.utils.UnitOfWork;
+import dk.utd.fordel.testsupport.TestFakes.FakeProjectRepository;
+import dk.utd.fordel.testsupport.TestFakes.FakeStudyLineRepository;
+import dk.utd.fordel.testsupport.TestFakes.FakeUnitOfWork;
+import dk.utd.fordel.testsupport.TestFakes.FakeUserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
 import java.util.List;
 
-@ExtendWith(MockitoExtension.class)
 class StudyLineControllerRightsTest {
 
-    @Mock
-    private StudyLineManager studyLineManager;
-
-    @Mock
-    private UnitOfWork unitOfWork;
-
-    @Mock
-    private UnitOfWork activeUnitOfWork;
-
-    @Mock
-    private UserManager userManager;
-
-    @Mock
-    private ProjectManager projectManager;
-
+    private FakeStudyLineRepository studyLineRepository;
+    private FakeUnitOfWork unitOfWork;
+    private FakeUserRepository userRepository;
+    private FakeProjectRepository projectRepository;
     private RightsService rightsService;
+    private StudyLineManager studyLineManager;
+    private UserManager userManager;
+    private ProjectManager projectManager;
     private StudyLineController controller;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
+        studyLineRepository = new FakeStudyLineRepository();
+        unitOfWork = new FakeUnitOfWork();
+        userRepository = new FakeUserRepository();
+        projectRepository = new FakeProjectRepository();
         rightsService = new RightsService();
+        studyLineManager = new StudyLineManager(studyLineRepository);
+        userManager = new UserManager(userRepository);
+        projectManager = new ProjectManager(projectRepository);
         controller = new StudyLineController(rightsService, studyLineManager, unitOfWork, userManager, projectManager);
-        lenient().when(unitOfWork.begin()).thenReturn(activeUnitOfWork);
     }
 
     @Test
@@ -61,16 +52,16 @@ class StudyLineControllerRightsTest {
                 "leader@fordel.dk");
         Model model = new ExtendedModelMap();
 
-        when(studyLineManager.canManageStudyLine(any(), eq(4))).thenReturn(true);
-        when(userManager.getAllStudentsRelatedToStudyLine(4)).thenReturn(List.of());
-        when(userManager.getAllLeadersRelatedToStudyLine(4)).thenReturn(List.of());
+        studyLineRepository.canManageByStudyLineId.put(4, true);
+        userRepository.students.clear();
+        userRepository.leaders.clear();
 
         String view = controller.getStudyLineMange(4, session, model);
 
         assertEquals("manage-study-line", view);
         assertEquals(4, model.asMap().get("studyLineId"));
-        verify(unitOfWork).begin();
-        verify(studyLineManager).canManageStudyLine(any(), eq(4));
+        assertEquals(1, unitOfWork.beginCount);
+        assertEquals(1, unitOfWork.commitCount);
     }
 
     @Test
@@ -81,7 +72,7 @@ class StudyLineControllerRightsTest {
         String view = controller.getStudyLineMange(4, session, new ExtendedModelMap());
 
         assertEquals("redirect:/forbidden", view);
-        verifyNoInteractions(unitOfWork);
+        assertEquals(0, unitOfWork.beginCount);
     }
 
     private static MockHttpSession sessionWith(User.Data data, String email) throws Exception {
