@@ -92,7 +92,7 @@ public class UserManager {
         return userRepository.getAllStudyLinesRelatedToUser(user);
     }
 
-    public boolean checkMaxWorkLoad(User advisor){
+    public boolean checkMaxWorkLoad(User advisor) {
         return userRepository.checkMaxWorkLoad(advisor);
     }
 
@@ -116,7 +116,9 @@ public class UserManager {
         userRepository.removeRole(user, roleToRemove);
     }
 
-    public void assignStudyLine(User user, String studyLineName) { userRepository.assignStudyLine(user, studyLineName); }
+    public void assignStudyLine(User user, String studyLineName) {
+        userRepository.assignStudyLine(user, studyLineName);
+    }
 
     public void assignStudyLineRole(User user, String studLineName, Roles roleToGrant) {
         userRepository.assignStudyLineRole(user, studLineName, roleToGrant);
@@ -134,14 +136,16 @@ public class UserManager {
         return userRepository.getAllUsersRelatedToStudyLine(studyLineId);
     }
 
-    public int getMaxWorkLoad(User user){return userRepository.getMaxWorkLoad(user);}
-
-    public void updateMaxWorkLoad(User user, int newMaxLoad){
-        userRepository.updateMaxWorkLoad(user,newMaxLoad);
+    public int getMaxWorkLoad(User user) {
+        return userRepository.getMaxWorkLoad(user);
     }
 
-    public Roles determineStudyLineSpecificRole(User user, String studyLineName){
-        return userRepository.determineStudyLineSpecificRole(user,studyLineName);
+    public void updateMaxWorkLoad(User user, int newMaxLoad) {
+        userRepository.updateMaxWorkLoad(user, newMaxLoad);
+    }
+
+    public Roles determineStudyLineSpecificRole(User user, String studyLineName) {
+        return userRepository.determineStudyLineSpecificRole(user, studyLineName);
     }
 
     public List<UserRepository.UserInfo> getAllStudentsRelatedToStudyLine(int studyLineId) {
