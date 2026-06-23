@@ -25,9 +25,6 @@
                     <p th:if="${project == null}">No project details available.</p>
                 </div>
             </details>
-            <th:block th:if="${rights.isAdvisor()}">
-                <!-- Advisor invitations section removed per request; advisors won't see an invitations panel here -->
-            </th:block>
         </section>
 
         <section id="members" class="members-section">
