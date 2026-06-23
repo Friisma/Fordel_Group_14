@@ -6,8 +6,10 @@ import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import javax.sql.DataSource;
 
 import dk.utd.fordel.domain.*;
@@ -287,7 +289,6 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
-
     /**
      * Updates project title and description
      * 
@@ -431,8 +432,6 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
             throw Log.giveUp(logger, e, "Failed to look up study line: " + studyLineName);
         }
     }
-
-
 
     @Override
     public List<StudyLineInfo> getAllStudyLinesRelatedToUser(User user) {
@@ -757,17 +756,17 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         }
     }
 
-    public int getStudyLineIdByStudylineName(String studyLine){
+    public int getStudyLineIdByStudylineName(String studyLine) {
         var stmt = "SELECT id FROM study_lines WHERE name = ?";
         try (var statement = getConnection().prepareStatement(stmt)) {
-            statement.setString(1,studyLine);
+            statement.setString(1, studyLine);
             try (var resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
                     return resultSet.getInt(1);
                 }
                 throw new NoSuchElementException("No such studyline");
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             throw new NoSuchElementException("No such studyline");
         }
 
@@ -961,14 +960,16 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
      */
     @Override
     public List<Roles> getUserRoles(User user) {
-        List<Roles> roles = new ArrayList<>();
-        var stmt2 = """
+        Set<Roles> roles = new LinkedHashSet<>();
+        int userId = getUserIdByEmail(user.getEmail());
+
+        var globalRolesStmt = """
                     SELECT r.name FROM roles r
                         JOIN user_roles ur ON r.id = ur.role_id
-                                  WHERE ur.user_id = (SELECT id FROM users WHERE email = ?)
+                                  WHERE ur.user_id = ?
                 """;
-        try (var statement = getConnection().prepareStatement(stmt2)) {
-            statement.setString(1, user.getEmail().asString());
+        try (var statement = getConnection().prepareStatement(globalRolesStmt)) {
+            statement.setInt(1, userId);
             var resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 String roleName = resultSet.getString("name");
@@ -977,7 +978,24 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         } catch (SQLException e) {
             throw Log.giveUp(logger, e, "Failed to read user: " + user);
         }
-        return roles;
+
+        var studyLineRolesStmt = """
+                    SELECT DISTINCT r.name FROM roles r
+                        JOIN study_line_memberships slm ON r.id = slm.role_id
+                                  WHERE slm.user_id = ?
+                """;
+        try (var statement = getConnection().prepareStatement(studyLineRolesStmt)) {
+            statement.setInt(1, userId);
+            var resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                String roleName = resultSet.getString("name");
+                roles.add(Roles.valueOf(roleName.toUpperCase().replace(" ", "_")));
+            }
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to read study line roles for user: " + user);
+        }
+
+        return new ArrayList<>(roles);
     }
 
     public Roles determineStudyLineSpecificRole(User user, String studyLineName) {
@@ -1398,21 +1416,33 @@ public class H2Repository implements PasswordRepository, UnitOfWork, UserReposit
         var stmt = """
                 MERGE INTO study_line_memberships (user_id, study_line_id, role_id)
                 KEY (user_id, study_line_id, role_id)
-                SELECT u.id, sl.id, r.id
-                FROM users u, study_lines sl, roles r
-                WHERE u.email = ?
-                AND sl.name = ?
-                AND r.name = ?
+                VALUES (?, ?, ?)
                 """;
 
         try (var statement = getConnection().prepareStatement(stmt)) {
-            statement.setString(1, user.getEmail().asString());
-            statement.setString(2, studyLineName);
-            statement.setString(3, roleToGrant.name().toLowerCase().replace("_", " "));
-            statement.executeUpdate();
+            statement.setInt(1, getUserIdByEmail(user.getEmail()));
+            statement.setInt(2, getStudyLineIdByStudylineName(studyLineName));
+            statement.setInt(3, getRoleIdByName(roleToGrant));
+            if (statement.executeUpdate() == 0) {
+                throw new SQLException("No study line membership was written");
+            }
         } catch (SQLException e) {
             throw Log.giveUp(logger, e, "Failed to assign study line to user");
         }
+    }
+
+    private int getRoleIdByName(Roles role) throws SQLException {
+        var stmt = "SELECT id FROM roles WHERE name = ?";
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setString(1, role.name().toLowerCase().replace("_", " "));
+            try (var resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt("id");
+                }
+            }
+        }
+
+        throw new SQLException("Role does not exist: " + role);
     }
 
     @Override
