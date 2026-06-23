@@ -3,6 +3,7 @@ package dk.utd.fordel.view;
 import dk.utd.fordel.domain.Email;
 import dk.utd.fordel.domain.StudyLine;
 import dk.utd.fordel.domain.User;
+import dk.utd.fordel.domain.Roles;
 import dk.utd.fordel.services.Authenticator;
 import dk.utd.fordel.services.ProjectManager;
 import dk.utd.fordel.services.StudyLineManager;
@@ -135,8 +136,18 @@ public class StudyLineController {
             var studyLineStudents = userManager.getAllStudentsRelatedToStudyLine(id);
             model.addAttribute("studyLineStudents", studyLineStudents);
 
+            var availableStudents = userManager.getAllUsers().stream()
+                    .filter(user -> user.roles().contains(Roles.STUDENT))
+                    .filter(user -> studyLineStudents.stream()
+                            .noneMatch(student -> student.email().equalsIgnoreCase(user.email())))
+                    .toList();
+            model.addAttribute("availableStudents", availableStudents);
+
             var studyLineLeaders = userManager.getAllLeadersRelatedToStudyLine(id);
             model.addAttribute("studyLineLeaders", studyLineLeaders);
+
+            var studyLineAdvisors = userManager.getAllAdvisorsRelatedToStudyLine(id);
+            model.addAttribute("studyLineAdvisors", studyLineAdvisors);
 
             model.addAttribute("studyLineId", id);
             uow.commit();

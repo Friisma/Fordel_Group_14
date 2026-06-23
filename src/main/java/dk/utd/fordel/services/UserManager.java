@@ -56,6 +56,8 @@ public class UserManager {
 
         List<UserInfo> getAllLeadersRelatedToStudyLine(int studyLineId);
 
+        List<UserInfo> getAllAdvisorsRelatedToStudyLine(int studyLineId);
+
     }
 
     private final UserRepository userRepository;
@@ -142,5 +144,9 @@ public class UserManager {
 
     public List<UserRepository.UserInfo> getAllLeadersRelatedToStudyLine(int studyLineId) {
         return userRepository.getAllLeadersRelatedToStudyLine(studyLineId);
+    }
+
+    public List<UserRepository.UserInfo> getAllAdvisorsRelatedToStudyLine(int studyLineId) {
+        return userRepository.getAllAdvisorsRelatedToStudyLine(studyLineId);
     }
 }
