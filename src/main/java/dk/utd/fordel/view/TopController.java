@@ -13,10 +13,10 @@ public class TopController {
 
     private static final Logger logger = LoggerFactory.getLogger(TopController.class);
 
-    @GetMapping("/display")
+    @GetMapping("/about")
     public String getDisplay(Model model) {
-        model.addAttribute("title", "Display");
-        return "display";
+        model.addAttribute("title", "About");
+        return "about";
     }
 
     @GetMapping("/error")
