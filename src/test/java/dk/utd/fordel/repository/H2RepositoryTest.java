@@ -157,6 +157,8 @@ public class H2RepositoryTest {
 
             h2Repository.assignAdvisor(advisor, project);
 
+            assertFalse(h2Repository.checkMaxWorkLoad(advisor));
+
             assertThrows(AdvisorReachedMaxWorkLoad.class,
                     () -> h2Repository.assignAdvisor(advisor, project2));
 

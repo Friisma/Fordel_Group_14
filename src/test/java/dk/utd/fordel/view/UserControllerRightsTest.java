@@ -20,6 +20,7 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
+import java.time.LocalDate;
 import java.util.List;
 
 class UserControllerRightsTest {
@@ -88,6 +89,72 @@ class UserControllerRightsTest {
         assertEquals(1, unitOfWork.beginCount);
         assertEquals(1, userRepository.deletedUsers.size());
         assertEquals(user("victim@fordel.dk"), userRepository.deletedUsers.getFirst());
+    }
+
+    @Test
+    void update_username_succeeds_for_logged_in_user() throws Exception {
+        MockHttpSession session = sessionWith(new User.Data("OldName", List.of(Roles.STUDENT), "Software Technology", null), "student@fordel.dk");
+        Model model = new ExtendedModelMap();
+
+        String view = controller.updateUsername(session, "NewName");
+
+        assertEquals("redirect:/", view);
+
+        User.Data updatedData = (User.Data) session.getAttribute("userData");
+        assertEquals("NewName", updatedData.name());
+    }
+
+    @Test
+    void update_username_redirects_to_login_if_not_authenticated() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+
+        String view = controller.updateUsername(session, "NewName");
+
+        assertEquals("redirect:/login", view);
+
+    }
+
+    @Test
+    void update_username_rejects_blank_name() throws Exception {
+        MockHttpSession session = sessionWith(new User.Data("OldName", List.of(Roles.STUDENT), null, null), "student@fordel.dk");
+
+        String view = controller.updateUsername(session, "   ");
+
+        assertEquals("redirect:/", view);
+
+    }
+
+    @Test
+    void update_study_start_succeeds_for_student() throws Exception {
+        MockHttpSession session = sessionWith(new User.Data("Peter", List.of(Roles.STUDENT), "Software Technology", null), "student@fordel.dk");
+        LocalDate date = LocalDate.of(2023, 9, 1);
+
+        String view = controller.updateStudyStart(session, date);
+
+        assertEquals("redirect:/", view);
+
+        User.Data updatedData = (User.Data) session.getAttribute("userData");
+        assertEquals(date, updatedData.studyStart());
+    }
+
+    @Test
+    void update_study_start_redirects_to_login_if_not_authenticated() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+
+        String view = controller.updateStudyStart(session, LocalDate.of(2023, 9, 1));
+
+        assertEquals("redirect:/login", view);
+
+    }
+
+    @Test
+    void update_study_start_blocked_for_non_student() throws Exception {
+        MockHttpSession session = sessionWith(new User.Data("Peter", List.of(Roles.ADVISOR), null, null), "advisor@fordel.dk");
+
+        String view = controller.updateStudyStart(session, LocalDate.of(2023, 9, 1));
+
+        assertEquals("redirect:/forbidden", view);
+
     }
 
     private static MockHttpSession sessionWith(User.Data data, String email) throws Email.InvalidEmail {
