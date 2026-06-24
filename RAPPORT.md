@@ -120,6 +120,10 @@ Ting der er gode at få med:
   - Her kan I bruge aktivitet og sekvens diagrammer til at beskrive opførsel hvis den er anderledes
     end AS-IS.
 
+### Gant diagram
+![Gantt-diagram](rapport-items/Gantt_diagram.png)
+
+
 ### Implementering
 
 > _Hvad fik vi lavet?_
