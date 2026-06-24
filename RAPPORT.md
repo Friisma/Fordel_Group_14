@@ -39,7 +39,62 @@ Ting der er gode at få med:
   - Dette hedder ofte AS-IS (som det er) som er i kontrast til TO-BE (som det skal være).
 - [ ] En prioritering af User Stories.
   - Her kan I gøre brug af MoSCoW.
-  - I kan også inddele dem i funktionelle, kvalitets og udviklings-mæssige krav.
+  - I kan også inddele dem i funktionelle, 
+## Product Backlog (MoSCoW)
+
+---
+### Must Have
+*Kritiske user stories, der SKAL være med i vores Minimum Viable Product (MVP). Uden disse fungerer systemet ikke.*
+
+| ID        | User Story                                                                                                                                                                     |
+|:----------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **US-1**  | **Login:** **As** any user of the site **I want to** be able to authenticate myself **such that** I can get a personalized view and options                                    |
+| **US-2**  | **Create A Study Line:** **As** the administrator **I want to** create study lines **such that** I can assign students and study leaders                                       |
+| **US-3**  | **Create Advisors:** **As** the administrator **I want to** assign users as advisors **such that** they can advise students                                                    |
+| **US-4**  | **Assign Study Leaders:** **As** the administrator **I want to** assign a study leader to a study line **such that** they can administrate the students of that line           |
+| **US-5**  | **Assign Students:** **As** a study leader **I want to** assign students to a study line **such that** I can monitor and help them complete their projects                     |
+| **US-8**  | **Advisor Project Choice:** **As** an advisor **I want to** see a list of potential projects **such that** I can choose some to advise                                         |
+| **US-10** | **Project Creation:** **As** a student **I want to** to create a project **such that** it can be chosen by an advisor                                                          |
+| **US-12** | **Multistudent Project:** **As** a student **I want to** to add other students to my project **such that** I can work with them on the project                                 |
+| **US-13** | **Project Collaborator Invitation:** **As** a student **I want to** accept or reject an invitation to be part of a project **such that** I can choose which project to work on |
+| **US-14** | **Project Advisor Invitation:** **As** a student **I want to** see a list of potential advisors **such that** I can send a request to join the project                         |
+
+---
+
+### Should Have
+*Vigtige funktioner, der skaber stor værdi for brugeren, men som kan udskydes, hvis tiden bliver for knap.*
+
+| ID        | User Story                                                                                                                                                                          |
+|:----------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **US-9**  | **Advisor Project Dashboard:** **As** an advisor **I want to** see a list of projects I have accepted to advise **such that** I can have an overview of the projects I'm advising   |
+| **US-11** | **Project Draft Creation:** **As** a student **I want to** save the project as a draft **such that** I do not have to publish an unfinished project                                 |
+| **US-16** | **Advisor Workload:** **As** an advisor **I want to** set my acceptable workload **such that** students do not contact me when I am full                                            |
+| **US-19** | **Advisor Project Creation:** **As** an advisor **I want to** publish a potential project **such that** students can choose it                                                      |
+| **US-23** | **Add student progress:** **As** a student **I want to** to be able set my start date **such that** the system can calculate approximate start dates for internship and the project |
+| **US-25** | **Invite co-advisors:** **As** an advisor **I want to** to be able to invite students and other advisors to the project **such that** I can get a co-advisors                       |
+| **US-28** | **Expire Passwords:** **As** a system administrator **I want to** require passwords to expire after 3 months **such that** to harden the security of the system                     |
+
+---
+
+### Could Have
+*Nice-to-have features. Disse kigger vi kun på, hvis vi er foran tidsplanen.*
+
+| ID        | User Story                                                                                                                                                                     |
+|:----------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **US-20** | **Have a Cookie Notice:** **As** any user **I want to** to be informed about the use of cookies **such that** my rights are upheld                                             |
+| **US-21** | **Delete Users:** **As** any user **I want to** to be able to have my account deleted **such that** my rights are upheld                                                       |
+| **US-22** | **Change name:** **As** any user **I want to** to be able change my name and information **such that** be represented as I prefer                                              |
+| **US-26** | **Update of project:** **As** an advisor **I want to** to be able update the name and abstract of the project after start **such that** the description match the project done |
+
+---
+
+### Won't Have
+*Funktioner vi aktivt har valgt fra i denne omgang for at holde fokus.*
+
+| ID        | User Story                                                                                                                                                         |
+|:----------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **US-27** | **A Change of Language:** **As** a user **I want to** to be able to see the webpage in both Danish and English **such that** the page is easy to understand for me |
+ 
 - [ ] En diskussion af hvad kundesnakken har ændret.
 
 ### Planlægning og Design
