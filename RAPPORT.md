@@ -31,7 +31,7 @@ authors:
 | **Planlægning og design** | 0%               | 0%              | 100%             | 0%                |
 | **Implementering**        | ?%               | 60%             | 20%              | ?%                |
 | **Validering**            | ?%               | ?%              | ?%               | ?%                |
-| **Diskussion**            | ?%               | 25%             | ?%               | ?%                |
+| **Diskussion**            | ?%               | 30%             | ?%               | ?%                |
 
 ## Use of AI
 ### s255896 (Lasse Pedersen)
