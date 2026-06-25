@@ -71,19 +71,9 @@ Udover code contribution score, er der også mere strukturelle arbejdsopgaver, d
 
 ## Indledning
 
-> _Hvem, Hvorfor, og Hvordan skal man læse rapporten?_
+Denne rapport beskriver udviklingen af Fordel 14, et system til håndtering af projekter, studielinjer, brugere og rettigheder for universitetet UTD. Projektet blev udviklet med udgangspunkt i kundens user stories, og undervejs har vi arbejdet tæt med kravafstemning og prioritering for at sikre os, at løsningen hænger sammen med de vigtigste behov i domænet. Rapporten er skrevet til en læser, der ønsker at forstå både problemet, vores valgte løsning og de vigtigste tekniske valg i projektet, uden at kende hele kodebasen på forhånd.
 
-Kort sagt, har indledningen formålet at sætte kontekst og forventningerne til resten af rapporten.
-En dårlig indledning giver derfor ofte et dårlig indtryk; som I så skal kæmpe jer tilbage fra i resten af rapporten.
-
-Ting der er gode at få med:
-
-- [ ] Sæt rapporten in kontekst. Hvad forventer I at jeres læser kan forstå?
-- [ ] En kort beskrivelse af hvad I har lavet og er specielt stolte af, gerne med referencer til resten af rapporten.
-
-
-
-
+I de følgende afsnit gennemgår vi først kravanalysen, hvor user stories og domænet bliver omsat til centrale begreber og relationer. Derefter beskriver vi planlægningen og designet, hvor vi forklarer, hvordan opgaven blev opdelt, og hvordan arkitekturen blev struktureret for bedst at understøtte samarbejde og videreudvikling. I implementerings-delen fokuserer vi på den konkrete kodebase, herunder lags opdelingen i systemet, de vigtigste domæneklasser og de patterns, vi har brugt til at holde løsningen overskuelig, læsbar og maintainable. Til sidst gennemgår vi validering og diskussion, hvor vi vurderer, hvad der fungerede godt, og hvad vi lærte af processen.
 
 ## Kravanalyse
 > _Hvad er problemet?_
