@@ -168,11 +168,11 @@ Ting der er gode at få med:
 - [x] Brudt User Stories ned i delsystemer.
   - Et delsystem er noget som er mere koblet end resten.
   - Bevægelse / Fængsel / Prøv Lykken / .. osv.
-- [ ] En beskrivelse af planlægningen.
+- [x] En beskrivelse af planlægningen.
   - Hvilke user stories afhænger af hvilke og er der tid nok til at nå de forskellige user stories.
   - Måske bruge et Gantt' Diagram.
-- [ ] En beskrivelse af hvordan planen har ændret sig over tid.
-- [ ] En beskrivelse af arkitekturen (pakke niveau).
+- [x] En beskrivelse af hvordan planen har ændret sig over tid.
+- [x] En beskrivelse af arkitekturen (pakke niveau).
   - Hvordan har I brudt jeres kode op i pakker sådan at I får høj sammenhæng og lav coupling.
   - Har I designet delsystemer sådan at I kan arbejde på dem parallelt?
   - Har I gjort jer nogle ideer omkring test.
@@ -213,6 +213,8 @@ hvordan vi har grebet de forskellige user stories an. Gantt diagrammet viser bla
 funktionaliteter, og hvilke user stories der direkte afhænger af løsningen på andre del-opgaver. For at gøre diagrammet mere overskueligt 
 fungere de forskellige møder med kunden som en "nulstilling" for at gøre diagrammet mere overskueligt.
 
+
+
 ![Gantt-diagram](rapport-items/Gantt_diagram.png)
 
 Som det ses i Gantt diagrammet har vi arbejdet ud fra nogle møder med vores kunde, der har fungeret som deadlines af udvalgte user stories.
@@ -248,6 +250,23 @@ Under mødet med kunden blev vores tolkning af rolle systemet udfordret. Det res
 vores rolle system, og tilhørende systemer. Vi valgte her at fortsætte med at implementere nye funktionaliteter mens rollesystemet blev omskrevet. 
 Konsekvenserne af dette vil vi reflektere yderligere over i vores diskussion. 
 
+### Arkitektur
+Systemet er opbygget efter en "layered" arkitektur, hvor de forskellige lag har forskellige funktionaliteter og formål.
+Denne opdeling praktiserer "separation of concerns", hvilket gør systemet mere skalerbar, testbar og nemmere at vedligeholde **[1]**. 
+
+
+Den overordnede filstruktur i projektet afspejler den her "layered" arkitektur, og er organiseret i følgende hovedområder: 
+- **domain** indeholder domænemodeller og entiteter, der repræsenterer systemets og dets forretningsobjekter. Klasserne i domain afspejler den data der arbejdes med i systemet på tværs af lagene.  
+- **repository** står alene for at kommunikere med databasen. Her implementeres der SQL-operationer, der anvendes til oprettelse, sletning og hentning af data. 
+Ved at samle database adgangen i ét lag, fremmer vi også **"high cohesion"**, da laget har et meget veldefineret ansvar.  
+- **services** indeholder projektets forretningslogik, og klasser som "ProjectManager" fungerer som et bindeled mellem view-laget og repository-laget. Service-laget koordinerer kald til 
+repository laget, håndterer domæne logik og gør det muligt at genbruge kode på tværs af systemet. Dette er med til at fremme **"low coupling"** da service-laget abstraherer repository-laget
+væk fra view laget, så de enkelte lag kan ændres uafhængigt af hinanden.
+- **view** håndterer præsentationen af data fra repository laget over for brugeren, og gør brug af Thymeleaf og Spring boot til at vise og hente data. 
+- **resources** indeholder database migrations, HTML-skabeloner og statiske filer som CSS og JavaScript.
+
+Ved at bruge denne arkitektur, har vi en klar opdeling af ansvar, hvor ændringer i ét lag, har minimal påvirkning på de øvrige lag. Det har givet os fleksibilitet i udviklingen
+og gjort det nemmere for os at arbejde parallelt på de forskellige dele af systemet.
 
 ### Implementering
 
@@ -308,4 +327,7 @@ Ting der er gode at få med:
 **HUSK AT SKRIV OM VORES MÆRKELIGE ROLLE SYSTEM**
 **REFLEKTER OVER HVAD VI KUNNE HAVE GJORT ANDERLEDES I FORHOLD TIL PLANLÆGNINGEN**
 
+
 ## Kilder
+
+- [1]: GeeksForGeeks, "Separation of Concerns (SoC)", 2024. https://www.geeksforgeeks.org/software-engineering/separation-of-concerns-soc/
