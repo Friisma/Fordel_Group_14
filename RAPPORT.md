@@ -1057,7 +1057,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 Når en bruger taster i inputfeltet, afsendes der et `input`-event for hvert eneste tegn (hvert enkelte tryk på en tast). Hvis søgefunktionen og den tilhørende filtrering kørte med det samme ved hvert tryk, ville computeren udføre tunge DOM-manipulationer unødvendigt mange gange i sekundet.
 
-Debouncing er et designmønster, der forsinker udførelsen af en funktion, indtil der har været en pause i brugerens aktivitet for et givet tidsrum.
+Debouncing er et designmønster, der forsinker udførelsen af en funktion, indtil der har været en pause i brugerens aktivitet for et givet tidsrum. **[5]**
 
 I denne kode fungerer det på følgende måde:
 
@@ -1220,6 +1220,7 @@ I en fremtidigt opgave som denne vil det være optimalt at integrere testskrivni
 ## Kilder
 
 - [1]: GeeksForGeeks, "Separation of Concerns (SoC)", 2024. https://www.geeksforgeeks.org/software-engineering/separation-of-concerns-soc/
-- [2]: Craig Larman, "Applying UML and Patterns: An Introduction to Object-Oriented Analysis and Design and Iterative Development, Third Edition", 2004
-- [3]: Erich Gamma, Richard Helm, Ralph Johnson, John Vilssides, "Design Patterns Elements of Reusable Object-Oriented Software", 1994
+- [2]: Craig Larman, "Applying UML and Patterns: An Introduction to Object-Oriented Analysis and Design and Iterative Development, Third Edition", 2004.
+- [3]: Erich Gamma, Richard Helm, Ralph Johnson, John Vilssides, "Design Patterns Elements of Reusable Object-Oriented Software", 1994.
 - [4]: GeeksForGeeks, "Layered Architecture in Computer Networks", 2025. https://www.geeksforgeeks.org/computer-networks/layered-architecture-in-computer-networks/
+- [5]: freeCodeCamp, "Debounce – How to Delay a Function in JavaScript (JS ES6 Example)", 2021. https://www.freecodecamp.org/news/javascript-debounce-example/
