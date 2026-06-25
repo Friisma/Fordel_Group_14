@@ -141,8 +141,11 @@ Ting der er gode at få med:
 - [ ] En gennemgang af de patterns I har gjort brug af.
   - Dependency Inversion/Injection, MVC, Observer Pattern, GoF, osv...
   - Her kan I bruge klasse diagrammer og sekvens diagrammer.
+  
 - [ ] En forklaring af specielet interessant eller vigtig kode.
   - Her kan I bruge sekvens diagrammer, tilstands diagrammer, eller kode eksempler.
+
+![sequence diagram](rapport-items/create_project_sequence.png)
 
 Husk at bruge de rigtige pile i klasse-diagrammet (By Yanpas - Own work, [CC BY-SA 4.0](https://commons.wikimedia.org/w/index.php?curid=48015014)):
 
