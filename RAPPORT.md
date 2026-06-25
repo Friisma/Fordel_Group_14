@@ -863,7 +863,144 @@ Dette er et eksempel på Creator-princippet ift. at lade `RightsContext` være s
 
 Fordelen ved dette er lavere coupling i systemet. Hvis andre klasser i systemet blev givet ansvaret for at oprette en anonym kontekst ved direkte brug af `new RightsContext(false, Set.of(), Set.of())`, ville de blive hårdt koblet til klassens specifikke constructore og parametre. Hvis der i fremtiden skulle ændres på, hvordan en "anonym" bruger defineres (fx. ved at tilføje en log eller andet), skulle denne ændring (med creator princippet) kun foretages et sted, i `anonymous()`-metoden. På denne måde har resten af systemet intet ansvar for de interne detaljer ift. opsætning.
 
-### Validering
+---
+
+### Vigtige metoder
+
+#### Project creation
+Et af projektets vigtigste metoder, er vores postCreateProject metode, der både interagere med service lag og derfor repository lag, men også direkte i vores HTML
+ved brug af Spring boot og Thymeleaf. Vi vil forklare koden i bidder, for at gøre forklaringen mere overskuelig.
+
+```Java
+@PostMapping("/create-project")
+public String postCreateProject(Model model,
+@RequestParam("project_name") String projectName,
+@RequestParam("project_description") String projectDescription,
+@RequestParam("study_line") String studyLineName,
+HttpSession session){
+model.addAttribute("title", "Opret projekt");
+```
+
+`@PostMapping("/create-project")` mapper vores endpoint for vores input i vores post metode via Spring boot til "/create-project". Her kommer 
+selve input dataen hentes fra `@RequestParam("...")`. Modellen hentes og bruges til at kunne returnere feedback til brugeren. Derudover hentes
+HttpSession, for at kunne validere brugeren af sessionen. 
+
+```Java
+        boolean isValid = true;
+
+        String projectNameMessage = null;
+        if (projectName.isEmpty()){
+            projectNameMessage = "Project needs a name";
+            isValid = false;
+        }
+
+        String projectDescriptionMessage = null;
+        if (projectDescription.isEmpty()){
+            projectDescriptionMessage = "Project needs a description";
+            isValid = false;
+
+        if (studyLineName == null || studyLineName.isBlank()) {
+            projectNameMessage = "You must select a study line";
+            isValid = false;
+        }
+```
+For at validere brugerens input inden vi kalder på vores services, indfører vi en boolean variabel `isValid` 
+der bruges til at holde styr på om brugerens input er gyldigt. Derudover er det besluttet at der ikke kan oprettes
+et projekt uden en tilhørende studie linje. 
+```Java
+        } else {
+            Authenticator.Auth auth = (Authenticator.Auth) session.getAttribute("auth");
+            User user = auth.user();
+            try (var uow = unitOfWork.begin()) {
+                Roles role = userManager.determineStudyLineSpecificRole(user, studyLineName);
+                uow.commit();
+                if (role == null) {
+                    projectNameMessage = "You do not belong to the selected study line";
+                    isValid = false;
+                }
+            } catch (UnitOfWork.UnitOfWorkException e) {
+                Log.giveUp(logger, e, "Failed to check study line membership");
+                isValid = false;
+            }
+        }
+```
+Udover at projektet skal være en del af en studielinje, er det besluttet at brugeren der opretter projektet også skal være 
+en del af en studielinje, da selve funktionaliteterne af projektet indebærer at brugeren har en rolle i en studielinje.
+Derfor henter vi sessionens bruger ned gennem vores Authenticator, og validere at brugeren er en del af 
+en studielinje. Dette gøres med `determineStudyLineSpecificRole(user, studyLineName)` Der igennem vores service lag, 
+kalder på den respektive funktion i vores repository lag. Hvis funktionen returnere null, betyder det at user ikke er en del af en 
+studielinje.
+
+```Java
+
+        Project project = null;
+        try {
+             project = new Project(projectName, projectDescription);
+        } catch (Project.InvalidProject e) {
+            isValid = false;
+            projectNameMessage = "Cant create project";
+        }
+        
+        if (isValid){
+            try (var uow = unitOfWork.begin()){
+                logger.info("UnitOfWork started: {}", uow);
+                Authenticator.Auth auth = (Authenticator.Auth)session.getAttribute("auth");
+                User user = auth.user();
+                int userId = userManager.getUserIdByEmail(user.getEmail());
+                projectManager.createProject(project, user, studyLineName, userId);
+                uow.commit();
+
+            } catch (ProjectTitleAlreadyInUse e) {
+                isValid = false;
+                projectNameMessage = "Invalid project title, already in use";
+
+            } catch (UnitOfWork.UnitOfWorkException e) {
+                Log.giveUp(logger, e, "Failed to create Project");
+                isValid = false;
+                projectNameMessage = "Failed to create project";
+            }
+        }
+```
+Hvis brugerens input og projektet er gyldigt, påbegyndes der et `UnitOfWork`, hvilket er et designmønster 
+der bruges til at samle flere databaseoperationer i én transaktion. Hvis der er nogle ting der går galt i transaktionen, 
+bliver alle operationer "rolled back" og bliver derfor ikke udført. Inde i vores UnitOfWork henter vi vores user ned fra vores session, 
+og finder userens id i vores database. Dette bruger vi til at oprette projektet, så det overholder dataen direkte fra databasen. 
+Herefter insættes der en nyt projekt i vores database, med den validerede data. Til sidst kalder vi `uow.commit()` der udfører vores transaktioner 
+og udfører ændringerne i databasen. 
+
+```Java
+        if(!isValid){
+            model.addAttribute("title", "Opret projekt");
+            model.addAttribute("project_name", new Field(
+                    "text", "project_name", "Project name",
+                    "", projectNameMessage));
+            model.addAttribute("project_description", new Field(
+                    "text", "project_description", "Description",
+                    "", projectDescriptionMessage));
+
+            try (var uow = unitOfWork.begin()) {
+                model.addAttribute("studyLines", studyLineManager.getAllStudyLines());
+                uow.commit();
+            } catch (UnitOfWork.UnitOfWorkException e) {
+                Log.giveUp(logger, e, "Failed to reload study lines");
+            }
+
+            return "create-project";
+        } else {
+            logger.info("project {} created", project);
+            return "redirect:/";
+        }
+    }
+```
+
+Hvis brugerens input ikke er gyldigt, eller hvis der på et tidspunkt er opstået en fejl i enten databasen eller i et 
+andet lag, skal brugeren have feedback. Derfor kan vi bruge `model.addAttribute(...)` der tilføjer en besked til brugeren, før den returnere
+stien tilbage til "create-proejct" siden. Dette kan lade sig gøre, da thymeleaf dynamisk tilføje værdierne til HTML siden. 
+
+Hvis alt ellers fungere, bliver brugeren redirected tilbage til vores main side, hvor brugeren kan se en oversigt over sine projekter 
+med det tilføjede projekt. 
+
+## Validering
 
 > _Virker det?_
 

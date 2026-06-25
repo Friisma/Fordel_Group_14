@@ -70,7 +70,6 @@ public class CreateProject {
      * Post method for creating a project.
      *
      */
-
     @PostMapping("/create-project")
     public String postCreateProject(Model model,
                                     @RequestParam("project_name") String projectName,
@@ -80,8 +79,6 @@ public class CreateProject {
         model.addAttribute("title", "Opret projekt");
 
         boolean isValid = true;
-
-
 
         String projectNameMessage = null;
         if (projectName.isEmpty()){
@@ -138,12 +135,10 @@ public class CreateProject {
                 isValid = false;
                 projectNameMessage = "Invalid project title, already in use";
 
-
             } catch (UnitOfWork.UnitOfWorkException e) {
                 Log.giveUp(logger, e, "Failed to create Project");
                 isValid = false;
                 projectNameMessage = "Failed to create project";
-
             }
         }
 
