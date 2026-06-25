@@ -31,7 +31,7 @@ authors:
 | **Planlægning og design** | 0%               | 0%              | 100%             | 0%                |
 | **Implementering**        | ?%               | 60%             | 20%              | ?%                |
 | **Validering**            | ?%               | ?%              | ?%               | ?%                |
-| **Diskussion**            | ?%               | ?%              | ?%               | ?%                |
+| **Diskussion**            | ?%               | 25%             | ?%               | ?%                |
 
 ## Use of AI
 ### s255896 (Lasse Pedersen)
@@ -1168,13 +1168,51 @@ Dette gjorde det muligt for os at afstemme vores forventninger med hinanden
 inden projektet gik i gang.
 
 
-
 ### Hvad kunne vi gøre bedre. 
 
-For at have struktureret vores planlægning og arbejde bedre, kunne vi ha brugt nogle værktøjer til at ligge en mere konkret plan 
-end den vi havde. På den måde kunne vi ha skabt en bedre forudsætning for at overtage nye arbejdsopgaver, og uddelegere arbejdet bedre. I vores planlægningsafsnit 
-viser vi med et Gantt diagram hvordan vi udviklet de forskellige funktioner til vores projekt. Sådan et værktøj kunne have været godt til at lave en mere udarbejdet plan. 
-proaktivt. 
+I dette afsnit reflekteres der over, hvordan projektet kunne være optimeret, opdelt i organisatoriske og tekniske områder.
+
+#### Organiseringsrelaterede forbedringer og projektstyring
+
+Selvom projektets deadlines blev overholdt, kunne det overordnede forløb have været struktureret mere proaktivt. Det Gantt-diagram, der præsenteres i planlægningsafsnittet, blev primært udarbejdet retrospektivt for at vise udviklingen. Hvis et tilsvarende planlægningsværktøj i stedet var blevet anvendt aktivt fra projektets start, ville det have skabt langt bedre forudsætninger for løbende at estimere tidsforbrug, uddelegere arbejdsbyrden og håndtere opgaver med indbyrdes afhængigheder.
+
+Dette ville have givet en mere struktureret ramme for afstemning af forventninger og ville havet gjort det nemmere for de enkelte gruppemedlemmer proaktivt at overtage nye opgaver.
+
+#### Tekniske og implementeringsmæssige forbedringer
+
+I dette afsnit analyseres de tekniske udfordringer, der opstod undervejs i udviklingen, samt hvordan arkitekturen og implementeringen kunne have været optimeret fra projektets begyndelse.
+
+##### Refaktorering mod en generisk databasemodel for rollestyring
+
+I starten af projektet blev koblingen mellem brugere, roller og studielinjer implementeret via specifikke relationstabeller, herunder `studyline_students` og `studyline_leaders`. Denne struktur viste sig hurtigt ikke at være generisk nok. Da det senere hen i forløbet blev et krav, at andre systemroller (såsom Advisors) på samme måde kunne have tilknytning til specifikke studielinjer, nødvendiggjorde det en stor og tidskrævende omskrivning af kodebasen.
+
+For at løse dette strukturelle problem blev der introduceret en mere generisk samletabel: `study_line_memberships`. Denne tabel forener `user_id`, `studyline_id` og `role_id` i en samlet entity.
+
+Erfaringen viser, at en dybere domæneanalyse inden database-designet kunne have forebygget denne situation. Ved at designe relationerne mere generisk fra start i stedet for at binde specifikke roller til isolerede tabeller, kunne applikationen have skaleret uden behov for større omskrivninger i slutfasen.
+
+##### Brud på DRY-princippet i præsentationslaget (Modals)
+
+Under udviklingen af brugergrænsefladen opstod der et brud på DRY-princippet (Don't Repeat Yourself!) i forbindelse med håndteringen af modals (dialogbokse). Da behovet for forskellige modals opstod på tværs af platformen, resulterede dette i oprettelsen af adskillige, stortset identiske HTML-templates til de enkelte modals.
+
+En langt bedre tilgang havde været at udvikle en generisk, genanvendelig modal-komponent i Thymeleaf-skabelonerne fra starten. Ved at lade modalen konfigurere dynamisk via parametre (f.eks. titel, inputfelter og form-aktions), kunne mængden af redundant frontend-kode have været reduceret, hvilket ligeledes ville have lettet den efterfølgende maintainability.
+
+##### Monolitisk arkitektur i repository-laget (`H2Repository`)
+
+Klassen `H2Repository` voksede enormt under implementeringen til en unødigt stor og kompleks fil. Klassen endte med at varetage databasekommunikationen for samtlige domæneobjekter i systemet, hvilket hurtigt lod filen komme op på over 1000 linjer.
+
+For at opnå en højere grad af high cohesion og bedre læsbarhed, burde denne fil have været delt ud i mindre, domænespecifikke repositories (eksempelvis et `UserRepository`, `ProjectRepository` og `StudyLineRepository`). Dette ville have isoleret SQL-requests'ne til deres respektive ansvarsområder og gjort at kodebasen blev mere overskuelig.
+
+Derudover var navngivningen af metoderne i `H2Repository` problematisk ift. manglende konsistens, da der ikke var fastsat nogle naming conventions far start. Etableringen af en fast standard for navne af metoder (fx. brug af præfixer som `findBy...`, `update...` eller `existsBy...`) ville have øget læsbarheden, søgbarheden og gennemsigtigheden på tværs af systemets lag.
+
+##### Teststrategi og løbende validering
+
+Som beskrevet i rapportens indledende afsnit, opstod der kritiske problemer med test-frameworket (Mockito) tæt på en vigtig deadline, hvilket skabte et akut behov for ekstern fejlretning og omskrivning til fakes (af ai). Dette understreger vigtigheden af en proaktiv teststrategi.
+
+I en fremtidigt opgave som denne vil det være optimalt at integrere testskrivningen som en fast del af den daglige udvikling, frem for en "isoleret" aktivitet til sidst. Ved at skrive unit tests og integrationstests løbende i takt med, at business-logic implementeres, sikres en konstant høj testdækning. Dette validerer ikke kun koden løbende, men fanger også problemer på tværs af gruppens lokale udviklingsmiljøer i tide, hvilket minimerer risikoen for problemer tæt på aflevering.
+
+#### Samarbejde og gruppedynamik
+
+*(Dette afsnit mangler at blive uddybet, f.eks. med refleksioner over kommunikation, gruppekontraktens overholdelse og håndtering af den ulige fordeling af arbejdsmængden).*
 
 
 
