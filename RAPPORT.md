@@ -76,6 +76,9 @@ Tabellen viser en liste over alle user stories, som kunden har fremlagt.
 | **US-28** | **Expire Passwords:** **As** a system administrator **I want to** require passwords to expire after 3 months **such that** to harden the security of the system                     |
 
 ### User story analyse
+
+
+---
 For at danne et overblik over produktet og hvad de forskellige ord i user stories betyder, har vi valgt at lave en analyse af user stories 
 med udgangspunkt i de mest centrale begreber. I analysen har vi kigget på hvilke navneord, tillægsord og udsagnsord der optræder i de forskellige
 user stories. Det fortæller nemlig ofte hvilke entities, attributes og relations, produktet skal bestå af. Dette kan senere i udviklingsprocessen 
@@ -99,6 +102,41 @@ Kigger vi i stedet på forholdet mellem **advisor** og **project**, som er "many
 _mange projekter_, og at et/mange projekter godt kan have flere advisors. 
 
 ![sequence diagram](rapport-items/domain-model.png)
+
+### System roller
+
+---
+Kigger man de forskellige user stories igennem, bliver det hurtigt klart, at kunden forventer et system, 
+hvor brugerne kan tildeles forskellige roller med dertilhørende rettigheder. Det har derfor været essentielt 
+at få skabt et overblik over, hvilke roller der findes i applikationen, og hvad de hver især har tilladelse til.
+På baggrund af de givet user stories har vi derfor lavet et overblik over de forskellige roller og hvilket rettigheder
+vi forventer de skal, så vi senere i udviklingen hurtigt kan få et overblik og rollerne. 
+
+**Any user**
+- Login
+- Ændre navn
+- Ændre sprog
+
+**Administrator** 
+- Oprette studielinjer 
+- Tildele roller
+- 
+
+**Study leader**
+- Tilføje students til sin linje
+- Råde over deres tildelte linje
+- Kontakte students
+
+**Advisor**
+- d
+
+**Student**
+- Oprette projekter
+- Sætte en status på projektet
+- Tilføje andre students til et projekt
+- Accepterer eller afslå invitation til andre projekter
+- Tilføje advisors til et projekt
+- Tilslutte sig advisor projekter
 
 ### Product Backlog (MoSCoW) 
 
