@@ -213,7 +213,7 @@ tydeligt, at kundens behov for at en bruger skulle kunne oprette projekter (US-1
 til at være must have, men samtalen gjorde at det blev prioriteret. Samtidig blev vi også klogere på domainet. Gennem
 dialogen med kunden blev det meget tydeligt hvilke relationer der var i mellem brugere, projekter, study lines osv... 
 
-### Planlægning og Design1
+### Planlægning og Design
 
 > _Hvordan kan vi løse det?_
 
@@ -295,18 +295,21 @@ Dette resulterede i at vi nåede alle user stories undtagen US27 (A change of la
 egentlige funktionaliteter. Det bør også noteres at et andet sprog ville kunne tilføjes uden at skulle modificere noget af den i forvejen implementerede logik. 
 
 
-##### Ændringer efter M1
+#### Ændringer efter M1
 Inden det første møde med kunden havde vi lagt en plan for den handlingsplan vi gerne ville præsentere kunden. Dette viste sig
 at være overflødigt, da kunden havde nogle andre forventninger end dem vi indledningsvis forventede. Derfor måtte vi
 omlægge vores plan til at bedre kunne imødekomme kunden forventninger. Til vores fordel havde vi valgt ikke at begynde 
 at producere noget kode før M1.
 
-##### Ændringer efter M2
+#### Ændringer efter M2
 Under mødet med kunden blev vores tolkning af rolle systemet udfordret. Det resulterede i at vi var nødt til at sætte tid af til at omskrive 
 vores rolle system, og tilhørende systemer. Vi valgte her at fortsætte med at implementere nye funktionaliteter mens rollesystemet blev omskrevet. 
 Konsekvenserne af dette vil vi reflektere yderligere over i vores diskussion. 
 
 ### Arkitektur
+
+> En "layered" arkitektur er et designmønster hvor systemet opdeles i lag, der hver har et veldefineret ansvar. Hvert lag må kun kommunikere med det lag direkte under eller over sig, hvilket reducere afhængigheder på tværs af systemet [4] 
+
 Systemet er opbygget efter en "layered" arkitektur, hvor de forskellige lag har forskellige funktionaliteter og formål.
 Denne opdeling praktiserer "separation of concerns", hvilket gør systemet mere skalerbar, testbar og nemmere at vedligeholde **[1]**. 
 
@@ -326,7 +329,8 @@ og gjort det nemmere for os at arbejde parallelt på de forskellige dele af syst
 
 ### Delsystemer
 
-Som beskrevet i planlægning, ligger vi vægt  
+Som beskrevet i planlægning og arkitektur, ligges der i projektet vægt på at opsætte delsystemerne, 
+så vi i gruppen kan arbejde parallelt med hinanden.  
 
 De delsystemer vi vil implementere er følgende: 
 - **User creation** er allerede implementeret ved starten af projektet. 
@@ -334,12 +338,17 @@ De delsystemer vi vil implementere er følgende:
 - **Roles** skal sættes op, så der er klar forskel på de forskellige roller en user kan have i systemet. Herunder skal der være et system til at opsætte roler til forskellige brugere. 
 - **Project creation** skal stå for at oprette projekter
 - **project management** skal kunne modificere projekter, og gøre at projektet kan ejes af en user. 
-- **invitations** skal til at starte med kunne stå for at invitere advisor roller til
-- **Study line creation** håndtere oprettelse af nye studie linjer 
-- **Study line management** skal kunne modificere studielinjer, samt hvem der hører til hvilke studielinjer, og
+- **invitations** skal til at starte med kunne stå for at invitere advisor roller til projekter. 
+- **Study line creation** håndtere oprettelse af nye studie linjer.  
+- **Study line management** skal kunne modificere studielinjer, samt hvem der hører til hvilke studielinjer, 
+og hvilke projekter der tilhører hvilke studielinjer. 
 
-for at give et billede på hvordan vi vil implementere de forskellige del-systemer kan vi vise hvordan vi har 
+For at give et billede på hvordan vi vil implementere de forskellige delsystemer, kan vi vise hvordan oprettelsen af et projekt foregår:
+
 ![sequence diagram](rapport-items/create_project_sequence.png)
+
+Diagrammet viser hvordan en bruger interagerer med systemet for at oprette et projekt. Controlleren modtager requestet,
+videresender det til service-laget, som koordinerer kald til repository-laget for at gemme projektet i databasen.
 
 ### Implementering
 
@@ -633,3 +642,4 @@ Ting der er gode at få med:
 - [1]: GeeksForGeeks, "Separation of Concerns (SoC)", 2024. https://www.geeksforgeeks.org/software-engineering/separation-of-concerns-soc/
 - [2]: Craig Larman, "Applying UML and Patterns: An Introduction to Object-Oriented Analysis and Design and Iterative Development, Third Edition", 2004
 - [3]: Erich Gamma, Richard Helm, Ralph Johnson, John Vilssides, Design Patterns Elements of Reusable Object-Oriented Software, 1994
+- [4]: GeeksForGeeks, "Layered Architecture in Computer Networks", 2025. https://www.geeksforgeeks.org/computer-networks/layered-architecture-in-computer-networks/
