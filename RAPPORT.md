@@ -14,6 +14,15 @@
 Tabel her
 
 ## Use of AI
+### s255896 (Lasse Pedersen)
+> Som et personligt princip har jeg valgt aldrig at bruge AI eller coding-agents til direkte generering af min kode, såkaldt "vibe-coding".
+> Min erfaring viser, at direkte genereret kode ofte fejler. AI-modeller kan hallucinere, og resultatet er sjældent maintainable eller i overensstemmelse med de principper for softwarearkitektur og clean code, vi lærer på universitetet (og som jeg opretholder for mig selv). Vigtigst af alt fjerner det læringsprocessen. Hvis man ukritisk lader en coding-agent løse opgaverne, fjerner man den faglige forståelse, da man kun for alvor lærer af fejl, man selv har begået og løst.
+> I stedet bruger jeg AI som en sparringspartner (næsten som en TA). Jeg anvender det i planlægningsfasen til at tage overvejelser ift. arkitekture, samt som et ekstra sæt øjne til code reviews og fejlfinding. 
+> Derudover bruger jeg AI værktøjer sprogligt til grammatisk kvalitetssikring, såsom at fange stavefejl og glemte kommaer i min egen tekst, uden at lade den formulere selve indholdet.
+> Målet er aldrig at blive afhængig af AI, men at arbejde sammen med det og bruge det som et værktøj, der løfter det endelige produkts kvalitet og understøtter min egen faglige og personlige udvikling.
+
+> Jeg blev dog nødt til at lave en undtagelse for dette princip en enkelt gang under projektet for at overholde deadlinen. Aftenen før det sidste kundemøde (vores endelige user story-deadline) opdagede vi alt for sent, at test-frameworket Mockito, som jeg havde brugt, fejlede på de andres computere. For at redde situationen og nå deadlinen var jeg tvunget til at lade en AI omskrive de 20-30 tests, jeg oprindeligt havde skrevet, der gjorde brug af Mockito, så de ikke længere var afhængige af Mockito. I denne situation fungerede AI’en udelukkende som en oversætter af mine egne, eksisterende tests, hvilket var afgørende for, at vi nåede i mål til tiden med en acceptabel test coverage.
+> AI'en oprettede en java-klasse under test/testsupport, der hedder TestFakes.java, som lod tests'ne gøre brug af Mockito-funktioner (mock-objekter, osv.) uden at have Mockito som en dependency.
 
 ## Statement on code contribution score
 
