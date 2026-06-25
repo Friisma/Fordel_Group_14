@@ -26,9 +26,9 @@ authors:
 ## Report contribution
 | Del af rapporten | Casper (s255762) | Lasse (s255896) | Magnus (s251019) | Mahmoud (s244632) |
 | --- | --- | --- |------------------| --- |
-| **Indledning** | ?% | ?% | ?%               | ?% |
+| **Indledning** | 0% | 100% | 0%               | 0% |
 | **Kravanalyse** | ?% | ?% | ?%               | ?% |
-| **Planlægning og design** | ?% | ?% | 100%             | ?% |
+| **Planlægning og design** | 0% | 0% | 100%             | 0% |
 | **Implementering** | ?% | ~50% | 20%              | ?% |
 | **Validering** | ?% | ?% | ?%               | ?% |
 | **Diskussion** | ?% | ?% | ?%               | ?% |
@@ -689,7 +689,7 @@ Modellen er opbygget omkring en klar separation af domæneroller `Roles` og konk
 Denne del af rapporten er dedikeret til at vise forskellige relavante principper og patterns brugt i koden.
 
 ##### GRASP: Pure Fabrication
-> Pure Fabrication er når en klasse der ikke eksistere i problem-domænet bliver oprettet for at opnå low coupling og high cohesion. Denne klasse er ikke nødvendigvis en reflektion af et koncept fra den virkelige verden, men den bliver introduceret af tekniske årsager. **[2]****[3]**
+> Pure Fabrication er når en klasse der ikke eksistere i problem-domænet bliver oprettet for at opnå low coupling og high cohesion. Denne klasse er ikke nødvendigvis en reflektion af et koncept fra den virkelige verden, men den bliver introduceret af tekniske årsager. **[2][3]**
 
 Klassen `GlobalModelAdvice` centralisere data som alle views kan bruge ved automatisk at ligge `userData` og brugeres rights ind i modellen for alle requests. Dette er både klassens eneste mål, men også klassens eneste adfærd, hvilket giver klassen high cohesion.
 Den henter `userData` fra http sessionen og hvis denne data findes returnere den både brugeres data og et `RightsContext` beregnet igennem `RightsService`. Hvis der ikke findes en bruger i sessionen gives der en "anonym" rettighedskontekst. På den måde slippes der fra at den samme logik gentages i hver controller (DRY).
@@ -732,9 +732,9 @@ public class GlobalModelAdvice {
 ---
 
 ##### GRASP: Indirection
-> Indirection er et designprincip, som introducerer et objekt, der formidler interaktioner mellem andre objekter og derved reducerer direkte coupling. Dette objekt fungerer som en mellemmand ved at kontrollere kommunikation og dependencies. **[2]****[3]**
+> Indirection er et designprincip, som introducerer et objekt, der formidler interaktioner mellem andre objekter og derved reducerer direkte coupling. Dette objekt fungerer som en mellemmand ved at kontrollere kommunikation og dependencies. **[2][3]**
 
-> Ved at bruge indirection bliver systemer mere modulære og nemmere at opretholde, siden ændringer i en klasse har en lavere sandsynlighed for at bevæge sig op igennem andre. Det understøtter også separation of concerns ved at delegere ansvar ud til dedikerede objekter. **[2]****[3]**
+> Ved at bruge indirection bliver systemer mere modulære og nemmere at opretholde, siden ændringer i en klasse har en lavere sandsynlighed for at bevæge sig op igennem andre. Det understøtter også separation of concerns ved at delegere ansvar ud til dedikerede objekter. **[2][3]**
 
 Det første og vigtigste eksempel på indirection er selvfølgelig brugen af Model-View-Controller (MVC) princippet overalt igennem hele projektet. Spring Boot MVC tvinger arkitekturen til at opdele systemet i tre forskellige lag, hvor Controlleren fungerer som det centrale Indirection-led (mellemmand).
 
@@ -849,7 +849,7 @@ Ved at uddelegere ansvaret for indehentning af data til denne specifikke metode,
 ---
 
 ##### GRASP: Creator
-> Creator er et princip, der handler om ansvarsplaceringen for, hvilken klasse der skal oprette (instantiere) nye objekter af en anden klasse. Creator patternet siger at en Klasse A tildeles ansvaret for at oprette Klasse B, hvis A har den nødvendige information til at gøre det, hvis A indeholder eller tæt anvender B, eller hvis A registrerer instanser af B. At sætte dette ansvar præcist føre til low coupling i systemet. **[2]****[3]**
+> Creator er et princip, der handler om ansvarsplaceringen for, hvilken klasse der skal oprette (instantiere) nye objekter af en anden klasse. Creator patternet siger at en Klasse A tildeles ansvaret for at oprette Klasse B, hvis A har den nødvendige information til at gøre det, hvis A indeholder eller tæt anvender B, eller hvis A registrerer instanser af B. At sætte dette ansvar præcist føre til low coupling i systemet. **[2][3]**
 
 I projektet ses Creator-princippet i håndteringen af systemets rettighedkontekst. Klassen `RightsContext` har formålet at indkapsulere og holde styr på om brugeren er logget ind (authenticated), hvilken rolle brugeren har (f.eks. `STUDENT` eller `TEACHER`), og hvilke specifikke tilladelser (permissions) der er knyttet til denne rolle. Den bruger en række helper methods til at verificere disse rettigheder.
 
