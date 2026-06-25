@@ -165,7 +165,7 @@ Der er to dele til denne del, en beskrivelse af det system som I vil udvikle, me
 
 Ting der er gode at få med:
 
-- [ ] Brudt User Stories ned i delsystemer.
+- [x] Brudt User Stories ned i delsystemer.
   - Et delsystem er noget som er mere koblet end resten.
   - Bevægelse / Fængsel / Prøv Lykken / .. osv.
 - [ ] En beskrivelse af planlægningen.
@@ -185,7 +185,7 @@ I dette afsnit vil vi gennemgå gruppens planlægning igennem projektets forløb
 tiltag der er blevet taget for at sikre at gruppen kunne efterleve denne planlægning. Derudover vil der også reflekteres over hvad vi som 
 gruppe vil gøre anderledes i fremtidige projekter. 
 
-### User stories 
+### Tilgang til User Stories 
 Ved projektets start blev der sat tid af til, at hvert gruppemedlem kunne sætte sig ned og danne sig et overblik over projektet, 
 dets user stories og den tilhørende kodebase. Dette blev gjort for at udarbejde en handleplan, 
 der afspejlede den eksisterende kodebase, samt for at finde ud af, 
@@ -193,14 +193,41 @@ hvordan vi i praksis kunne implementere de givne user stories. Inden vores førs
 
 Igennem projektet blev det klart for os at vi kunne implementere forskellige User stories på samme tid, uden implementationerne overlappede hinanden.
 Altså kunne vi dele det overordnede system op i del-opgaver der i starten kunne implementeres selvstændigt og virke som sit eget system. På den måde kunne vi 
-imellem M1 og M2 arbejde sideløbende på flere forskellige systemer, der var med til at løse hver deres User stories.     
+imellem M1 og M2 arbejde sideløbende på flere forskellige systemer, der var med til at løse hver deres User stories.  
+
+Det handlede derfor for os, som en start, at udvælge nogle 
+user stories hvor de tilhørende implementationer kunne fungere uafhængigt af hinanden. Et eksempel på dette kunne være US10 (Project Creation) & US2 (Create A Study Line), 
+der i første omgang godt kunne implementeres uden funktionelt overlap. Når begge user stories blev implementeret selvstændigt, 
+kunne der herefter arbejdes på at skabe sammenhængende funktioner, som at give et projekt in tilhørende studielinje, eller på at vise alle projekter der tilhører en studielinje.
 
 ### Planlægning
 
-#### Gant diagram
+For at have den ovenstående tilgang til vores user stories, krævede det at vi som gruppe kunne uddelegere de forskellige del-opgaver. 
+Derfor aftalte vi i vores gruppe kontrakt, at der som udgangspunkt skulle mødes 2-3 gange om ugen. Dette bidragede til at skabe overblik over vores fremskridt 
+med user stories, og uddelegere user stories og del opgaver der afhænger af nogle af de delsystemer der allerede er blevet eller ville blive
+implementeret. 
+
+For at give et indtryk af vores fremgangsmåde har vi, efter vores sidste møde ("F1"), lavet nedenstående Gantt-diagram for at vise 
+hvordan vi har grebet de forskellige user stories an. Gantt diagrammet viser blandt andet hvilke arbejdsopgaver der kunne løses uden nogle foregående
+funktionaliteter, og hvilke user stories der direkte afhænger af løsningen på andre del-opgaver. For at gøre diagrammet mere overskueligt 
+fungere de forskellige møder med kunden som en "nulstilling" for at gøre diagrammet mere overskueligt.
+
 ![Gantt-diagram](rapport-items/Gantt_diagram.png)
 
+Som det ses i Gantt diagrammet har vi arbejdet ud fra nogle møder med vores kunde, der har fungeret som deadlines af udvalgte user stories.
+I den anledning kunne møderne også bruges til at undersøge hvad der ligges mest vægt på fra kundens side, og hvad der skal tilrettes
+af det der allerede var blevet implementeret.
+
+Inden vores andet møde med kunden ("M2"), aftalte vi at have produceret et "minimal viable product" (MVP), ud fra de tilgængelige user stories, 
+og de indtryk vi havde fået fra kundens prioriteringer. Dette fungerede som en god milepæl for vores projekt. 
+Her var vi også tvunget til at tage nogle beslutninger om hvilke user stories vi i første omgang ikke havde tid
+til at få implementeret. 
+
 #### Ændringer af plan
+Inden det første møde med kunden havde vi lagt en plan for den handlingsplan vi gerne ville præsentere kunden. Dette viste sig
+at være overflødigt, da kunden havde nogle andre forventninger end dem vi indledningsvis forventede. Derfor måtte vi
+omlægge vores plan til at bedre kunne imødekomme kunden forventninger. Til vores fordel havde vi valgt ikke at begynde 
+at producere noget kode før M1.   
 
 ### Implementering
 
