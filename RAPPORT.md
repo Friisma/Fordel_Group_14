@@ -560,6 +560,45 @@ Ting der er gode at få med:
 - [ ] En forklaring af brug af unit-test og code coverage.
   - Screen shots fra jeres IDE med code coverage.
 
+For at validere hjemmesiden har vi brugt både automatiske test og manuelle test. De automatiske test bliv kørt med Maven, og manuelle test bliv brugt til at kontrollere de vigtigste flows i browseren. På den måde har vi både testet enkelte dele af koden og hvordan systemer virker samlet.
+
+Projektet er blive testet på både windows og macOS, da vores druppemedlemmerne har arbejdet på forskellige systemer. På Windows bliv testene kørt med Java 24.0.2. vi har ikke oplevet problemer med at køre projektet på systemer vi brugte. Projektet er lavet med Spring Boot, Thymeleaf og H2-database. Under test blive databasen kørt som en in-memory database, så testener kan køre uden ekstern database.
+
+Testen var kørte med: mvn test
+
+Da vi kørte testerne, bliv der kørt 156 tests, resultatet var 0 failures, 0 errors og 0 skipped test. Det viser at de automatiske test i projektet kørte igennem uden fjel.
+
+Vi har især haft fokus på de dele at systemet som brugeren møder. Det gælder blandet andet login, oprettelse af brugere, ændring af password, password expiry, rettigheder, rollebaseret adgang, study lines, projekter, invitationer og student progress. Der er også testes for repository-laget, så vi kan se at data bliver gemt, hentet og opdateret korrekt i databasen.
+
+Vi har brugt unit tests til at teste de mindre dele af systemet. Det er for eksempel tests af Email, User, Project og lins, men også test af seervises som Login, password expiry, rights og student progress. Det gjorde det lettere at finde fejl i selve logikken, uden at vi skulle teste det hele manuelt i browseren hver gang.
+
+Vi har også brugt controller test til at teste de flows, som går gennem websiden, her testede vi blandt andet projekter, study lines, invitationer og rollebaseret adgang. Disse tests kontrollerer for eksempel om brugeren kommer til den rigtige side, bliver redirectet korrekt, eller bliver stoppet hvis brugeren ikke har rettigheder.
+
+Vi har også selv prøvet de vigtigste user stories i browseren, der gjorde vo for at se om funktionerne virkede fra brugerens fra brugerens side, og ikke kun i de automatiske tests. 
+
+| Accepttest / flov                              | Resultat |
+|------------------------------------------------|----------|
+| Login, logout og brugeroprettelse              | Lykkedes |
+| Fejl ved ugyldig login og duplicate user       | Lykkedes |
+| Ændring af brugernavn og password              | Lykkedes |
+| Password expiry og password update             | Lykkedes |
+| Admin-side, rolle og sletning af brugere       | Lykkedes |
+| Rollebaseret adgang og management              | Lykkedes |
+| Study Lines, visning og redigering             | Lykkedes |
+| Tilføjelse/fjernelse af bruger fra study lines | Lykkedes |
+| Study start date og student progress| Lykkedes |
+|Projektoprattelse, visning og redigering | Lykkedes |
+|Start af projekt og aadvisor dashbord | Lykkedes |
+|Advisor og student-ivitationer | Lykkedes |
+|Accept/afvisning af invitationer | Lykkedes |
+|Repository/database handling | Lykkedes |
+
+Vi har også brugt JaCoCo til at måle code coverage. Code coverage bliv brugt som et redskab til at se, hvilke dale af kodenstesterne faktisk kørte igennem, den samlede instricrion coverage var 73%, og branch coverage var 53%, hvor det biger et godt billede af hvor meget af koden der bliver kørt gennem testene. De bedste dækkede områder var blandt andet rettighedslogik, domain-klasser og service-laget.
+![JaCoCo code coverage report](rapport-items/code_coverage.png)
+Samlet set viser testerne og de manuelle gennemgange, at de vigtigste dele at systemet virker. De automatiske tests kørte uden fejl, og coverage-resultatet viser at en stor del af koden bliver testet. Derfor vurderer vi, at centrale user stories fungerer i den afleverede version. 
+
+
+
 ### Diskussion
 
 > _Hvad har vi lært?_
