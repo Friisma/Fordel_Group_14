@@ -14,6 +14,12 @@
 Tabel her
 
 ## Use of AI
+### s255896 (Lasse Pedersen)
+> Som et personligt princip har jeg valgt aldrig at bruge AI eller coding-agents til direkte generering af min kode, såkaldt "vibe-coding".
+> Min erfaring viser, at direkte genereret kode ofte fejler. AI-modeller kan hallucinere, og resultatet er sjældent maintainable eller i overensstemmelse med de principper for softwarearkitektur og clean code, vi lærer på universitetet (og som jeg opretholder for mig selv). Vigtigst af alt fjerner det læringsprocessen. Hvis man ukritisk lader en coding-agent løse opgaverne, fjerner man den faglige forståelse, da man kun for alvor lærer af fejl, man selv har begået og løst.
+> I stedet bruger jeg AI som en sparringspartner (næsten som en TA). Jeg anvender det i planlægningsfasen til at tage overvejelser ift. arkitekture, samt som et ekstra sæt øjne til code reviews og fejlfinding. 
+> Derudover bruger jeg AI værktøjer sprogligt til grammatisk kvalitetssikring, såsom at fange stavefejl og glemte kommaer i min egen tekst, uden at lade den formulere selve indholdet.
+> Målet er aldrig at blive afhængig af AI, men at arbejde sammen med det og bruge det som et værktøj, der løfter det endelige produkts kvalitet og understøtter min egen faglige og personlige udvikling.
 
 ## Statement on code contribution score
 
