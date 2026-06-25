@@ -120,9 +120,27 @@ Ting der er gode at få med:
   - Her kan I bruge aktivitet og sekvens diagrammer til at beskrive opførsel hvis den er anderledes
     end AS-IS.
 
-### Gant diagram
+## Planlægning og design
+I dette afsnit vil vi gennemgå gruppens planlægning igennem projektets forløb, og i sammenhæng kigge på de designmæssige
+tiltag der er blevet taget for at sikre at gruppen kunne efterleve denne planlægning. Derudover vil der også reflekteres over hvad vi som 
+gruppe vil gøre anderledes i fremtidige projekter. 
+
+### User stories 
+Ved projektets start blev der sat tid af til, at hvert gruppemedlem kunne sætte sig ned og danne sig et overblik over projektet, 
+dets user stories og den tilhørende kodebase. Dette blev gjort for at udarbejde en handleplan, 
+der afspejlede den eksisterende kodebase, samt for at finde ud af, 
+hvordan vi i praksis kunne implementere de givne user stories. Inden vores første møde ("M1") med kunden blev der derfor kun implementeret en meget begrænset mængde kode.
+
+Igennem projektet blev det klart for os at vi kunne implementere forskellige User stories på samme tid, uden implementationerne overlappede hinanden.
+Altså kunne vi dele det overordnede system op i del-opgaver der i starten kunne implementeres selvstændigt og virke som sit eget system. På den måde kunne vi 
+imellem M1 og M2 arbejde sideløbende på flere forskellige systemer, der var med til at løse hver deres User stories.     
+
+### Planlægning
+
+#### Gant diagram
 ![Gantt-diagram](rapport-items/Gantt_diagram.png)
 
+#### Ændringer af plan
 
 ### Implementering
 
@@ -179,3 +197,6 @@ Ting der er gode at få med:
 - [ ] Hvad gik godt, hvad gik dårligt?
 - [ ] Næste gang, hvad ville I gøre anderledes?
 - [ ] Hvad har I lært?
+
+
+## Kilder
