@@ -362,9 +362,9 @@ Ting der er gode at få med:
 - [ ] En liste over de værktøjer, biblioteker, og ekstern kode I har brugt med versioner.
   - Java version, GUI_Library, IDE version, osv.
 - [ ] En beskrivelse af hvordan man kører jeres kode.
-- [ x ] Et overblik over koden.
+- [x] Et overblik over koden.
   - Her kan I bruge et klasse diagram til at beskrive hvordan det ser ud.
-- [ x ] En gennemgang af de patterns I har gjort brug af.
+- [x] En gennemgang af de patterns I har gjort brug af.
   - Dependency Inversion/Injection, MVC, Observer Pattern, GoF, osv...
   - Her kan I bruge klasse diagrammer og sekvens diagrammer.
   
@@ -909,6 +909,33 @@ Ting der er gode at få med:
 
 **HUSK AT SKRIV OM VORES MÆRKELIGE ROLLE SYSTEM**
 **REFLEKTER OVER HVAD VI KUNNE HAVE GJORT ANDERLEDES I FORHOLD TIL PLANLÆGNINGEN**
+## Diskussion
+I denne diskussion vil vi først gennemgå de succeser vi har haft i vores projekt, 
+samt vurdere om vi har overholdt vores gruppekontrakt. Herefter vil vi gennemgå de ting vi kunne ha gjort bedre, og de ting 
+vi som individuelle og gruppe vil tage med videre. Til sidst vil vi redegøre for hvad vi ville have udviklet hvis vi havde haft 
+mere tid. 
+
+### Hvad er gået godt. 
+Inden projektet gik i gang indleverede vi en gruppekontrakt, for at danne så gode rammer om vores gruppearbejde som muligt. 
+Dette gjorde det muligt for os at afstemme vores forventninger med hinanden 
+inden projektet gik i gang.
+
+i §2 har vi noteret: 
+> "Vi vil gerne prøve at fordele arbejdsmængden nogenlunde lige, i sådan grad at alle er tilfredse med deres bidragelse."
+
+I vores score kan det ses at vores arbejdsfordeling ikke har været helt lige. Her skal det pointeres at 
+vi som gruppe gik ind til projektet med den forudsætning at der **bidrages i sådan en grad at man er tilfreds.** 
+
+
+
+### Hvad kunne vi gøre bedre. 
+
+For at have struktureret vores planlægning og arbejde bedre, kunne vi ha brugt nogle værktøjer til at ligge en mere konkret plan 
+end den vi havde. På den måde kunne vi ha skabt en bedre forudsætning for at overtage nye arbejdsopgaver, og uddelegere arbejdet bedre. I vores planlægningsafsnit 
+viser vi med et Gantt diagram hvordan vi udviklet de forskellige funktioner til vores projekt. Sådan et værktøj kunne have været godt til at ligge en mere udarbejdet plan
+proaktivt. 
+
+
 
 
 ## Kilder
