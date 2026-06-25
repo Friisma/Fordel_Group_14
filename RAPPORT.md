@@ -1,13 +1,23 @@
-# Rapport
+# Rapport - Fordel 14
+### Indholdsfortegnelse
+- [Report contribution](#Report-contribution)
+- [Use of AI](#Use-of-AI)
+- [Statement on code contribution score](#Statement-on-code-contribution-score)
+- [Indledning](#Indledning)
+- [Kravanalyse](#Kravanalyse)
+- [Planlægning og design](#Planlægning-og-design)
+- [Implementering](#Implementering)
+- [Validering](#Validering)
+- [Diskussion](#Diskussion)
 
-Dette er en vejledende og løs beskrivelse af, hvad der skal være i en god rapport.
+## Report contribution
+Tabel her
 
-**Rapportens opgave er at være et spejl af jeres produkt.**
-Formålet ved rapporten er derfor til dels at sælge hvad I har lavet så godt som muligt.
+## Use of AI
 
-De følgende sektioner er opdelt lidt ligesom en rapport ville være.
+## Statement on code contribution score
 
-### Indledning
+## Indledning
 
 > _Hvem, Hvorfor, og Hvordan skal man læse rapporten?_
 
@@ -19,28 +29,12 @@ Ting der er gode at få med:
 - [ ] Sæt rapporten in kontekst. Hvad forventer I at jeres læser kan forstå?
 - [ ] En kort beskrivelse af hvad I har lavet og er specielt stolte af, gerne med referencer til resten af rapporten.
 
-### Kravsanalyse / Problemet
 
+
+
+
+## Kravanalyse
 > _Hvad er problemet?_
-
-I denne sektion skal I forklare det problem I arbejder med.
-I jeres tilfælde er det programmet, kundens behov, samt en gennemgang af de user stories I har.
-
-Siden vi bruger User Stories er der ikke nogen grund til at præsentere jeres krav på andre måder.
-
-Ting der er gode at få med:
-
-- [x] En navneords analyse sådan vi ved, hvad de ord, kunden bruger, betyder.
-  - Her kan I bruge et domain diagram.
-- [ ] En analyse af hvilke roller (brugere) der eksisterer.
-  - Designer?, Animator?
-- [ ] En forklaring af hvordan brugen af et tegneprogram er.
-  - Her kan I bruge et aktivitet diagram.
-  - Dette hedder ofte AS-IS (som det er) som er i kontrast til TO-BE (som det skal være).
-- [x] En prioritering af User Stories. 
-  - MoSCoW
-
-## Kravsanalyse / Problemet
 
 UTD har i længere tid oplevet at håndteringen af projekter og studielinjer, samt tildelingen af vejledere ofte en kompleks proces, 
 der involverer mange forskellige typer af brugere, det alt fra den studerende til administratorer og studieledere. Uden et system
@@ -116,11 +110,12 @@ vi forventer de skal, så vi senere i udviklingen hurtigt kan få et overblik og
 - Login
 - Ændre navn
 - Ændre sprog
+- Slette egen bruger
 
 **Administrator** 
 - Oprette studielinjer 
 - Tildele roller
-- 
+
 
 **Study leader**
 - Tilføje students til sin linje
@@ -128,19 +123,30 @@ vi forventer de skal, så vi senere i udviklingen hurtigt kan få et overblik og
 - Kontakte students
 
 **Advisor**
-- d
+- Vejlede studerende
+- Se en oversigt over projekter som de kan vejlede
+- Se en oversigt over projekter de vejleder
+- Sætte et workload så de ikke får mange projekter de ikke har tid til
+- Oprette advisor projekter
+- Opdaterer projekt navne eller beskrivelser
 
 **Student**
 - Oprette projekter
 - Sætte en status på projektet
-- Tilføje andre students til et projekt
+- Tilføje/invitere andre students til et projekt
 - Accepterer eller afslå invitation til andre projekter
-- Tilføje advisors til et projekt
+- Tilføje/invitere advisors til et projekt
 - Tilslutte sig advisor projekter
+- Sætte en studie start dato
 
-### Product Backlog (MoSCoW) 
+### Prioritering af user stories (MoSCoW model) 
 
 ---
+Vi har valgt at lave en MoSCoW til nemt at få et overblik over hvordan vi skulle prioriterer de forskellige user stories.
+Da vi arbejder med en kunde er det meget vigtigt at få forventningsafstemt deres forventninger med vores. For så vidt
+muligt at imødekomme kunden krav og behov. Vi kommer mere ind på, [senere i afsnittet](#Forventningsafstemning-af-krav-med-kunden),
+hvordan de forskellige modeller i dette afsnit har ændret sig i forbindelse med de snakke vi har haft med kunden
+undervejs.
 ### Must Have
 *Kritiske user stories, der SKAL være med i vores Minimum Viable Product (MVP). Uden disse fungerer systemet ikke.*
 
@@ -193,9 +199,21 @@ vi forventer de skal, så vi senere i udviklingen hurtigt kan få et overblik og
 |:----------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **US-27** | **A Change of Language:** **As** a user **I want to** to be able to see the webpage in both Danish and English **such that** the page is easy to understand for me |
  
-- [ ] En diskussion af hvad kundesnakken har ændret.
 
-### Planlægning og Design
+### Forventningsafstemning af krav med kunden
+
+---
+I dette projekt er kravene til produktet blevet præsenteret i user stories. Selvom user stories fortæller meget om 
+hvad kunden forventer er det stadig ikke fuldstændig tydeligt, derfor er det vigtigt at have en aktiv dialog med 
+kunden undervejs i udviklingen af produktet for at tydelig gøre kravene kunden har. Vi har undervejs været til to 
+møder med kunden, hvor vi haft mulighed for at få et bedre indblik i hvad kunden forventer applikationen skal kunne. 
+Dette har gjort det nemmere at lave MoSCowW-prioritering af de forskellige user stories, da det gennem dialogen blev 
+tydeligt, hvilke user stories der reelt skabte den største værdi. Allerede under det første møde blev det for eksempel 
+tydeligt, at kundens behov for at en bruger skulle kunne oprette projekter (US-10). Dette var ikke krav vi havde vurderet
+til at være must have, men samtalen gjorde at det blev prioriteret. Samtidig blev vi også klogere på domainet. Gennem
+dialogen med kunden blev det meget tydeligt hvilke relationer der var i mellem brugere, projekter, study lines osv... 
+
+### Planlægning og Design1
 
 > _Hvordan kan vi løse det?_
 
