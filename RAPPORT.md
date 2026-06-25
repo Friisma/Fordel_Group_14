@@ -1,36 +1,13 @@
-diff --git a/RAPPORT.md b/RAPPORT.md
-index bfd62fd..3d1d482 100644
---- a/RAPPORT.md
-+++ b/RAPPORT.md
-@@ -1,3 +1,27 @@
-+---
-+authors:
-+  - name: Magnus Friis
-+    studentid: s251019
-+  - name: Student Name
-+    studentid: s654321
-+  - name: Student Name
-+    studentid: 
-+  - name: Student Name
-+    studentid:
-     +contributions:
-+  - introduction:
-+        s123456: 100
-+  - problem-statement:
-+        s654321: 75
-+        s123456: 25
-+  - design:
-+        s123456: 100
-+  - implementation:
-+        s654321: 75
-+        s123456: 25
-+  - validation:
-+        s123456: 100
-+  - discussion:
-+        s654321: 25
-+        s123456: 75
-+...
-+
+authors:
+- name: Magnus Friis
+  - studentid: s251019
+- name: Lasse Pedersen
+  - studentid: s255896
+- name: Mahmoud Mustafa
+  - studentid: s244632
+- name: Casper Rasmussen
+  - studentid: s255762
+
 
 # Rapport - Fordel 14
 ### Indholdsfortegnelse
@@ -435,6 +412,10 @@ Ting der er gode at få med:
 Husk at bruge de rigtige pile i klasse-diagrammet (By Yanpas - Own work, [CC BY-SA 4.0](https://commons.wikimedia.org/w/index.php?curid=48015014)):
 
 <img src="graphics/uml_classes_en.svg" width="250pt" />
+
+#### Database og database design
+
+
 
 #### Arkitektur og Systemstruktur
 
