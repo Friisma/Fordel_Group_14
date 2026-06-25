@@ -11,7 +11,14 @@
 - [Diskussion](#Diskussion)
 
 ## Report contribution
-Tabel her
+| Del af rapporten | Casper (s255762) | Lasse (s255896) | Magnus (s251019) | Mahmoud (s244632) |
+| --- | --- | --- | --- | --- |
+| **Indledning** | ?% | ?% | ?% | ?% |
+| **Kravanalyse** | ?% | ?% | ?% | ?% |
+| **Planlægning og design** | ?% | ?% | ?% | ?% |
+| **Implementering** | ?% | ~50% | ?% | ?% |
+| **Validering** | ?% | ?% | ?% | ?% |
+| **Diskussion** | ?% | ?% | ?% | ?% |
 
 ## Use of AI
 ### s255896 (Lasse Pedersen)
