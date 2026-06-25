@@ -268,6 +268,10 @@ væk fra view laget, så de enkelte lag kan ændres uafhængigt af hinanden.
 Ved at bruge denne arkitektur, har vi en klar opdeling af ansvar, hvor ændringer i ét lag, har minimal påvirkning på de øvrige lag. Det har givet os fleksibilitet i udviklingen
 og gjort det nemmere for os at arbejde parallelt på de forskellige dele af systemet.
 
+### Delsystemer
+
+
+
 ### Implementering
 
 > _Hvad fik vi lavet?_
