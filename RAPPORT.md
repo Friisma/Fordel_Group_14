@@ -355,6 +355,280 @@ Husk at bruge de rigtige pile i klasse-diagrammet (By Yanpas - Own work, [CC BY-
 
 <img src="graphics/uml_classes_en.svg" width="250pt" />
 
+#### Arkitektur og Systemstruktur
+
+Dette afsnit er til formål at give et overblik over kodebasen og de vigtigste valg, der blev taget i systemets implementering. Formålet er ikke at gennemgå hver enkelte klasse i detaljer, men at forklare hvordan koden er organiseret, og hvordan de vigtigste dele af løsningen hænger sammen. På denne måde kan det forstås, hvordan projektet er bygget op, inden de more specifikke patterns og klasser bliver gennemgået.
+
+I det følgende beskrives der derfor de vigtigste lag i systemet, deres ansvar og hvordan de hænger sammen i den samlede arkitektur.
+
+Systemet er opbygget efter et "layered architecture", hvor hvert lag har sit eget ansvar.
+
+##### Domain
+
+`domain` indeholder systemets domain-models og entities. Her ligger de klasser, der repræsenterer de centrale entities i problemet, for eksempel brugere, projekter, studielinjer og invitationer. Laget bruges til at modellere data og forretningsobjekter uden at blande præsentation eller databaseadgang ind i them.
+
+```Java
+public enum Roles {
+    STUDENT(1),
+    ADVISOR(2),
+    TEACHER(3),
+    STUDY_LEADER(4),
+    ADMINISTRATOR(5);
+
+    private final int clearanceLevel;
+
+    Roles(int clearanceLevel) {
+        this.clearanceLevel = clearanceLevel;
+    }
+
+    public int getClearanceLevel() {return clearanceLevel;}
+}
+
+```
+
+Eksemplet ovenfor viser `Roles`-enumen, som er en del af domain-laget. Den indkapsler de forskellige typer af brugere i systemet og knytter et `clearanceLevel` til hver rolle, hvilket viser en business-rule som ikke er afhængig af databaser eller web-routing.
+
+##### Repository
+
+`repository` har ansvaret for at kommunikere med databasen. Her findes de metoder, der læser, opretter, opdaterer og sletter data i databasen. Dette lag bruges til at isolere SQL og dataadgang fra resten af systemet, så resten af koden ikke behøver at kende databasens opbygning.
+
+```Java
+private int getRoleIdByName(Roles role) throws SQLException {
+        var stmt = "SELECT id FROM roles WHERE name = ?";
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            statement.setString(1, role.name().toLowerCase().replace("_", " "));
+            try (var resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt("id");
+                }
+            }
+        }
+
+        throw new SQLException("Role does not exist: " + role);
+    }
+
+```
+
+Dette eksempel illustrerer en intern hjælpemetode i repository-laget, der udfører en direkte SQL-request mod databasen for at slå et specifikt ID op baseret på en domænerolle. Ved at placere denne SQL-logik på dette lag, sikres det, at databasens struktur holdes skjult for resten af applikationen, da dette ansvar kun placeres på klassen der er ansvarlig for at kommunikere med databasen.
+
+##### Services
+
+`services` indeholder business-logic. Her samles den kode, der har ansvar for handlinger på tværs af flere dele af systemet, fx. når en bruger skal oprette et projekt eller se deres rettigheder. Laget bruges til at binde controller og repository sammen, så logikken ikke ender spredt ud flere steder.
+
+```Java
+public static interface ProjectRepository {
+    void create(Project project, User user, int userId) throws ProjectTitleAlreadyInUse;
+
+    void create(Project project, User user, String studyLineName, int userId) throws ProjectTitleAlreadyInUse;
+
+
+    List<Project> getAllProjectsRelatedToUser(User user) throws Project.InvalidProject;
+
+    List<Project> getAllProjectsRelatedToStudyLine(int studyLineId);
+
+    List<Project> getAllProjectsRelatedToStudyLineAndUser(int studyLineId, User user);
+
+    boolean canViewProject(User user, int projectId);
+
+    String getProjectCreatorEmail(int projectId);
+
+    void kickMemberFromProject(int projectId, User member);
+
+    List<Project> getAllAdvisorProjects(User advisor);
+
+    int getCountOfAdvisorProjects(User advisor);
+
+    void startProject(int pId) throws ProjectAlreadyFinished;
+
+    void update(Project project) throws ProjectDoesNotExist;
+
+    void advisorCreation(Project project, String studyLineName, int userId);
+
+    void delete(Project project) throws ProjectDoesNotExist;
+    List<Project> getAllProjects() throws Project.InvalidProject;
+    void assignAdvisor(User advisor,Project project) throws AdvisorAlreadyAdvises;
+}
+
+```
+
+Eksemplet ovenfor viser et interface for et `ProjectRepository`, som defineres i service-laget. Dette gør det muligt for business-logic'en i servicelaget at diktere, hvilke operationer der skal være tilgængelige for projekthåndtering, uden at servicelaget behøver at bruge en specifik implementering af databasen.
+
+##### View
+
+`view` står for præsentationen af data til brugeren. Her ligger de templates, der viser siderne i browseren. Dette lag bruges til at håndtere brugerens interaktion med systemet.
+
+```html
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="da">
+
+<head th:replace="~{fragments/head ::head}"></head>
+
+<body>
+    <header th:replace="~{fragments/header ::header}"></header>
+
+    <main class="container">
+        <section>
+            <h1 th:text="${title}"></h1>
+
+            <p>
+                ...
+            </p>
+
+            <br>
+
+            <div style="text-align: center;">
+                <img th:src="@{/images/utd-logo.png}" alt="UTD Logo"
+                    style="max-width: 200px; width: 100%; text-align: center;" />
+            </div>
+
+        </section>
+    </main>
+
+    <footer th:replace="~{fragments/footer ::footer}"></footer>
+</body>
+
+</html>
+
+```
+
+Dette er en del af en Thymeleaf-skabelon som ligger i view-laget. Koden viser, hvordan præsentationen struktureres med HTML, mens dynamiske data (som f.eks. overskriften via `${title}`) indsættes på siden uden viden til, eller ansvar for, hvordan denne data blev fundet eller valideret.
+
+##### Resources
+
+`resources` indeholder de filer, som systemet bruger under kørsel, men som ikke selv er Java-kode. Dette er blandt andet database migrations, HTML-templates og statiske filer som CSS og JavaScript. Laget bruges til at samle de tekniske ressourcer, der understøtter applikationens funktion og udseende.
+
+```JavaScript
+document.addEventListener("DOMContentLoaded", () => {
+    const searchInput = document.getElementById("search");
+    const cards = Array.from(document.querySelectorAll("[data-user-name]"));
+    const noResults = document.getElementById("users-no-results");
+
+    if (!searchInput || cards.length === 0) {
+        return;
+    }
+
+    let debounceTimer = null;
+
+    const applySearch = () => {
+        const query = searchInput.value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        const nameMatches = cards.filter((card) => {
+            const name = (card.dataset.userName || "").toLowerCase();
+            return query === "" || name.includes(query);
+        });
+
+        const useEmailFallback = query !== "" && nameMatches.length === 0;
+
+        cards.forEach((card) => {
+            const name = (card.dataset.userName || "").toLowerCase();
+            const email = (card.dataset.userEmail || "").toLowerCase();
+            const matches = useEmailFallback
+                ? email.includes(query)
+                : query === "" || name.includes(query);
+            card.hidden = !matches;
+
+            if (matches) {
+                visibleCount += 1;
+            }
+        });
+
+        if (noResults) {
+            noResults.hidden = visibleCount !== 0;
+        }
+    };
+
+    searchInput.addEventListener("input", () => {
+        window.clearTimeout(debounceTimer);
+        debounceTimer = window.setTimeout(applySearch, 250);
+    });
+
+    applySearch();
+});
+
+```
+
+Eksemplet ovenfor er et JavaScript script, der ligger i resource-laget. Det håndterer clientside-funktionalitet i form af en search funktion med debounce, der søger igennem brugere af systemet. Dette forbedrer brugeroplevelsen direkte i browseren uden at belaste serveren med en masse forespørgsler under søgning.
+
+Udover static scripts og style.css indeholder resource-laget også vigtige komponenter til applikationens database og visuelle opbygning. Dette inkluderer Thymeleaf HTML-templates, som definerer brugergrænsefladen, samt SQL-migrationfiler (fra `0000.sql` til `0010.sql`). Disse migrationfiler sikrer, at databasens tabeller og startdata opbygges ensartet og automatisk, uanset om systemet kører i et lokalt udviklingsmiljø, under etsts, eller i produktion.
+
+Et eksempel på dette er filen `0002.sql`, som opretter tabellerne til systemets rollestyring og udfulder databasen med de nødvendige standardroller:
+
+```SQL
+CREATE TABLE roles (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE user_roles (
+    user_id INT NOT NULL,
+    role_id INT NOT NULL,
+
+    PRIMARY KEY (user_id, role_id),
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+);
+
+INSERT INTO roles (name) VALUES
+    ('administrator'),
+    ('advisor'),
+    ('study leader'),
+    ('teacher'),
+    ('student');
+
+```
+##### Dataflow igennem systemet
+
+En vigtigt del i systemets arkitektur er, hvordan data bevæger sig gennem de forskellige lag. Når en bruger interagerer med systemet i view-laget, bliver handlingen sendt videre til en controller, som modtager forespørgslen og beslutter, hvilket flow der skal følges. Controlleren fungerer som en mellemmand imellem viewet og den underliggende logik. Hvis handlingen fx. kræver business-logic, sendes den videre til service-laget, som udfører den nødvendige behandling. Når data skal gemmes eller hentes, kommunikerer service-laget videre med repository-laget, som står for forbindelsen til databasen. På denne måde sikres det ift. arkitekturen, at hvert lag kun har ansvar for sin egen del, og gør flowet mere overskueligt og lettere at vedligeholde.
+
+> Flow for når en bruger opretter et nyt projekt på platformen:
+> 1. **View:** Brugeren udfylder formularen i Thymeleaf-templaten `create-project.html`.
+> 2. **Controller:** Data sendes til `ProjectController.java`, som modtager og validerer HTTP-forespørgslen.
+> 3. **Service:** Controlleren kalder business-logic i `ProjectManager.java` (placeret i /services), som håndterer valideringsregler, såsom kontrol af dublerede titler.
+> 4. **Repository:** `ProjectManager` kalder metoder på databaselaget, som eksekveres gennem den konkrete `H2Repository.java`, der foretager de direkte SQL-requests i H2-databasen.
+
+##### Domæneklasser
+
+Systemets domain-lag består af de klasser, der modellerer problemområdet, og som resten af applikationen bruger og bygger videre på. I dette lag ligger blandt andet brugere, projekter, studielinjer og invitationer, som tilsammen udgør de vigtigste entities i løsningen (domainet). Disse klasser repræsenterer systemets business objekter og bruges på tværs af resten af applikationen, ligegyldigt om data vises i view-laget, behandles i services eller gemmes i databasen. Domain-klasserne er med til at holde logikken samlet og gør det muligt at arbejde med en delt model af systemet igennem hele kodebasen.
+
+> Kigger man direkte i projektmappen `src/main/java/dk/utd/fordel/domain`, ses det, hvordan problemområdets entities er opdelt i forskellige dedikerede Java-klasser. Objekterne relateret til business-logic repræsenteres af filer som `User.java`, `Project.java` og `StudyLine.java`.
+> Logikken for "forretningsreglerne" holdes tæt på objekterne ved, at potentielle fejl er modelleret direkte som selvstændige klasser som fx. `ProjectTitleAlreadyInUse.java`, `AdvisorReachedMaxWorkLoad.java` og `StudentAlreadyInvited.java`. Resten af systemets arkitektur (services og controllere) genbruger disse fejl, hvilket sikrer, at "forretningsreglerne" aldrig dikteres af andre lag.
+
+##### Dataflow i systemet
+
+Det nedenstående diagram viser systemets overordnede kontrolflow og interaktion mellem komponenter henover systemets tre primære lag: view laget, service laget og repository leget.
+
+![Klassediagram over dataflow i stystemet](rapport-items/system-flow.png "Klassediagram over dataflow i stystemet")
+
+Diagrammet viser en klar implementering af separation of concerns og loose coupling. Når en bruger interagerer med systemet (fx. via `Login` eller `CreateProject`), isoleres denne HTTP-forespørgsel med det samme i præsentationslaget, hvor controllere som `ProjectController` validerer input og session tilstanden.
+
+Istedet for at lade controllere udføre databasetransaktioner eller forretningsregler direkte, deles ansvaret ud til dedikerede services som `ProjectManager` og `Authenticator`. Disse controllere sikrer, at præsentationslaget er uafhængigt af, hvordan forretningslogikken er implementeret. Endeligt er alt der har med SQL at gøre indkapslet i repository-laget `H2Repository`. Dette sikrer, at en ændring af databasen i fremtiden kan ske, uden at det bryder applikationens forretningslogik eller brugergrænseflade.
+
+##### Domænemodellen
+
+Det følgene diagram viser systemets domænemodel og illustrere entities og deres relationer.
+
+![Klassediagram over systemets domain-model](rapport-items/domain-model-diagram.png "Klassediagram over systemets domain-model")
+
+Modellen er opdelt efter principperne fra Domain-Driven Design (DDD) ved at skelne mellem entities (`User`, `Project`, `StudyLine`) og Value Objects (`User.Data`, `Email`). For eksempel er brugerens data indkapslet i et final objekt (`User.Data`). Dette betyder, at dataen ikke kan ændres ved en fejl, hvilket beskytter systemet mod uforventede fejl og sikrer, at `User.Data` altid kan stoles på.
+
+Et vigtigt valg ift. arkitektur i domænemodellen er loose coupling mellem forskellige entities. For eksempel refererer `Project` og `StudyLine` ikke til hinanden via direkte, referencer, men i stedet via simple datatyper som navne og database-id'er (f.eks. i `AdvisorInvitation`). Denne struktur minimerer afhængigheder der er unødvendige imellem domæneobjekterne og sikrer, at domænelaget forbliver light-weight og testbart.
+
+Denne opdeling sikrer også, at systemets forskellige komponenter kan udvikles, testes og vedligeholdes relativt uafhængigt af hinanden.
+
+##### Roller og rettigheder
+
+Nedenstående klassediagram illustrerer systemets arkitektur for rettigheder. Diagrammet viser, hvordan adgangskontrol og rettighedsvalidering er struktureret for at bestemme, hvilke handlinger og endpoints en bruger har tilladelse til at bruge.
+
+![Klassediagram Over Roller og Rettigheder](rapport-items/rights-diagram.png "Klassediagram Over Roller og Rettigheder")
+
+Modellen er opbygget omkring en klar separation af domæneroller `Roles` og konkrete, tilladelser `Permission`. I stedet for at hænge systemets business-logic direkte sammen med de overordnede roller, transformeres en brugers `User.Data` om til en rettighedskontekst, `RightsContext` af `RightsService`.
+
+`RightsContext` fungerer som en normaliseret komponent, der indkapsler logikken for at checke rettigheder. Ved at dele evalueringen af specifikke handlinger ud (fx. `CAN_START_PROJECT` eller `MANAGE_STUDY_LINE`) til `RightsContext`, opnår systemet loose coupling. Hvis reglerne for fx. en `ADMIN` rolle eller en specifik tilladelse ændres i fremtiden, skal denne ændring kun laves i denne del af systemet, mens controllere og views forbliver uændret.
+
+---
+
 #### Software Patterns
 
 Denne del af rapporten er dedikeret til at vise forskellige relavante principper og patterns brugt i koden.
