@@ -11,7 +11,14 @@
 - [Diskussion](#Diskussion)
 
 ## Report contribution
-Tabel her
+| Del af rapporten | Casper (s255762) | Lasse (s255896) | Magnus (s251019) | Mahmoud (s244632) |
+| --- | --- | --- | --- | --- |
+| **Indledning** | ?% | ?% | ?% | ?% |
+| **Kravanalyse** | ?% | ?% | ?% | ?% |
+| **Planlægning og design** | ?% | ?% | ?% | ?% |
+| **Implementering** | ?% | ~50% | ?% | ?% |
+| **Validering** | ?% | ?% | ?% | ?% |
+| **Diskussion** | ?% | ?% | ?% | ?% |
 
 ## Use of AI
 ### s255896 (Lasse Pedersen)
@@ -959,5 +966,5 @@ proaktivt.
 
 - [1]: GeeksForGeeks, "Separation of Concerns (SoC)", 2024. https://www.geeksforgeeks.org/software-engineering/separation-of-concerns-soc/
 - [2]: Craig Larman, "Applying UML and Patterns: An Introduction to Object-Oriented Analysis and Design and Iterative Development, Third Edition", 2004
-- [3]: Erich Gamma, Richard Helm, Ralph Johnson, John Vilssides, Design Patterns Elements of Reusable Object-Oriented Software, 1994
+- [3]: Erich Gamma, Richard Helm, Ralph Johnson, John Vilssides, "Design Patterns Elements of Reusable Object-Oriented Software", 1994
 - [4]: GeeksForGeeks, "Layered Architecture in Computer Networks", 2025. https://www.geeksforgeeks.org/computer-networks/layered-architecture-in-computer-networks/
