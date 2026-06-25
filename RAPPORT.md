@@ -24,6 +24,14 @@ Tabel her
 > Jeg blev dog nødt til at lave en undtagelse for dette princip en enkelt gang under projektet for at overholde deadlinen. Aftenen før det sidste kundemøde (vores endelige user story-deadline) opdagede vi alt for sent, at test-frameworket Mockito, som jeg havde brugt, fejlede på de andres computere. For at redde situationen og nå deadlinen var jeg tvunget til at lade en AI omskrive de 20-30 tests, jeg oprindeligt havde skrevet, der gjorde brug af Mockito, så de ikke længere var afhængige af Mockito. I denne situation fungerede AI’en udelukkende som en oversætter af mine egne, eksisterende tests, hvilket var afgørende for, at vi nåede i mål til tiden med en acceptabel test coverage.
 > AI'en oprettede en java-klasse under test/testsupport, der hedder TestFakes.java, som lod tests'ne gøre brug af Mockito-funktioner (mock-objekter, osv.) uden at have Mockito som en dependency.
 
+### s251019 (Magnus Friis)
+> I vores gruppekontrakt har vi angivet at brugen af AI skal være begrænset til den samme funktion som en hjælpelærer. 
+> Dette vil sige at vi ikke må bruge AI til at "producere" kode for os, men bruge det som et værktøj til at få svar på spørgsmål, 
+> eller sætte sig ind i noget nyt konceptuelt udfordrende. Jeg har i løbet af projektet sørget for at begrænse mit eget 
+> brug af AI i sådan en grad, at det overholder den kontrakt vi lavede som gruppe da vi gik ind til samarbejdet. Konkret har jeg brugt 
+> AI til at søge ny viden, finde inspiration til at løse opgaver og til at hjælpe med at de "bugs" der er opstået under udvikling.
+> Personligt er det vigtigste for mig, at jeg føler jeg får det samme indlæring om jeg bruger AI eller ej, og jeg vurderer at jeg har fået lige så meget, 
+> hvis ikke mere, ud af projektet sammenlignet med tidligere projekter uden brug af AI.
 ## Statement on code contribution score
 
 ## Indledning
