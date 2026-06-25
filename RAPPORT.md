@@ -1210,12 +1210,6 @@ Som beskrevet i rapportens indledende afsnit, opstod der kritiske problemer med 
 
 I en fremtidigt opgave som denne vil det være optimalt at integrere testskrivningen som en fast del af den daglige udvikling, frem for en "isoleret" aktivitet til sidst. Ved at skrive unit tests og integrationstests løbende i takt med, at business-logic implementeres, sikres en konstant høj testdækning. Dette validerer ikke kun koden løbende, men fanger også problemer på tværs af gruppens lokale udviklingsmiljøer i tide, hvilket minimerer risikoen for problemer tæt på aflevering.
 
-#### Samarbejde og gruppedynamik
-
-*(Dette afsnit mangler at blive uddybet, f.eks. med refleksioner over kommunikation, gruppekontraktens overholdelse og håndtering af den ulige fordeling af arbejdsmængden).*
-
-
-
 
 ## Kilder
 
