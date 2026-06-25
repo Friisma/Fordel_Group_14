@@ -24,14 +24,14 @@ authors:
 
 
 ## Report contribution
-| Del af rapporten | Casper (s255762) | Lasse (s255896) | Magnus (s251019) | Mahmoud (s244632) |
-| --- | --- | --- |------------------| --- |
-| **Indledning** | 0% | 100% | 0%               | 0% |
-| **Kravanalyse** | ?% | ?% | ?%               | ?% |
-| **Planlægning og design** | 0% | 0% | 100%             | 0% |
-| **Implementering** | ?% | ~50% | 20%              | ?% |
-| **Validering** | ?% | ?% | ?%               | ?% |
-| **Diskussion** | ?% | ?% | ?%               | ?% |
+| Del af rapporten          | Casper (s255762) | Lasse (s255896) | Magnus (s251019) | Mahmoud (s244632) |
+|---------------------------|------------------|-----------------|------------------|-------------------|
+| **Indledning**            | 0%               | 100%            | 0%               | 0%                |
+| **Kravanalyse**           | ?%               | ?%              | ?%               | ?%                |
+| **Planlægning og design** | 0%               | 0%              | 100%             | 0%                |
+| **Implementering**        | ?%               | 60%             | 20%              | ?%                |
+| **Validering**            | ?%               | ?%              | ?%               | ?%                |
+| **Diskussion**            | ?%               | ?%              | ?%               | ?%                |
 
 ## Use of AI
 ### s255896 (Lasse Pedersen)
