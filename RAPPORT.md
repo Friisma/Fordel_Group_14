@@ -53,6 +53,15 @@ authors:
 > Personligt er det vigtigste for mig, at jeg føler jeg får det samme indlæring om jeg bruger AI eller ej, og jeg vurderer at jeg har fået lige så meget, 
 > hvis ikke mere, ud af projektet sammenlignet med tidligere projekter uden brug af AI.
 ## Statement on code contribution score
+i §2 i vores gruppe kontrakt har vi noteret:
+> "Vi vil gerne prøve at fordele arbejdsmængden nogenlunde lige, i sådan grad at alle er tilfredse med deres bidragelse."
+
+Contribution-scoren afspejler, at arbejdsfordelingen i gruppen ikke har været helt ens. 
+Gruppen havde dog fra projektets begyndelse en fælles forståelse af, at alle skulle bidrage i et omfang, 
+de selv kunne være tilfredse med, og det er den samlede vurdering, 
+at dette er blevet overholdt. På trods af forskelle i contribution-scorerne har alle medlemmer bidraget med det, 
+de kunne, og samarbejdet har været godt gennem hele projektforløbet.   
+
 
 ## Indledning
 
@@ -1097,12 +1106,6 @@ mere tid.
 Inden projektet gik i gang indleverede vi en gruppekontrakt, for at danne så gode rammer om vores gruppearbejde som muligt. 
 Dette gjorde det muligt for os at afstemme vores forventninger med hinanden 
 inden projektet gik i gang.
-
-i §2 har vi noteret: 
-> "Vi vil gerne prøve at fordele arbejdsmængden nogenlunde lige, i sådan grad at alle er tilfredse med deres bidragelse."
-
-I vores score kan det ses at vores arbejdsfordeling ikke har været helt lige. Her skal det pointeres at 
-vi som gruppe gik ind til projektet med den forudsætning at der **bidrages i sådan en grad at man er tilfreds.** 
 
 
 
