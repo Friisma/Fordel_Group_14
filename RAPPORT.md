@@ -30,17 +30,77 @@ Siden vi bruger User Stories er der ikke nogen grund til at præsentere jeres kr
 
 Ting der er gode at få med:
 
-- [ ] En navneords analyse sådan vi ved, hvad de ord, kunden bruger, betyder.
+- [x] En navneords analyse sådan vi ved, hvad de ord, kunden bruger, betyder.
   - Her kan I bruge et domain diagram.
 - [ ] En analyse af hvilke roller (brugere) der eksisterer.
   - Designer?, Animator?
 - [ ] En forklaring af hvordan brugen af et tegneprogram er.
   - Her kan I bruge et aktivitet diagram.
   - Dette hedder ofte AS-IS (som det er) som er i kontrast til TO-BE (som det skal være).
-- [ ] En prioritering af User Stories.
-  - Her kan I gøre brug af MoSCoW.
-  - I kan også inddele dem i funktionelle, 
-## Product Backlog (MoSCoW)
+- [x] En prioritering af User Stories. 
+  - MoSCoW
+
+## Kravsanalyse / Problemet
+
+UTD har i længere tid oplevet at håndteringen af projekter og studielinjer, samt tildelingen af vejledere ofte en kompleks proces, 
+der involverer mange forskellige typer af brugere, det alt fra den studerende til administratorer og studieledere. Uden et system
+til håndtering af ovenstående kan overblikket over invitationer, projektstatus og godkendelser let gå tabt. Kunden har i denne forbindelse
+præsenteret os for en en række krav i form af user stories. Kravene vil i dette afsnit blive præsenteret, analyseret og gennemgået, for at danne
+overblik over problemet og den tilhørende applikation. Dette vil sikre at udvikling af produktet starter i den rigtige retning.
+
+Tabellen viser en liste over alle user stories, som kunden har fremlagt.
+
+| ID        | User Story                                                                                                                                                                          |
+|:----------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **US-1**  | **Login:** **As** any user of the site **I want to** be able to authenticate myself **such that** I can get a personalized view and options                                         |
+| **US-2**  | **Create A Study Line:** **As** the administrator **I want to** create study lines **such that** I can assign students and study leaders                                            | 
+| **US-3**  | **Create Advisors:** **As** the administrator **I want to** assign users as advisors **such that** they can advise students                                                         | 
+| **US-4**  | **Assign Study Leaders:** **As** the administrator **I want to** assign a study leader to a study line **such that** they can administrate the students of that line                | 
+| **US-5**  | **Assign Students:** **As** a study leader **I want to** assign students to a study line **such that** I can monitor and help them complete their projects                          |
+| **US-8**  | **Advisor Project Choice:** **As** an advisor **I want to** see a list of potential projects **such that** I can choose some to advise                                              |
+| **US-9**  | **Advisor Project Dashboard:** **As** an advisor **I want to** see a list of projects I have accepted to advise **such that** I can have an overview of the projects I'm advising   |
+| **US-10** | **Project Creation:** **As** a student **I want to** to create a project **such that** it can be chosen by an advisor                                                               |
+| **US-11** | **Project Draft Creation:** **As** a student **I want to** save the project as a draft **such that** I do not have to publish an unfinished project                                 |
+| **US-12** | **Multistudent Project:** **As** a student **I want to** to add other students to my project **such that** I can work with them on the project                                      |
+| **US-13** | **Project Collaborator Invitation:** **As** a student **I want to** accept or reject an invitation to be part of a project **such that** I can choose which project to work on      |
+| **US-14** | **Project Advisor Invitation:** **As** a student **I want to** see a list of potential advisors **such that** I can send a request to join the project                              |
+| **US-16** | **Advisor Workload:** **As** an advisor **I want to** set my acceptable workload **such that** students do not contact me when I am full                                            |
+| **US-19** | **Advisor Project Creation:** **As** an advisor **I want to** publish a potential project **such that** students can choose it                                                      |
+| **US-20** | **Have a Cookie Notice:** **As** any user **I want to** to be informed about the use of cookies **such that** my rights are upheld                                                  |
+| **US-21** | **Delete Users:** **As** any user **I want to** to be able to have my account deleted **such that** my rights are upheld                                                            |
+| **US-22** | **Change name:** **As** any user **I want to** to be able change my name and information **such that** be represented as I prefer                                                   |
+| **US-23** | **Add student progress:** **As** a student **I want to** to be able set my start date **such that** the system can calculate approximate start dates for internship and the project |
+| **US-25** | **Invite co-advisors:** **As** an advisor **I want to** to be able to invite students and other advisors to the project **such that** I can get a co-advisors                       |
+| **US-26** | **Update of project:** **As** an advisor **I want to** to be able update the name and abstract of the project after start **such that** the description match the project done      |
+| **US-27** | **A Change of Language:** **As** a user **I want to** to be able to see the webpage in both Danish and English **such that** the page is easy to understand for me                  |
+| **US-28** | **Expire Passwords:** **As** a system administrator **I want to** require passwords to expire after 3 months **such that** to harden the security of the system                     |
+
+### User story analyse
+For at danne et overblik over produktet og hvad de forskellige ord i user stories betyder, har vi valgt at lave en analyse af user stories 
+med udgangspunkt i de mest centrale begreber. I analysen har vi kigget på hvilke navneord, tillægsord og udsagnsord der optræder i de forskellige
+user stories. Det fortæller nemlig ofte hvilke entities, attributes og relations, produktet skal bestå af. Dette kan senere i udviklingsprocessen 
+bruges at få et hurtigt overblik over hvad databasen skal bestå af, samt hvordan de forskellige roller og entities intetagerer med hinanden.
+
+| Ord           | Ordklasse  | Domain model type |   | Ord          | Ordklasse  | Domain model type |         
+|:--------------|:-----------|:------------------|:-:|:-------------|:-----------|:------------------|
+| Administrator | Navneord   | User role         |   | Invitation   | Navneord   | Entity            |
+| Advisor       | Navneord   | User role         |   | Advise       | Udsagnsord | Relation          |
+| Student       | Navneord   | User role         |   | Invite       | Udsagnsord | Relation          |
+| Study leader  | Navneord   | User role         |   | Join         | Udsagnsord | Atribute          |
+| Project       | Navneord   | Entity            |   | Reject       | Udsagnsord | Atribute          |
+| Study line    | Navneord   | Entity            |   | Send         | Udsagnsord | Relation          |
+| Description   | Navneord   | Atribute          |   | Administrate | Udsagnsord | Relation          |
+
+På baggrund af vores user story analyse har oversat ovenstående tabel til en domain model, som har til formål at visualiserer systemet arkitektur, og
+samtidig skabe en sammenhængen mellem de forskellige attributes, entities og relations. Pilene forklarer med en kort forklarende tekst forholdet.
+**"1"** og **"*"** fortæller os om kardinaliteten i forholdet, hvis vi for eksempel kigger forholdet mellem **administrator** og **study line** er
+"one-to-many", hvilket fortæller os at _en administrator_ kan lave flere _study lines_, men at _en study line_ kun kan blive lavet af _en administrator_. 
+Kigger vi i stedet på forholdet mellem **advisor** og **project**, som er "many-to-many", kan det beskrives som at _mange advisors_ kan oprette og vejlede
+_mange projekter_, og at et/mange projekter godt kan have flere advisors. 
+
+![sequence diagram](rapport-items/domain-model.png)
+
+### Product Backlog (MoSCoW) 
 
 ---
 ### Must Have
