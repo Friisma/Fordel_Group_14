@@ -65,7 +65,7 @@ description = """
 *I want to* assign students to a study line
 *such that* I can monitor and help them complete their projects
 """
-completed = false
+completed = true
 
 [[requirements]]
 id = "US8"
@@ -105,7 +105,7 @@ description = """
 *I want to* set my acceptable workload
 *such that* students do not contact me when I am full
 """
-completed = false
+completed = true
 
 [[requirements]]
 id = "US20"
@@ -135,7 +135,7 @@ description = """
 *I want to* to be able set my start date
 *such that* the system can calculate approximate start dates for internship and the project
 """
-completed = false
+completed = true
 
 [[requirements]]
 id = "US28"
@@ -145,7 +145,7 @@ description = """
 *I want to* require passwords to expire after 3 months
 *such that* to harden the security of the system
 """
-completed = false
+completed = true
 
 [[requirements]]
 id = "US9"
@@ -155,7 +155,7 @@ description = """
 *I want to* see a list of projects I have accepted to advise
 *such that* I can have an overview of the projects I'm advising
 """
-completed = false
+completed = true
 
 [[requirements]]
 id = "US11"
@@ -165,7 +165,7 @@ description = """
 *I want to* save the project as a draft
 *such that* I do not have to publish an unfinished project
 """
-completed = false
+completed = true
 
 [[requirements]]
 id = "US12"
@@ -175,7 +175,7 @@ description = """
 *I want to* to add other students to my project
 *such that* I can work with them on the project
 """
-completed = false
+completed = true
 
 [[requirements]]
 id = "US13"
@@ -185,7 +185,7 @@ description = """
 *I want to* accept or reject an invitation to be part of a project
 *such that* I can choose which project to work on
 """
-completed = false
+completed = true
 
 [[requirements]]
 id = "US19"
@@ -195,7 +195,7 @@ description = """
 *I want to* publish a potential project
 *such that* students can choose it
 """
-completed = false
+completed = true
 
 [[requirements]]
 id = "US21"
@@ -205,7 +205,7 @@ description = """
 *I want to* to be able to have my account deleted
 *such that* my rights are upheld
 """
-completed = false
+completed = true
 
 [[requirements]]
 id = "US25"
@@ -215,7 +215,7 @@ description = """
 *I want to* to be able to invite students and other advisors to the project
 *such that* I can get a co-advisors
 """
-completed = false
+completed = true
 
 [[requirements]]
 id = "US26"
@@ -225,7 +225,7 @@ description = """
 *I want to* to be able update the name and abstract of the project after start
 *such that* the description match the project done.
 """
-completed = false
+completed = true
 
 [[requirements]]
 id = "US27"
