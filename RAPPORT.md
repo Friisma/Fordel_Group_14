@@ -326,7 +326,20 @@ og gjort det nemmere for os at arbejde parallelt på de forskellige dele af syst
 
 ### Delsystemer
 
+Som beskrevet i planlægning, ligger vi vægt  
 
+De delsystemer vi vil implementere er følgende: 
+- **User creation** er allerede implementeret ved starten af projektet. 
+- **User management** er også implementeret, men skal modificeres til at passe til vores user stories.
+- **Roles** skal sættes op, så der er klar forskel på de forskellige roller en user kan have i systemet. Herunder skal der være et system til at opsætte roler til forskellige brugere. 
+- **Project creation** skal stå for at oprette projekter
+- **project management** skal kunne modificere projekter, og gøre at projektet kan ejes af en user. 
+- **invitations** skal til at starte med kunne stå for at invitere advisor roller til
+- **Study line creation** håndtere oprettelse af nye studie linjer 
+- **Study line management** skal kunne modificere studielinjer, samt hvem der hører til hvilke studielinjer, og
+
+for at give et billede på hvordan vi vil implementere de forskellige del-systemer kan vi vise hvordan vi har 
+![sequence diagram](rapport-items/create_project_sequence.png)
 
 ### Implementering
 
@@ -349,7 +362,6 @@ Ting der er gode at få med:
 - [ ] En forklaring af specielet interessant eller vigtig kode.
   - Her kan I bruge sekvens diagrammer, tilstands diagrammer, eller kode eksempler.
 
-![sequence diagram](rapport-items/create_project_sequence.png)
 
 Husk at bruge de rigtige pile i klasse-diagrammet (By Yanpas - Own work, [CC BY-SA 4.0](https://commons.wikimedia.org/w/index.php?curid=48015014)):
 
