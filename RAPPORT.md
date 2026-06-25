@@ -340,7 +340,7 @@ Ting der er gode at få med:
 - [ ] En liste over de værktøjer, biblioteker, og ekstern kode I har brugt med versioner.
   - Java version, GUI_Library, IDE version, osv.
 - [ ] En beskrivelse af hvordan man kører jeres kode.
-- [ ] Et overblik over koden.
+- [ x ] Et overblik over koden.
   - Her kan I bruge et klasse diagram til at beskrive hvordan det ser ud.
 - [ x ] En gennemgang af de patterns I har gjort brug af.
   - Dependency Inversion/Injection, MVC, Observer Pattern, GoF, osv...
