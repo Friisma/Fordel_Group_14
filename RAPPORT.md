@@ -21,6 +21,9 @@ Tabel her
 > Derudover bruger jeg AI værktøjer sprogligt til grammatisk kvalitetssikring, såsom at fange stavefejl og glemte kommaer i min egen tekst, uden at lade den formulere selve indholdet.
 > Målet er aldrig at blive afhængig af AI, men at arbejde sammen med det og bruge det som et værktøj, der løfter det endelige produkts kvalitet og understøtter min egen faglige og personlige udvikling.
 
+> Jeg blev dog nødt til at lave en undtagelse for dette princip en enkelt gang under projektet for at overholde deadlinen. Aftenen før det sidste kundemøde (vores endelige user story-deadline) opdagede vi alt for sent, at test-frameworket Mockito, som jeg havde brugt, fejlede på de andres computere. For at redde situationen og nå deadlinen var jeg tvunget til at lade en AI omskrive de 20-30 tests, jeg oprindeligt havde skrevet, der gjorde brug af Mockito, så de ikke længere var afhængige af Mockito. I denne situation fungerede AI’en udelukkende som en oversætter af mine egne, eksisterende tests, hvilket var afgørende for, at vi nåede i mål til tiden med en acceptabel test coverage.
+> AI'en oprettede en java-klasse under test/testsupport, der hedder TestFakes.java, som lod tests'ne gøre brug af Mockito-funktioner (mock-objekter, osv.) uden at have Mockito som en dependency.
+
 ## Statement on code contribution score
 
 ## Indledning
