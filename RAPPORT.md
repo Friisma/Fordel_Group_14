@@ -224,11 +224,11 @@ Ting der er gode at få med:
 - [x] Brudt User Stories ned i delsystemer.
   - Et delsystem er noget som er mere koblet end resten.
   - Bevægelse / Fængsel / Prøv Lykken / .. osv.
-- [ ] En beskrivelse af planlægningen.
+- [x] En beskrivelse af planlægningen.
   - Hvilke user stories afhænger af hvilke og er der tid nok til at nå de forskellige user stories.
   - Måske bruge et Gantt' Diagram.
-- [ ] En beskrivelse af hvordan planen har ændret sig over tid.
-- [ ] En beskrivelse af arkitekturen (pakke niveau).
+- [x] En beskrivelse af hvordan planen har ændret sig over tid.
+- [x] En beskrivelse af arkitekturen (pakke niveau).
   - Hvordan har I brudt jeres kode op i pakker sådan at I får høj sammenhæng og lav coupling.
   - Har I designet delsystemer sådan at I kan arbejde på dem parallelt?
   - Har I gjort jer nogle ideer omkring test.
@@ -238,7 +238,8 @@ Ting der er gode at få med:
 
 ## Planlægning og design
 I dette afsnit vil vi gennemgå gruppens planlægning igennem projektets forløb, og i sammenhæng kigge på de designmæssige
-tiltag der er blevet taget for at sikre at gruppen kunne efterleve denne planlægning. Derudover vil der også reflekteres over hvad vi som 
+tiltag der er blevet taget for at sikre at gruppen kunne efterleve denne planlægning. I vores diskussion vil vi vende tilbage til
+planlægningen, hvor der reflekteres over hvad vi som 
 gruppe vil gøre anderledes i fremtidige projekter. 
 
 ### Tilgang til User Stories 
@@ -268,22 +269,60 @@ hvordan vi har grebet de forskellige user stories an. Gantt diagrammet viser bla
 funktionaliteter, og hvilke user stories der direkte afhænger af løsningen på andre del-opgaver. For at gøre diagrammet mere overskueligt 
 fungere de forskellige møder med kunden som en "nulstilling" for at gøre diagrammet mere overskueligt.
 
+
+
 ![Gantt-diagram](rapport-items/Gantt_diagram.png)
 
 Som det ses i Gantt diagrammet har vi arbejdet ud fra nogle møder med vores kunde, der har fungeret som deadlines af udvalgte user stories.
 I den anledning kunne møderne også bruges til at undersøge hvad der ligges mest vægt på fra kundens side, og hvad der skal tilrettes
-af det der allerede var blevet implementeret.
+af det der allerede var blevet udviklet.
 
 Inden vores andet møde med kunden ("M2"), aftalte vi at have produceret et "minimal viable product" (MVP), ud fra de tilgængelige user stories, 
-og de indtryk vi havde fået fra kundens prioriteringer. Dette fungerede som en god milepæl for vores projekt. 
-Her var vi også tvunget til at tage nogle beslutninger om hvilke user stories vi i første omgang ikke havde tid
-til at få implementeret. 
+og de indtryk vi havde fået fra kundens prioriteringer. Dette viste sig at fungere som en god milepæl for vores projekt, da de udvalgte user stories lagde et godt fundament
+for de user stories vi blev præsenteret for efter mødet. 
 
-#### Ændringer af plan
+op til mødet var vi også tvunget til at tage nogle beslutninger om hvilke user stories vi i første omgang ikke havde tid
+til at færdiggøre, hvilket også blev gjort ud fra de indtryk vi havde fået fra kunden. Vi valgte blandt andet at fokusere mest på at etablere 
+noget funktionelt i forhold til at få oprettet projekter, og etablere en kommunikation, hvilket var et af de punkter kunden lagde vægt på. 
+Her valgte vi også at fravælge udvalgte user stories som US23 (add student progress), hvilket vi også har defineret som et "should have" i 
+stedet for et must have i vores MoSCoW analyse.
+
+Efter vores andet møde ("M2") og frem mod den endelige præsentation af vores produkt ("F1"), kunne vi fokusere på at få udviklet nogle af de user stories vi ikke nåede 
+frem til mødet, samt de nye user stories der allerede byggede på noget af den funktionalitet vi havde implementeret. Gruppen planlagde at der, de sidste 2 dage op til mødet 
+ikke skulle udvikles nye funktionaliteter, men fokuseres på JUnit test, samt at raffinere vores produkt og gøre det klar til at blive præsenteret for kunden. 
+
+Dette resulterede i at vi nåede alle user stories undtagen US27 (A change of language), som vi også har fravalgt os i vores MoSCoW analyse, for at holde fokus på de 
+egentlige funktionaliteter. Det bør også noteres at et andet sprog ville kunne tilføjes uden at skulle modificere noget af den i forvejen implementerede logik. 
+
+
+##### Ændringer efter M1
 Inden det første møde med kunden havde vi lagt en plan for den handlingsplan vi gerne ville præsentere kunden. Dette viste sig
 at være overflødigt, da kunden havde nogle andre forventninger end dem vi indledningsvis forventede. Derfor måtte vi
 omlægge vores plan til at bedre kunne imødekomme kunden forventninger. Til vores fordel havde vi valgt ikke at begynde 
-at producere noget kode før M1.   
+at producere noget kode før M1.
+
+##### Ændringer efter M2
+Under mødet med kunden blev vores tolkning af rolle systemet udfordret. Det resulterede i at vi var nødt til at sætte tid af til at omskrive 
+vores rolle system, og tilhørende systemer. Vi valgte her at fortsætte med at implementere nye funktionaliteter mens rollesystemet blev omskrevet. 
+Konsekvenserne af dette vil vi reflektere yderligere over i vores diskussion. 
+
+### Arkitektur
+Systemet er opbygget efter en "layered" arkitektur, hvor de forskellige lag har forskellige funktionaliteter og formål.
+Denne opdeling praktiserer "separation of concerns", hvilket gør systemet mere skalerbar, testbar og nemmere at vedligeholde **[1]**. 
+
+
+Den overordnede filstruktur i projektet afspejler den her "layered" arkitektur, og er organiseret i følgende hovedområder: 
+- **domain** indeholder domænemodeller og entiteter, der repræsenterer systemets og dets forretningsobjekter. Klasserne i domain afspejler den data der arbejdes med i systemet på tværs af lagene.  
+- **repository** står alene for at kommunikere med databasen. Her implementeres der SQL-operationer, der anvendes til oprettelse, sletning og hentning af data. 
+Ved at samle database adgangen i ét lag, fremmer vi også **"high cohesion"**, da laget har et meget veldefineret ansvar.  
+- **services** indeholder projektets forretningslogik, og klasser som "ProjectManager" fungerer som et bindeled mellem view-laget og repository-laget. Service-laget koordinerer kald til 
+repository laget, håndterer domæne logik og gør det muligt at genbruge kode på tværs af systemet. Dette er med til at fremme **"low coupling"** da service-laget abstraherer repository-laget
+væk fra view laget, så de enkelte lag kan ændres uafhængigt af hinanden.
+- **view** håndterer præsentationen af data fra repository laget over for brugeren, og gør brug af Thymeleaf og Spring boot til at vise og hente data. 
+- **resources** indeholder database migrations, HTML-skabeloner og statiske filer som CSS og JavaScript.
+
+Ved at bruge denne arkitektur, har vi en klar opdeling af ansvar, hvor ændringer i ét lag, har minimal påvirkning på de øvrige lag. Det har givet os fleksibilitet i udviklingen
+og gjort det nemmere for os at arbejde parallelt på de forskellige dele af systemet.
 
 ### Implementering
 
@@ -341,5 +380,10 @@ Ting der er gode at få med:
 - [ ] Næste gang, hvad ville I gøre anderledes?
 - [ ] Hvad har I lært?
 
+**HUSK AT SKRIV OM VORES MÆRKELIGE ROLLE SYSTEM**
+**REFLEKTER OVER HVAD VI KUNNE HAVE GJORT ANDERLEDES I FORHOLD TIL PLANLÆGNINGEN**
+
 
 ## Kilder
+
+- [1]: GeeksForGeeks, "Separation of Concerns (SoC)", 2024. https://www.geeksforgeeks.org/software-engineering/separation-of-concerns-soc/
