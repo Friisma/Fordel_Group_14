@@ -1128,12 +1128,12 @@ Vi har også selv prøvet de vigtigste user stories i browseren, der gjorde vo f
 | Rollebaseret adgang og management              | Lykkedes |
 | Study Lines, visning og redigering             | Lykkedes |
 | Tilføjelse/fjernelse af bruger fra study lines | Lykkedes |
-| Study start date og student progress| Lykkedes |
-|Projektoprattelse, visning og redigering | Lykkedes |
-|Start af projekt og aadvisor dashbord | Lykkedes |
-|Advisor og student-ivitationer | Lykkedes |
-|Accept/afvisning af invitationer | Lykkedes |
-|Repository/database handling | Lykkedes |
+| Study start date og student progress           | Lykkedes |
+| Projektoprattelse, visning og redigering       | Lykkedes |
+| Start af projekt og aadvisor dashbord          | Lykkedes |
+| Advisor og student-ivitationer                 | Lykkedes |
+| Accept/afvisning af invitationer               | Lykkedes |
+| Repository/database handling                   | Lykkedes |
 
 Vi har også brugt JaCoCo til at måle code coverage. Code coverage bliv brugt som et redskab til at se, hvilke dale af kodenstesterne faktisk kørte igennem, den samlede instricrion coverage var 73%, og branch coverage var 53%, hvor det biger et godt billede af hvor meget af koden der bliver kørt gennem testene. De bedste dækkede områder var blandt andet rettighedslogik, domain-klasser og service-laget.
 ![JaCoCo code coverage report](rapport-items/code_coverage.png)
