@@ -230,7 +230,7 @@ Ting der er gode at få med:
 - [x] En beskrivelse af hvordan planen har ændret sig over tid.
 - [x] En beskrivelse af arkitekturen (pakke niveau).
   - Hvordan har I brudt jeres kode op i pakker sådan at I får høj sammenhæng og lav coupling.
-  - Har I designet delsystemer sådan at I kan arbejde på dem parallelt?
+  - Har I designet delsystemer ****sådan at I kan arbejde på dem parallelt?
   - Har I gjort jer nogle ideer omkring test.
 - [ ] En beskrivelse af de delsystemer I vil udvikle.
   - Her kan I bruge aktivitet og sekvens diagrammer til at beskrive opførsel hvis den er anderledes
@@ -342,7 +342,7 @@ Ting der er gode at få med:
 - [ ] En beskrivelse af hvordan man kører jeres kode.
 - [ ] Et overblik over koden.
   - Her kan I bruge et klasse diagram til at beskrive hvordan det ser ud.
-- [ ] En gennemgang af de patterns I har gjort brug af.
+- [ x ] En gennemgang af de patterns I har gjort brug af.
   - Dependency Inversion/Injection, MVC, Observer Pattern, GoF, osv...
   - Her kan I bruge klasse diagrammer og sekvens diagrammer.
   
@@ -354,6 +354,195 @@ Ting der er gode at få med:
 Husk at bruge de rigtige pile i klasse-diagrammet (By Yanpas - Own work, [CC BY-SA 4.0](https://commons.wikimedia.org/w/index.php?curid=48015014)):
 
 <img src="graphics/uml_classes_en.svg" width="250pt" />
+
+#### Software Patterns
+
+Denne del af rapporten er dedikeret til at vise forskellige relavante principper og patterns brugt i koden.
+
+##### GRASP: Pure Fabrication
+> Pure Fabrication er når en klasse der ikke eksistere i problem-domænet bliver oprettet for at opnå low coupling og high cohesion. Denne klasse er ikke nødvendigvis en reflektion af et koncept fra den virkelige verden, men den bliver introduceret af tekniske årsager. **[2]****[3]**
+
+Klassen `GlobalModelAdvice` centralisere data som alle views kan bruge ved automatisk at ligge `userData` og brugeres rights ind i modellen for alle requests. Dette er både klassens eneste mål, men også klassens eneste adfærd, hvilket giver klassen high cohesion.
+Den henter `userData` fra http sessionen og hvis denne data findes returnere den både brugeres data og et `RightsContext` beregnet igennem `RightsService`. Hvis der ikke findes en bruger i sessionen gives der en "anonym" rettighedskontekst. På den måde slippes der fra at den samme logik gentages i hver controller (DRY).
+
+Low Coupling opnås af `GlobalModelAdvice` da resten af systemet ikke behøver at kende detaljer om hvordan `userData` hentes fra sessionen, eller hvordan rettigheder beregnes. Controllers og views kan bare bruge de færdige attributter `userData` og `rights`. Dette betyder også at ændringer i session håndteren eller beregning af rettigheder kun kræver ændringer et sted.
+
+Nedenfor kan implementeringen af denne klasse ses:
+
+``` Java
+@ControllerAdvice
+public class GlobalModelAdvice {
+
+    private final RightsService rightsService;
+
+    public GlobalModelAdvice(RightsService rightsService) {
+        this.rightsService = rightsService;
+    }
+
+    @ModelAttribute("userData")
+    public User.Data userData(HttpSession session) {
+        Object userData = session.getAttribute("userData");
+        if (userData instanceof User.Data data) {
+            return data;
+        }
+
+        return null;
+    }
+
+    @ModelAttribute("rights")
+    public RightsContext rights(HttpSession session) {
+        Object userData = session.getAttribute("userData");
+        if (userData instanceof User.Data data) {
+            return rightsService.from(data);
+        }
+
+        return RightsContext.anonymous();
+    }
+}
+```
+---
+
+##### GRASP: Indirection
+> Indirection er et designprincip, som introducerer et objekt, der formidler interaktioner mellem andre objekter og derved reducerer direkte coupling. Dette objekt fungerer som en mellemmand ved at kontrollere kommunikation og dependencies. **[2]****[3]**
+
+> Ved at bruge indirection bliver systemer mere modulære og nemmere at opretholde, siden ændringer i en klasse har en lavere sandsynlighed for at bevæge sig op igennem andre. Det understøtter også separation of concerns ved at delegere ansvar ud til dedikerede objekter. **[2]****[3]**
+
+Det første og vigtigste eksempel på indirection er selvfølgelig brugen af Model-View-Controller (MVC) princippet overalt igennem hele projektet. Spring Boot MVC tvinger arkitekturen til at opdele systemet i tre forskellige lag, hvor Controlleren fungerer som det centrale Indirection-led (mellemmand).
+
+**Controller**:
+
+```Java
+// 1. CONTROLLER (Mellemmanden)
+@Controller
+public class SomethingController {
+
+    @GetMapping("/something")
+    public String getSomething(Model model) {
+        Something data = Something.of(...);     // Modellen
+        model.addAttribute("data", data);       // Formidlingen
+        return "something-view";                // Viewet
+    }
+}
+
+```
+
+**View**:
+
+```html
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="da">
+
+<head th:replace="~{fragments/head ::head}"></head>
+
+<body>
+    <header th:replace="~{fragments/header ::header}"></header>
+
+    ...
+
+    <footer th:replace="~{fragments/footer ::footer}"></footer>
+</body>
+
+</html>
+
+```
+
+**Model**:
+
+```Java
+/*
+ * 3. MODEL (Data)
+ * En record der udelukkende repræsenterer vores domænedata.
+ */
+public record Something(...) {
+
+    public static Something of(...) throws ... {
+        return new Something(...);
+    }
+
+    ...
+}
+
+```
+
+I implementeringen fungerer SomethingController som mellemmand mellem Something-recorden (Model) og Thymeleaf HTML-filen (View), hvilket giver en række fordele ift. arkitektur.
+
+Den tydeligste fordel er, at vi opnår en loose coupling mellem lagene. Modellen indeholder udelukkende data og business rules og behøver ikke have ansvar for, hvordan den bliver præsenteret for brugeren. På samme måde har vores View kun ansvar for, hvordan data skal vises visuelt, ikke hvor det kommer fra, eller hvordan det valideres. De to lag har derfor intet overlap ift. deres ansvar.
+
+Ved at lade controlleren være et indirektionsled sikres det, at Modellen og Viewet kan ændres uafhængigt af hinanden. Hvis Thymeleaf på et tidspunkt skulle udskiftes med en React-frontend eller noget andet, vil Model-laget forblive uberørt. Der skal kun justeres i, hvad Controlleren returnerer.
+
+Det samme gælder for maintainability. Hvis der opstår ændringer i, hvordan dataen skal struktureres, håndteres dette ét sted i Controlleren, før det sendes videre, hvilket minimerer risikoen for, at en ændring propagerer op igennem systemet.
+
+---
+
+##### SOLID: Single Responsibility Principle (SRP)
+> Single Responsibility Princippet (SRP) siger, at en klasse eller et modul kun må have et ansvar for præcis et job eller en stakeholder. Dette fører til loose coupling, da en ændring i en feature ikke kommer til uforudsigeligt at have indflydelse på urelaterede dele af systemet. Derudover gør det klasser mindre, og siden de kun har fokus på et mål, gør det koden meget nemmere at læse, forstå og opretholde. Endelig bliver koden nemmere at validere med tests, da unit tests her kan rettes efter et enkelt isoleret og veldefineret modul. **[3]**
+
+I dette projekt ses Single Responsibility Princippet tydeligt i implementeringen af databaselaget. I stedet for at lade controllerne eller services håndtere SQL-requests direkte, ligger al databaseinteraktion udelukkende direkte i en dedikeret klasse: H2Repository.
+
+Nedenstående metode, `getAllUsers()`, er en metode i H2Repository, som har det fulde og eneste ansvar for at etablere forbindelse til H2-databasen, eksekvere SQL-kaldet og transformere resultatet fra databasen om til domæneobjekter. Ligesom alle andre metoder i klassen.
+
+```Java
+    @Override
+    public List<UserInfo> getAllUsers() {
+        var users = new ArrayList<UserInfo>();
+        var stmt = "SELECT id, email, name FROM users";
+        try (var statement = getConnection().prepareStatement(stmt)) {
+            var resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                var currUser = read(User.of(resultSet.getString("email")));
+
+                users.add(new UserInfo(
+                        resultSet.getString("id"),
+                        resultSet.getString("email"),
+                        resultSet.getString("name"),
+                        currUser.roles(),
+                        currUser.studyLine()));
+
+            }
+            return users;
+        } catch (SQLException e) {
+            throw Log.giveUp(logger, e, "Failed to find all users");
+        } catch (UserDoesNotExist e) {
+            throw new RuntimeException(e);
+        } catch (Email.InvalidEmail e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+```
+
+Denne opbygning viser brugen af SRP i praksis, da klassen kun har en eneste årsag til at ændre sig (one reason to change) (hvis strukturen i databasen eller måden, data tilgås på, ændres).
+
+Hvis tabellens navne i SQL-databasen i fremtiden ændres, eller hvis H2-databasen skiftes ud med en PostgreSQL-database, er det udelukkende koden i H2Repository, der skal ændres. Systemets business-logic (Services) og præsentationslag (Controllere og Views) vil forblive uberørte, fordi they ikke har ansvar for og derfor ikke kender de underliggende SQL-statements.
+
+Ved at uddelegere ansvaret for indehentning af data til denne specifikke metode, sikres det, at resten af systemet holdes fri for database-specifik fejlhåndtering (såsom SQLExceptions, etc.), hvilket gør det samlede system mere modulært, læsbart og nemmere at teste via isolerede unit tests.
+
+---
+
+##### GRASP: Creator
+> Creator er et princip, der handler om ansvarsplaceringen for, hvilken klasse der skal oprette (instantiere) nye objekter af en anden klasse. Creator patternet siger at en Klasse A tildeles ansvaret for at oprette Klasse B, hvis A har den nødvendige information til at gøre det, hvis A indeholder eller tæt anvender B, eller hvis A registrerer instanser af B. At sætte dette ansvar præcist føre til low coupling i systemet. **[2]****[3]**
+
+I projektet ses Creator-princippet i håndteringen af systemets rettighedkontekst. Klassen `RightsContext` har formålet at indkapsulere og holde styr på om brugeren er logget ind (authenticated), hvilken rolle brugeren har (f.eks. `STUDENT` eller `TEACHER`), og hvilke specifikke tilladelser (permissions) der er knyttet til denne rolle. Den bruger en række helper methods til at verificere disse rettigheder.
+
+I stedet for at lade klasser udefra (såsom controllere eller services) selv sammensætte detaljerne for en uautoriseret eller anonym bruger, er dette ansvar placeret direkte inde i `RightsContext` via en factory method:
+
+```Java
+public record RightsContext(
+        boolean authenticated,
+        Set<Roles> roles,
+        Set<Permission> permissions) {
+
+    // ... Hjælpemetoder til tjek af roller (hasRole, isStudent osv.) ...
+
+    public static RightsContext anonymous() {
+        return new RightsContext(false, Set.of(), Set.of());
+    }
+}
+```
+
+Dette er et eksempel på Creator-princippet ift. at lade `RightsContext` være skaber af sine egne instanser. Metoden `anonymous()` har det fulde ansvar for at kende og konfigurere tilstanden for en bruger som ikke er logget ind i systemet.
+
+Fordelen ved dette er lavere coupling i systemet. Hvis andre klasser i systemet blev givet ansvaret for at oprette en anonym kontekst ved direkte brug af `new RightsContext(false, Set.of(), Set.of())`, ville de blive hårdt koblet til klassens specifikke constructore og parametre. Hvis der i fremtiden skulle ændres på, hvordan en "anonym" bruger defineres (fx. ved at tilføje en log eller andet), skulle denne ændring (med creator princippet) kun foretages et sted, i `anonymous()`-metoden. På denne måde har resten af systemet intet ansvar for de interne detaljer ift. opsætning.
 
 ### Validering
 
@@ -391,3 +580,5 @@ Ting der er gode at få med:
 ## Kilder
 
 - [1]: GeeksForGeeks, "Separation of Concerns (SoC)", 2024. https://www.geeksforgeeks.org/software-engineering/separation-of-concerns-soc/
+- [2]: Craig Larman, "Applying UML and Patterns: An Introduction to Object-Oriented Analysis and Design and Iterative Development, Third Edition", 2004
+- [3]: Erich Gamma, Richard Helm, Ralph Johnson, John Vilssides, Design Patterns Elements of Reusable Object-Oriented Software, 1994
