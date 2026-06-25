@@ -122,7 +122,8 @@ Ting der er gode at få med:
 
 ## Planlægning og design
 I dette afsnit vil vi gennemgå gruppens planlægning igennem projektets forløb, og i sammenhæng kigge på de designmæssige
-tiltag der er blevet taget for at sikre at gruppen kunne efterleve denne planlægning. Derudover vil der også reflekteres over hvad vi som 
+tiltag der er blevet taget for at sikre at gruppen kunne efterleve denne planlægning. I vores diskussion vil vi vende tilbage til
+planlægningen, hvor der reflekteres over hvad vi som 
 gruppe vil gøre anderledes i fremtidige projekter. 
 
 ### Tilgang til User Stories 
@@ -156,18 +157,37 @@ fungere de forskellige møder med kunden som en "nulstilling" for at gøre diagr
 
 Som det ses i Gantt diagrammet har vi arbejdet ud fra nogle møder med vores kunde, der har fungeret som deadlines af udvalgte user stories.
 I den anledning kunne møderne også bruges til at undersøge hvad der ligges mest vægt på fra kundens side, og hvad der skal tilrettes
-af det der allerede var blevet implementeret.
+af det der allerede var blevet udviklet.
 
 Inden vores andet møde med kunden ("M2"), aftalte vi at have produceret et "minimal viable product" (MVP), ud fra de tilgængelige user stories, 
-og de indtryk vi havde fået fra kundens prioriteringer. Dette fungerede som en god milepæl for vores projekt. 
-Her var vi også tvunget til at tage nogle beslutninger om hvilke user stories vi i første omgang ikke havde tid
-til at få implementeret. 
+og de indtryk vi havde fået fra kundens prioriteringer. Dette viste sig at fungere som en god milepæl for vores projekt, da de udvalgte user stories lagde et godt fundament
+for de user stories vi blev præsenteret for efter mødet. 
 
-#### Ændringer af plan
+op til mødet var vi også tvunget til at tage nogle beslutninger om hvilke user stories vi i første omgang ikke havde tid
+til at færdiggøre, hvilket også blev gjort ud fra de indtryk vi havde fået fra kunden. Vi valgte blandt andet at fokusere mest på at etablere 
+noget funktionelt i forhold til at få oprettet projekter, og etablere en kommunikation, hvilket var et af de punkter kunden lagde vægt på. 
+Her valgte vi også at fravælge udvalgte user stories som US23 (add student progress), hvilket vi også har defineret som et "should have" i 
+stedet for et must have i vores MoSCoW analyse.
+
+Efter vores andet møde ("M2") og frem mod den endelige præsentation af vores produkt ("F1"), kunne vi fokusere på at få udviklet nogle af de user stories vi ikke nåede 
+frem til mødet, samt de nye user stories der allerede byggede på noget af den funktionalitet vi havde implementeret. Gruppen planlagde at der, de sidste 2 dage op til mødet 
+ikke skulle udvikles nye funktionaliteter, men fokuseres på JUnit test, samt at raffinere vores produkt og gøre det klar til at blive præsenteret for kunden. 
+
+Dette resulterede i at vi nåede alle user stories undtagen US27 (A change of language), som vi også har fravalgt os i vores MoSCoW analyse, for at holde fokus på de 
+egentlige funktionaliteter. Det bør også noteres at et andet sprog ville kunne tilføjes uden at skulle modificere noget af den i forvejen implementerede logik. 
+
+
+##### Ændringer efter M1
 Inden det første møde med kunden havde vi lagt en plan for den handlingsplan vi gerne ville præsentere kunden. Dette viste sig
 at være overflødigt, da kunden havde nogle andre forventninger end dem vi indledningsvis forventede. Derfor måtte vi
 omlægge vores plan til at bedre kunne imødekomme kunden forventninger. Til vores fordel havde vi valgt ikke at begynde 
-at producere noget kode før M1.   
+at producere noget kode før M1.
+
+##### Ændringer efter M2
+Under mødet med kunden blev vores tolkning af rolle systemet udfordret. Det resulterede i at vi var nødt til at sætte tid af til at omskrive 
+vores rolle system, og tilhørende systemer. Vi valgte her at fortsætte med at implementere nye funktionaliteter mens rollesystemet blev omskrevet. 
+Konsekvenserne af dette vil vi reflektere yderligere over i vores diskussion. 
+
 
 ### Implementering
 
@@ -225,5 +245,7 @@ Ting der er gode at få med:
 - [ ] Næste gang, hvad ville I gøre anderledes?
 - [ ] Hvad har I lært?
 
+**HUSK AT SKRIV OM VORES MÆRKELIGE ROLLE SYSTEM**
+**REFLEKTER OVER HVAD VI KUNNE HAVE GJORT ANDERLEDES I FORHOLD TIL PLANLÆGNINGEN**
 
 ## Kilder
