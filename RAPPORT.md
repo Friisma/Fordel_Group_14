@@ -25,13 +25,13 @@ authors:
 
 ## Report contribution
 | Del af rapporten | Casper (s255762) | Lasse (s255896) | Magnus (s251019) | Mahmoud (s244632) |
-| --- | --- | --- | --- | --- |
-| **Indledning** | ?% | ?% | ?% | ?% |
-| **Kravanalyse** | ?% | ?% | ?% | ?% |
-| **Planlægning og design** | ?% | ?% | ?% | ?% |
-| **Implementering** | ?% | ~50% | ?% | ?% |
-| **Validering** | ?% | ?% | ?% | ?% |
-| **Diskussion** | ?% | ?% | ?% | ?% |
+| --- | --- | --- |------------------| --- |
+| **Indledning** | ?% | ?% | ?%               | ?% |
+| **Kravanalyse** | ?% | ?% | ?%               | ?% |
+| **Planlægning og design** | ?% | ?% | 100%             | ?% |
+| **Implementering** | ?% | ~50% | 20%              | ?% |
+| **Validering** | ?% | ?% | ?%               | ?% |
+| **Diskussion** | ?% | ?% | ?%               | ?% |
 
 ## Use of AI
 ### s255896 (Lasse Pedersen)
@@ -52,6 +52,9 @@ authors:
 > AI til at søge ny viden, finde inspiration til at løse opgaver og til at hjælpe med at de "bugs" der er opstået under udvikling.
 > Personligt er det vigtigste for mig, at jeg føler jeg får det samme indlæring om jeg bruger AI eller ej, og jeg vurderer at jeg har fået lige så meget, 
 > hvis ikke mere, ud af projektet sammenlignet med tidligere projekter uden brug af AI.
+> 
+> Derudover har jeg brugt AI til at rette stavefejl i rapporten, og til at hjælpe med at kontrollere at meningen bag det jeg skriver, 
+> også er det der opfattes af læseren - dog uden at skrive teksten for mig.  
 ## Statement on code contribution score
 i §2 i vores gruppe kontrakt har vi noteret:
 > "Vi vil gerne prøve at fordele arbejdsmængden nogenlunde lige, i sådan grad at alle er tilfredse med deres bidragelse."
@@ -59,8 +62,11 @@ i §2 i vores gruppe kontrakt har vi noteret:
 Contribution-scoren afspejler, at arbejdsfordelingen i gruppen ikke har været helt ens. 
 Gruppen havde dog fra projektets begyndelse en fælles forståelse af, at alle skulle bidrage i et omfang, 
 de selv kunne være tilfredse med, og det er den samlede vurdering, 
-at dette er blevet overholdt. På trods af forskelle i contribution-scorerne har alle medlemmer bidraget med det, 
-de kunne, og samarbejdet har været godt gennem hele projektforløbet.   
+at dette er blevet overholdt. På trods af forskelle i contribution-scorerne har alle medlemmer bidraget med det 
+de kunne, og samarbejdet har været godt gennem hele projektforløbet.
+
+Udover code contribution score, er der også mere strukturelle arbejdsopgaver, der ikke bliver afspejles i scoren
+— herunder planlægning, koordinering og idé generering
 
 
 ## Indledning
@@ -259,28 +265,6 @@ tydeligt, at kundens behov for at en bruger skulle kunne oprette projekter (US-1
 til at være must have, men samtalen gjorde at det blev prioriteret. Samtidig blev vi også klogere på domainet. Gennem
 dialogen med kunden blev det meget tydeligt hvilke relationer der var i mellem brugere, projekter, study lines osv... 
 
-### Planlægning og Design
-
-> _Hvordan kan vi løse det?_
-
-Der er to dele til denne del, en beskrivelse af det system som I vil udvikle, men også en prioritering sådan at ting bliver udviklet i den rigtige orden.
-
-Ting der er gode at få med:
-
-- [x] Brudt User Stories ned i delsystemer.
-  - Et delsystem er noget som er mere koblet end resten.
-  - Bevægelse / Fængsel / Prøv Lykken / .. osv.
-- [x] En beskrivelse af planlægningen.
-  - Hvilke user stories afhænger af hvilke og er der tid nok til at nå de forskellige user stories.
-  - Måske bruge et Gantt' Diagram.
-- [x] En beskrivelse af hvordan planen har ændret sig over tid.
-- [x] En beskrivelse af arkitekturen (pakke niveau).
-  - Hvordan har I brudt jeres kode op i pakker sådan at I får høj sammenhæng og lav coupling.
-  - Har I designet delsystemer ****sådan at I kan arbejde på dem parallelt?
-  - Har I gjort jer nogle ideer omkring test.
-- [ ] En beskrivelse af de delsystemer I vil udvikle.
-  - Her kan I bruge aktivitet og sekvens diagrammer til at beskrive opførsel hvis den er anderledes
-    end AS-IS.
 
 ## Planlægning og design
 I dette afsnit vil vi gennemgå gruppens planlægning igennem projektets forløb, og i sammenhæng kigge på de designmæssige
@@ -350,7 +334,7 @@ at producere noget kode før M1.
 #### Ændringer efter M2
 Under mødet med kunden blev vores tolkning af rolle systemet udfordret. Det resulterede i at vi var nødt til at sætte tid af til at omskrive 
 vores rolle system, og tilhørende systemer. Vi valgte her at fortsætte med at implementere nye funktionaliteter mens rollesystemet blev omskrevet. 
-Konsekvenserne af dette vil vi reflektere yderligere over i vores diskussion. 
+Konsekvenserne af dette vil vi reflektere yderligere over i vores diskussion. Dette vil vi vende tilbage til i diskussionen.  
 
 ### Arkitektur
 
@@ -1113,7 +1097,7 @@ inden projektet gik i gang.
 
 For at have struktureret vores planlægning og arbejde bedre, kunne vi ha brugt nogle værktøjer til at ligge en mere konkret plan 
 end den vi havde. På den måde kunne vi ha skabt en bedre forudsætning for at overtage nye arbejdsopgaver, og uddelegere arbejdet bedre. I vores planlægningsafsnit 
-viser vi med et Gantt diagram hvordan vi udviklet de forskellige funktioner til vores projekt. Sådan et værktøj kunne have været godt til at ligge en mere udarbejdet plan
+viser vi med et Gantt diagram hvordan vi udviklet de forskellige funktioner til vores projekt. Sådan et værktøj kunne have været godt til at lave en mere udarbejdet plan. 
 proaktivt. 
 
 
