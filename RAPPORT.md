@@ -865,7 +865,7 @@ Fordelen ved dette er lavere coupling i systemet. Hvis andre klasser i systemet 
 
 ---
 
-### Vigtige metoder
+### Vigtig & Interessant Kode
 
 #### Project creation
 Et af projektets vigtigste metoder, er vores postCreateProject metode, der både interagere med service lag og derfor repository lag, men også direkte i vores HTML
@@ -999,6 +999,92 @@ stien tilbage til "create-proejct" siden. Dette kan lade sig gøre, da thymeleaf
 
 Hvis alt ellers fungere, bliver brugeren redirected tilbage til vores main side, hvor brugeren kan se en oversigt over sine projekter 
 med det tilføjede projekt. 
+
+#### Client-side søgning med Debounce
+
+Ved implementeringen af `/users`-siden, der viser en samlet oversigt over systemets brugere, blev der observeret at listen hurtigt kunne blive lang og uoverskuelig med flere brugere. Dette betød, at det i praksis kunne blive besværligt for en administrator eller studieleder at scrolle ned og finde en specifik bruger. For at løse dette problem og optimere brugervenligheden blev der implementeret en søgefunktion direkte i frontenden ved hjælp af JavaScript, ved brug af debouncing, og en dynamisk fallback-logik.
+
+Kildekoden for implementeringen ses herunder:
+
+```javascript
+document.addEventListener("DOMContentLoaded", () => {
+    const searchInput = document.getElementById("search");
+    const cards = Array.from(document.querySelectorAll("[data-user-name]"));
+    const noResults = document.getElementById("users-no-results");
+
+    if (!searchInput || cards.length === 0) return;
+
+    let debounceTimer = null;
+
+    const applySearch = () => {
+        const query = searchInput.value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        const nameMatches = cards.filter((card) => {
+            const name = (card.dataset.userName || "").toLowerCase();
+            return query === "" || name.includes(query);
+        });
+
+        const useEmailFallback = query !== "" && nameMatches.length === 0;
+
+        cards.forEach((card) => {
+            const name = (card.dataset.userName || "").toLowerCase();
+            const email = (card.dataset.userEmail || "").toLowerCase();
+            const matches = useEmailFallback
+                ? email.includes(query)
+                : query === "" || name.includes(query);
+            card.hidden = !matches;
+
+            if (matches) visibleCount += 1;
+        });
+
+        if (noResults) {
+            noResults.hidden = visibleCount !== 0;
+        }
+    };
+
+    searchInput.addEventListener("input", () => {
+        window.clearTimeout(debounceTimer);
+        debounceTimer = window.setTimeout(applySearch, 250);
+    });
+
+    applySearch();
+});
+
+```
+
+##### Hvad betyder "Debounce", og hvordan fungerer det?
+
+Når en bruger taster i inputfeltet, afsendes der et `input`-event for hvert eneste tegn (hvert enkelte tryk på en tast). Hvis søgefunktionen og den tilhørende filtrering kørte med det samme ved hvert tryk, ville computeren udføre tunge DOM-manipulationer unødvendigt mange gange i sekundet.
+
+Debouncing er et designmønster, der forsinker udførelsen af en funktion, indtil der har været en pause i brugerens aktivitet for et givet tidsrum.
+
+I denne kode fungerer det på følgende måde:
+
+1. Hver gang brugeren trykker på en tast, kaldes `searchInput.addEventListener("input", ...)`.
+2. Først ryddes en eventuelt eksisterende timer med `window.clearTimeout(debounceTimer)`.
+3. Derefter sættes en ny timer med `window.setTimeout(applySearch, 250)`.
+
+Dette betyder, at søgningen `applySearch()` først bliver kørt 250 millisekunder efter, at brugeren har sluppet tastaturet. Hvis brugeren skriver hurtigt, nulstilles timeren konstant, og søgningen kører kun en enkelt gang til sidst. Dette sparer CPU-ressourcer på klientens maskine og sikrer, at interfacet ikke lagger.
+
+##### Hvorfor frontend i stedet for backend?
+
+Da problemet med den lange liste blev identificeret, blev det overvejet, om søgningen skulle håndteres af backenden (f.eks. via et AJAX/Fetch-kald til systemet, som kunne lave en `LIKE`-søgning i databasen). Der blev dog bevidst valgt at bruge en frontend-løsning ud fra to årsager:
+
+1. Da alle brugerkort (cards) allerede bliver hentet ind og renderet via Thymeleaf-templaten ved den første indlæsning af `/users`, ligger dataen lokalt i browserens hukommelse. Ved at filtrere på front-enden undgås det at belaste serveren og databasen med nye HTTP-forespørgsler, hver gang der søges.
+2. Da filtreringen sker direkte på de eksisterende DOM-elementer ved blot at manipulere `.hidden`-attributen, reagerer siden med det samme. Brugeren oplever overhovedet ingen pause, hvilket gør det enormt hurtigt at søge igennem den lange liste.
+
+##### Hvad gør koden interessant?
+
+Udover selve debounce-delen er koden interessant på grund af sin dynamiske fallback-UX, som kompenserer for, at listen er så lang.
+
+Søgningen prioriterer i første omgang brugernes navne `data-user-name`. Men hvis der skrives noget, der *ikke* matcher nogen navne overhovedet (`nameMatches.length === 0`), bruger algoritmen variablen `useEmailFallback` og skifter automatisk over til at søge i brugernes e-mails (`data-user-email`) i stedet:
+
+```javascript
+const useEmailFallback = query !== "" && nameMatches.length === 0;
+```
+
+Dette giver en meget intuitiv søgning. Hvis en administrator leder efter en specifik studerende i den lange liste, men kun kender dennes studiemandat/e-mail (f.eks. `s255896`), vil systemet uden problemer finde brugeren, selvom der skrives i det samme søgefelt. På denne måde undgås det at skulle splitte interfacet op i flere forskellige søgefelter.
 
 ## Validering
 
