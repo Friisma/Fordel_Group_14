@@ -24,14 +24,16 @@ authors:
 
 
 ## Report contribution
-| Del af rapporten | Casper (s255762) | Lasse (s255896) | Magnus (s251019) | Mahmoud (s244632) |
-| --- | --- | --- |------------------| --- |
-| **Indledning** | ?% | ?% | ?%               | ?% |
-| **Kravanalyse** | ?% | ?% | ?%               | ?% |
-| **Planlægning og design** | ?% | ?% | 100%             | ?% |
-| **Implementering** | ?% | ~50% | 20%              | ?% |
-| **Validering** | ?% | ?% | ?%               | ?% |
-| **Diskussion** | ?% | ?% | 50%              | ?% |
+
+| Del af rapporten          | Casper (s255762) | Lasse (s255896) | Magnus (s251019) | Mahmoud (s244632) |
+|---------------------------|------------------|-----------------|------------------|-------------------|
+| **Indledning**            | 0%               | 100%            | 0%               | 0%                |
+| **Kravanalyse**           | ?%               | ?%              | ?%               | ?%                |
+| **Planlægning og design** | 0%               | 0%              | 100%             | 0%                |
+| **Implementering**        | ?%               | 60%             | 20%              | ?%                |
+| **Validering**            | ?%               | ?%              | ?%               | ?%                |
+| **Diskussion**            | ?%               | 30%             | ?%               | ?%                |
+
 
 ## Use of AI
 ### s255896 (Lasse Pedersen)
@@ -55,6 +57,9 @@ authors:
 > 
 > Derudover har jeg brugt AI til at rette stavefejl i rapporten, og til at hjælpe med at kontrollere at meningen bag det jeg skriver, 
 > også er det der opfattes af læseren - dog uden at skrive teksten for mig.  
+
+### s244632 (Mahmoud)
+> Jeg har anvendt AI-værktøjer til sproglig og grammatisk kvalitetssikring og til at finde stavefejl og manglende kommaer i min egne tekster. Da jeg er ordblind, laver jeg ofte stavefejl, og AI har derfor fungeret som et hjælpemiddel til korrekturlæsning. AI er ikke blivet brugt til at formulere eller udvikle indholdet. Derudover har jeg anvendt AI som et læringsværktøj til at søge viden og få forklaringer på spørgsmål som jeg havde svært ved at forstå. AI har kun været brugt som en hjælp til at forstå emnet bedre.  
 ## Statement on code contribution score
 i §2 i vores gruppe kontrakt har vi noteret:
 > "Vi vil gerne prøve at fordele arbejdsmængden nogenlunde lige, i sådan grad at alle er tilfredse med deres bidragelse."
@@ -71,19 +76,9 @@ Udover code contribution score, er der også mere strukturelle arbejdsopgaver, d
 
 ## Indledning
 
-> _Hvem, Hvorfor, og Hvordan skal man læse rapporten?_
+Denne rapport beskriver udviklingen af Fordel 14, et system til håndtering af projekter, studielinjer, brugere og rettigheder for universitetet UTD. Projektet blev udviklet med udgangspunkt i kundens user stories, og undervejs har vi arbejdet tæt med kravafstemning og prioritering for at sikre os, at løsningen hænger sammen med de vigtigste behov i domænet. Rapporten er skrevet til en læser, der ønsker at forstå både problemet, vores valgte løsning og de vigtigste tekniske valg i projektet, uden at kende hele kodebasen på forhånd.
 
-Kort sagt, har indledningen formålet at sætte kontekst og forventningerne til resten af rapporten.
-En dårlig indledning giver derfor ofte et dårlig indtryk; som I så skal kæmpe jer tilbage fra i resten af rapporten.
-
-Ting der er gode at få med:
-
-- [ ] Sæt rapporten in kontekst. Hvad forventer I at jeres læser kan forstå?
-- [ ] En kort beskrivelse af hvad I har lavet og er specielt stolte af, gerne med referencer til resten af rapporten.
-
-
-
-
+I de følgende afsnit gennemgår vi først kravanalysen, hvor user stories og domænet bliver omsat til centrale begreber og relationer. Derefter beskriver vi planlægningen og designet, hvor vi forklarer, hvordan opgaven blev opdelt, og hvordan arkitekturen blev struktureret for bedst at understøtte samarbejde og videreudvikling. I implementerings-delen fokuserer vi på den konkrete kodebase, herunder lags opdelingen i systemet, de vigtigste domæneklasser og de patterns, vi har brugt til at holde løsningen overskuelig, læsbar og maintainable. Til sidst gennemgår vi validering og diskussion, hvor vi vurderer, hvad der fungerede godt, og hvad vi lærte af processen.
 
 ## Kravanalyse
 > _Hvad er problemet?_
@@ -401,7 +396,45 @@ Ting der er gode at få med:
 - [ ] En forklaring af specielet interessant eller vigtig kode.
   - Her kan I bruge sekvens diagrammer, tilstands diagrammer, eller kode eksempler.
 
+### Implementerede user stories og tidsforløb
 
+Som beskrevet tidligere under Planlægning, bliv implementering delt op efter de forskellige kundemøde. Før M1 brugte vi mest tid på at forstå den eksisterende kodebase, de forskellige user stories og hvad kunden forventede af systemet. Derfor blev der kun implementeret meget lidt kode før M1.
+
+Mellem M1 og M2 arbejdede vi på at få et MVP på plads. Her fokuserede vi først på de dele af systemet, som de andre funktioner byggede videre på. Det var blandt anden login, brugerhåndtering, roller, study lines og project creation. Disse dele gjorde det muligt at arbejde videre med de mere sammenhængende flows i systemet.
+
+Efter M2 arbejdede vi videre med de user stories, som enten ikke var færdige endnu, eller som byggede oven på den funktionalitet vi allerede havde lavet. Her arbejdede vi blandt andet med projekter, invitationer, advisor-funktioner, student progress, password expiry og rettigheder. Vi måtte også ændre i rollesystemet, da vores første forståelse af rollerne ikke passede helt med kundens forventninger.
+
+Frem mod F1 blev fokus flyttet fra nye funktioner til at samle systemet, rette fejl og gøre det klar til præsentation. De sidste dage blev især brugt på JUnit tests og på at forbedre de vigtigste flows.
+
+### Værktøjer og biblioteker 
+
+Projektet er lavet som en Java webapplikation med Spring Boot. Maven bruges til at bygge og køre projektet. Thymeleaf bruges til HTML-siderne, og H2 bruges som database i projektet, blandt andet under udvikling og test.
+
+Det vigtigste værktøjer og biblioteker er Java 21, Spring Boot 3.4.4, Maven, Thymeleaf, H2, htmx-spring-boot-thymeleaf 4.0.1, spring-security-crypto 6.4.5, BouncyCastle 1.76, JUnit og JaCoCo 0.8.13.
+
+### Sådan køres projektet 
+
+Projektet kan køres lokalt med Maven. Først åbnes projektmappen i en terminal, og derefter kan applikationen startes med:
+
+```bash
+mvn spring-boot:run
+```
+
+Når applikationen kører, kan man åbne den i browseren på:
+
+```text
+http://localhost:8080
+```
+Testene kan køres med:
+
+```bash
+mvn verify
+```
+Efter testkørslen kan code coverage ses i:
+
+```text
+target/site/jacoco/index.html
+```
 Husk at bruge de rigtige pile i klasse-diagrammet (By Yanpas - Own work, [CC BY-SA 4.0](https://commons.wikimedia.org/w/index.php?curid=48015014)):
 
 <img src="graphics/uml_classes_en.svg" width="250pt" />
@@ -689,7 +722,7 @@ Modellen er opbygget omkring en klar separation af domæneroller `Roles` og konk
 Denne del af rapporten er dedikeret til at vise forskellige relavante principper og patterns brugt i koden.
 
 ##### GRASP: Pure Fabrication
-> Pure Fabrication er når en klasse der ikke eksistere i problem-domænet bliver oprettet for at opnå low coupling og high cohesion. Denne klasse er ikke nødvendigvis en reflektion af et koncept fra den virkelige verden, men den bliver introduceret af tekniske årsager. **[2]****[3]**
+> Pure Fabrication er når en klasse der ikke eksistere i problem-domænet bliver oprettet for at opnå low coupling og high cohesion. Denne klasse er ikke nødvendigvis en reflektion af et koncept fra den virkelige verden, men den bliver introduceret af tekniske årsager. **[2][3]**
 
 Klassen `GlobalModelAdvice` centralisere data som alle views kan bruge ved automatisk at ligge `userData` og brugeres rights ind i modellen for alle requests. Dette er både klassens eneste mål, men også klassens eneste adfærd, hvilket giver klassen high cohesion.
 Den henter `userData` fra http sessionen og hvis denne data findes returnere den både brugeres data og et `RightsContext` beregnet igennem `RightsService`. Hvis der ikke findes en bruger i sessionen gives der en "anonym" rettighedskontekst. På den måde slippes der fra at den samme logik gentages i hver controller (DRY).
@@ -732,9 +765,9 @@ public class GlobalModelAdvice {
 ---
 
 ##### GRASP: Indirection
-> Indirection er et designprincip, som introducerer et objekt, der formidler interaktioner mellem andre objekter og derved reducerer direkte coupling. Dette objekt fungerer som en mellemmand ved at kontrollere kommunikation og dependencies. **[2]****[3]**
+> Indirection er et designprincip, som introducerer et objekt, der formidler interaktioner mellem andre objekter og derved reducerer direkte coupling. Dette objekt fungerer som en mellemmand ved at kontrollere kommunikation og dependencies. **[2][3]**
 
-> Ved at bruge indirection bliver systemer mere modulære og nemmere at opretholde, siden ændringer i en klasse har en lavere sandsynlighed for at bevæge sig op igennem andre. Det understøtter også separation of concerns ved at delegere ansvar ud til dedikerede objekter. **[2]****[3]**
+> Ved at bruge indirection bliver systemer mere modulære og nemmere at opretholde, siden ændringer i en klasse har en lavere sandsynlighed for at bevæge sig op igennem andre. Det understøtter også separation of concerns ved at delegere ansvar ud til dedikerede objekter. **[2][3]**
 
 Det første og vigtigste eksempel på indirection er selvfølgelig brugen af Model-View-Controller (MVC) princippet overalt igennem hele projektet. Spring Boot MVC tvinger arkitekturen til at opdele systemet i tre forskellige lag, hvor Controlleren fungerer som det centrale Indirection-led (mellemmand).
 
@@ -849,7 +882,7 @@ Ved at uddelegere ansvaret for indehentning af data til denne specifikke metode,
 ---
 
 ##### GRASP: Creator
-> Creator er et princip, der handler om ansvarsplaceringen for, hvilken klasse der skal oprette (instantiere) nye objekter af en anden klasse. Creator patternet siger at en Klasse A tildeles ansvaret for at oprette Klasse B, hvis A har den nødvendige information til at gøre det, hvis A indeholder eller tæt anvender B, eller hvis A registrerer instanser af B. At sætte dette ansvar præcist føre til low coupling i systemet. **[2]****[3]**
+> Creator er et princip, der handler om ansvarsplaceringen for, hvilken klasse der skal oprette (instantiere) nye objekter af en anden klasse. Creator patternet siger at en Klasse A tildeles ansvaret for at oprette Klasse B, hvis A har den nødvendige information til at gøre det, hvis A indeholder eller tæt anvender B, eller hvis A registrerer instanser af B. At sætte dette ansvar præcist føre til low coupling i systemet. **[2][3]**
 
 I projektet ses Creator-princippet i håndteringen af systemets rettighedkontekst. Klassen `RightsContext` har formålet at indkapsulere og holde styr på om brugeren er logget ind (authenticated), hvilken rolle brugeren har (f.eks. `STUDENT` eller `TEACHER`), og hvilke specifikke tilladelser (permissions) der er knyttet til denne rolle. Den bruger en række helper methods til at verificere disse rettigheder.
 
@@ -875,7 +908,7 @@ Fordelen ved dette er lavere coupling i systemet. Hvis andre klasser i systemet 
 
 ---
 
-### Vigtige metoder
+### Vigtig & Interessant Kode
 
 #### Project creation
 Et af projektets vigtigste metoder, er vores postCreateProject metode, der både interagere med service lag og derfor repository lag, men også direkte i vores HTML
@@ -1010,6 +1043,92 @@ stien tilbage til "create-proejct" siden. Dette kan lade sig gøre, da thymeleaf
 Hvis alt ellers fungere, bliver brugeren redirected tilbage til vores main side, hvor brugeren kan se en oversigt over sine projekter 
 med det tilføjede projekt. 
 
+#### Client-side søgning med Debounce
+
+Ved implementeringen af `/users`-siden, der viser en samlet oversigt over systemets brugere, blev der observeret at listen hurtigt kunne blive lang og uoverskuelig med flere brugere. Dette betød, at det i praksis kunne blive besværligt for en administrator eller studieleder at scrolle ned og finde en specifik bruger. For at løse dette problem og optimere brugervenligheden blev der implementeret en søgefunktion direkte i frontenden ved hjælp af JavaScript, ved brug af debouncing, og en dynamisk fallback-logik.
+
+Kildekoden for implementeringen ses herunder:
+
+```javascript
+document.addEventListener("DOMContentLoaded", () => {
+    const searchInput = document.getElementById("search");
+    const cards = Array.from(document.querySelectorAll("[data-user-name]"));
+    const noResults = document.getElementById("users-no-results");
+
+    if (!searchInput || cards.length === 0) return;
+
+    let debounceTimer = null;
+
+    const applySearch = () => {
+        const query = searchInput.value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        const nameMatches = cards.filter((card) => {
+            const name = (card.dataset.userName || "").toLowerCase();
+            return query === "" || name.includes(query);
+        });
+
+        const useEmailFallback = query !== "" && nameMatches.length === 0;
+
+        cards.forEach((card) => {
+            const name = (card.dataset.userName || "").toLowerCase();
+            const email = (card.dataset.userEmail || "").toLowerCase();
+            const matches = useEmailFallback
+                ? email.includes(query)
+                : query === "" || name.includes(query);
+            card.hidden = !matches;
+
+            if (matches) visibleCount += 1;
+        });
+
+        if (noResults) {
+            noResults.hidden = visibleCount !== 0;
+        }
+    };
+
+    searchInput.addEventListener("input", () => {
+        window.clearTimeout(debounceTimer);
+        debounceTimer = window.setTimeout(applySearch, 250);
+    });
+
+    applySearch();
+});
+
+```
+
+##### Hvad betyder "Debounce", og hvordan fungerer det?
+
+Når en bruger taster i inputfeltet, afsendes der et `input`-event for hvert eneste tegn (hvert enkelte tryk på en tast). Hvis søgefunktionen og den tilhørende filtrering kørte med det samme ved hvert tryk, ville computeren udføre tunge DOM-manipulationer unødvendigt mange gange i sekundet.
+
+Debouncing er et designmønster, der forsinker udførelsen af en funktion, indtil der har været en pause i brugerens aktivitet for et givet tidsrum. **[5]**
+
+I denne kode fungerer det på følgende måde:
+
+1. Hver gang brugeren trykker på en tast, kaldes `searchInput.addEventListener("input", ...)`.
+2. Først ryddes en eventuelt eksisterende timer med `window.clearTimeout(debounceTimer)`.
+3. Derefter sættes en ny timer med `window.setTimeout(applySearch, 250)`.
+
+Dette betyder, at søgningen `applySearch()` først bliver kørt 250 millisekunder efter, at brugeren har sluppet tastaturet. Hvis brugeren skriver hurtigt, nulstilles timeren konstant, og søgningen kører kun en enkelt gang til sidst. Dette sparer CPU-ressourcer på klientens maskine og sikrer, at interfacet ikke lagger.
+
+##### Hvorfor frontend i stedet for backend?
+
+Da problemet med den lange liste blev identificeret, blev det overvejet, om søgningen skulle håndteres af backenden (f.eks. via et AJAX/Fetch-kald til systemet, som kunne lave en `LIKE`-søgning i databasen). Der blev dog bevidst valgt at bruge en frontend-løsning ud fra to årsager:
+
+1. Da alle brugerkort (cards) allerede bliver hentet ind og renderet via Thymeleaf-templaten ved den første indlæsning af `/users`, ligger dataen lokalt i browserens hukommelse. Ved at filtrere på front-enden undgås det at belaste serveren og databasen med nye HTTP-forespørgsler, hver gang der søges.
+2. Da filtreringen sker direkte på de eksisterende DOM-elementer ved blot at manipulere `.hidden`-attributen, reagerer siden med det samme. Brugeren oplever overhovedet ingen pause, hvilket gør det enormt hurtigt at søge igennem den lange liste.
+
+##### Hvad gør koden interessant?
+
+Udover selve debounce-delen er koden interessant på grund af sin dynamiske fallback-UX, som kompenserer for, at listen er så lang.
+
+Søgningen prioriterer i første omgang brugernes navne `data-user-name`. Men hvis der skrives noget, der *ikke* matcher nogen navne overhovedet (`nameMatches.length === 0`), bruger algoritmen variablen `useEmailFallback` og skifter automatisk over til at søge i brugernes e-mails (`data-user-email`) i stedet:
+
+```javascript
+const useEmailFallback = query !== "" && nameMatches.length === 0;
+```
+
+Dette giver en meget intuitiv søgning. Hvis en administrator leder efter en specifik studerende i den lange liste, men kun kender dennes studiemandat/e-mail (f.eks. `s255896`), vil systemet uden problemer finde brugeren, selvom der skrives i det samme søgefelt. På denne måde undgås det at skulle splitte interfacet op i flere forskellige søgefelter.
+
 ## Validering
 
 > _Virker det?_
@@ -1019,11 +1138,11 @@ I kan beskrive hvilke ekstra steps I har taget for at få accepttest til at kør
 
 Ting der er gode at få med:
 
-- [ ] En beskrivelse af hvilke systemer som koden er blevet testet på.
+- [x] En beskrivelse af hvilke systemer som koden er blevet testet på.
   - Linux, MacOSX, Windows?
   - Versioner af Java?
-- [ ] En gennem gang af de accepttest der lykkedes og ikke lykkedes.
-- [ ] En forklaring af brug af unit-test og code coverage.
+- [x] En gennem gang af de accepttest der lykkedes og ikke lykkedes.
+- [x] En forklaring af brug af unit-test og code coverage.
   - Screen shots fra jeres IDE med code coverage.
 
 For at validere hjemmesiden har vi brugt både automatiske test og manuelle test. De automatiske test bliv kørt med Maven, og manuelle test bliv brugt til at kontrollere de vigtigste flows i browseren. På den måde har vi både testet enkelte dele af koden og hvordan systemer virker samlet.
@@ -1052,12 +1171,12 @@ Vi har også selv prøvet de vigtigste user stories i browseren, der gjorde vo f
 | Rollebaseret adgang og management              | Lykkedes |
 | Study Lines, visning og redigering             | Lykkedes |
 | Tilføjelse/fjernelse af bruger fra study lines | Lykkedes |
-| Study start date og student progress| Lykkedes |
-|Projektoprattelse, visning og redigering | Lykkedes |
-|Start af projekt og aadvisor dashbord | Lykkedes |
-|Advisor og student-ivitationer | Lykkedes |
-|Accept/afvisning af invitationer | Lykkedes |
-|Repository/database handling | Lykkedes |
+| Study start date og student progress           | Lykkedes |
+| Projektoprattelse, visning og redigering       | Lykkedes |
+| Start af projekt og aadvisor dashbord          | Lykkedes |
+| Advisor og student-ivitationer                 | Lykkedes |
+| Accept/afvisning af invitationer               | Lykkedes |
+| Repository/database handling                   | Lykkedes |
 
 Vi har også brugt JaCoCo til at måle code coverage. Code coverage bliv brugt som et redskab til at se, hvilke dale af kodenstesterne faktisk kørte igennem, den samlede instricrion coverage var 73%, og branch coverage var 53%, hvor det biger et godt billede af hvor meget af koden der bliver kørt gennem testene. De bedste dækkede områder var blandt andet rettighedslogik, domain-klasser og service-laget.
 ![JaCoCo code coverage report](rapport-items/code_coverage.png)
@@ -1091,12 +1210,13 @@ Inden projektet gik i gang indleverede vi en gruppekontrakt, for at danne så go
 Dette gjorde det muligt for os at afstemme vores forventninger med hinanden 
 inden projektet gik i gang.
 
+
+
 ### Hvad kunne vi gøre bedre. 
 
-For at have struktureret vores planlægning og arbejde bedre, kunne vi ha brugt nogle værktøjer til at ligge en mere konkret plan 
-end den vi havde. På den måde kunne vi ha skabt en bedre forudsætning for at overtage nye arbejdsopgaver, og uddelegere arbejdet bedre. I vores planlægningsafsnit 
-viser vi med et Gantt diagram hvordan vi udviklet de forskellige funktioner til vores projekt. Sådan et værktøj kunne have været godt til at lave en mere udarbejdet plan. 
-proaktivt. 
+I dette afsnit reflekteres der over, hvordan projektet kunne være optimeret, opdelt i organisatoriske og tekniske områder.
+
+#### Organiseringsrelaterede forbedringer og projektstyring
 
 Som nævnt i vores planlægning og design afsnit havde vi efter ("M2"), en udfordring med vores rolle system, 
 der resulterede i tilføjelsen af en ny relation i vores database. Dette betød at den kode der var blevet implementeret i sammenhæng med den del af databasen skulle omskrives for bedre at imødekomme kundens behov. 
@@ -1110,12 +1230,47 @@ På trods af den forøgede arbejdsbyrde, har gruppen lært en del af denne fejl,
 den grundige analyse forud for udviklingen. 
 
 
+Selvom projektets deadlines blev overholdt, kunne det overordnede forløb have været struktureret mere proaktivt. Det Gantt-diagram, der præsenteres i planlægningsafsnittet, blev primært udarbejdet retrospektivt for at vise udviklingen. Hvis et tilsvarende planlægningsværktøj i stedet var blevet anvendt aktivt fra projektets start, ville det have skabt langt bedre forudsætninger for løbende at estimere tidsforbrug, uddelegere arbejdsbyrden og håndtere opgaver med indbyrdes afhængigheder.
 
+Dette ville have givet en mere struktureret ramme for afstemning af forventninger og ville havet gjort det nemmere for de enkelte gruppemedlemmer proaktivt at overtage nye opgaver.
+
+#### Tekniske og implementeringsmæssige forbedringer
+
+I dette afsnit analyseres de tekniske udfordringer, der opstod undervejs i udviklingen, samt hvordan arkitekturen og implementeringen kunne have været optimeret fra projektets begyndelse.
+
+##### Refaktorering mod en generisk databasemodel for rollestyring
+
+I starten af projektet blev koblingen mellem brugere, roller og studielinjer implementeret via specifikke relationstabeller, herunder `studyline_students` og `studyline_leaders`. Denne struktur viste sig hurtigt ikke at være generisk nok. Da det senere hen i forløbet blev et krav, at andre systemroller (såsom Advisors) på samme måde kunne have tilknytning til specifikke studielinjer, nødvendiggjorde det en stor og tidskrævende omskrivning af kodebasen.
+
+For at løse dette strukturelle problem blev der introduceret en mere generisk samletabel: `study_line_memberships`. Denne tabel forener `user_id`, `studyline_id` og `role_id` i en samlet entity.
+
+Erfaringen viser, at en dybere domæneanalyse inden database-designet kunne have forebygget denne situation. Ved at designe relationerne mere generisk fra start i stedet for at binde specifikke roller til isolerede tabeller, kunne applikationen have skaleret uden behov for større omskrivninger i slutfasen.
+
+##### Brud på DRY-princippet i præsentationslaget (Modals)
+
+Under udviklingen af brugergrænsefladen opstod der et brud på DRY-princippet (Don't Repeat Yourself!) i forbindelse med håndteringen af modals (dialogbokse). Da behovet for forskellige modals opstod på tværs af platformen, resulterede dette i oprettelsen af adskillige, stortset identiske HTML-templates til de enkelte modals.
+
+En langt bedre tilgang havde været at udvikle en generisk, genanvendelig modal-komponent i Thymeleaf-skabelonerne fra starten. Ved at lade modalen konfigurere dynamisk via parametre (f.eks. titel, inputfelter og form-aktions), kunne mængden af redundant frontend-kode have været reduceret, hvilket ligeledes ville have lettet den efterfølgende maintainability.
+
+##### Monolitisk arkitektur i repository-laget (`H2Repository`)
+
+Klassen `H2Repository` voksede enormt under implementeringen til en unødigt stor og kompleks fil. Klassen endte med at varetage databasekommunikationen for samtlige domæneobjekter i systemet, hvilket hurtigt lod filen komme op på over 1000 linjer.
+
+For at opnå en højere grad af high cohesion og bedre læsbarhed, burde denne fil have været delt ud i mindre, domænespecifikke repositories (eksempelvis et `UserRepository`, `ProjectRepository` og `StudyLineRepository`). Dette ville have isoleret SQL-requests'ne til deres respektive ansvarsområder og gjort at kodebasen blev mere overskuelig.
+
+Derudover var navngivningen af metoderne i `H2Repository` problematisk ift. manglende konsistens, da der ikke var fastsat nogle naming conventions far start. Etableringen af en fast standard for navne af metoder (fx. brug af præfixer som `findBy...`, `update...` eller `existsBy...`) ville have øget læsbarheden, søgbarheden og gennemsigtigheden på tværs af systemets lag.
+
+##### Teststrategi og løbende validering
+
+Som beskrevet i rapportens indledende afsnit, opstod der kritiske problemer med test-frameworket (Mockito) tæt på en vigtig deadline, hvilket skabte et akut behov for ekstern fejlretning og omskrivning til fakes (af ai). Dette understreger vigtigheden af en proaktiv teststrategi.
+
+I en fremtidigt opgave som denne vil det være optimalt at integrere testskrivningen som en fast del af den daglige udvikling, frem for en "isoleret" aktivitet til sidst. Ved at skrive unit tests og integrationstests løbende i takt med, at business-logic implementeres, sikres en konstant høj testdækning. Dette validerer ikke kun koden løbende, men fanger også problemer på tværs af gruppens lokale udviklingsmiljøer i tide, hvilket minimerer risikoen for problemer tæt på aflevering.
 
 
 ## Kilder
 
 - [1]: GeeksForGeeks, "Separation of Concerns (SoC)", 2024. https://www.geeksforgeeks.org/software-engineering/separation-of-concerns-soc/
-- [2]: Craig Larman, "Applying UML and Patterns: An Introduction to Object-Oriented Analysis and Design and Iterative Development, Third Edition", 2004
-- [3]: Erich Gamma, Richard Helm, Ralph Johnson, John Vilssides, "Design Patterns Elements of Reusable Object-Oriented Software", 1994
+- [2]: Craig Larman, "Applying UML and Patterns: An Introduction to Object-Oriented Analysis and Design and Iterative Development, Third Edition", 2004.
+- [3]: Erich Gamma, Richard Helm, Ralph Johnson, John Vilssides, "Design Patterns Elements of Reusable Object-Oriented Software", 1994.
 - [4]: GeeksForGeeks, "Layered Architecture in Computer Networks", 2025. https://www.geeksforgeeks.org/computer-networks/layered-architecture-in-computer-networks/
+- [5]: freeCodeCamp, "Debounce – How to Delay a Function in JavaScript (JS ES6 Example)", 2021. https://www.freecodecamp.org/news/javascript-debounce-example/
