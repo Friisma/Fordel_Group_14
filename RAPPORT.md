@@ -857,7 +857,7 @@ Nedenstående metode, `getAllUsers()`, er en metode i H2Repository, som har det 
 
 Denne opbygning viser brugen af SRP i praksis, da klassen kun har en eneste årsag til at ændre sig (one reason to change) (hvis strukturen i databasen eller måden, data tilgås på, ændres).
 
-Hvis tabellens navne i SQL-databasen i fremtiden ændres, eller hvis H2-databasen skiftes ud med en PostgreSQL-database, er det udelukkende koden i H2Repository, der skal ændres. Systemets business-logic (Services) og præsentationslag (Controllere og Views) vil forblive uberørte, fordi they ikke har ansvar for og derfor ikke kender de underliggende SQL-statements.
+Hvis tabellens navne i SQL-databasen i fremtiden ændres, eller hvis H2-databasen skiftes ud med en PostgreSQL-database, er det udelukkende koden i H2Repository, der skal ændres. Systemets business-logic (Services) og præsentationslag (Controllere og Views) vil forblive uberørte, fordi de ikke har ansvar for og derfor ikke kender de underliggende SQL-statements.
 
 Ved at uddelegere ansvaret for indehentning af data til denne specifikke metode, sikres det, at resten af systemet holdes fri for database-specifik fejlhåndtering (såsom SQLExceptions, etc.), hvilket gør det samlede system mere modulært, læsbart og nemmere at teste via isolerede unit tests.
 
@@ -1167,7 +1167,7 @@ inden projektet gik i gang. Det er gruppens samlede vurdering at samarbejdet har
 af niveau forskelle, blevet bidraget fra alle gruppemedlemmer i en tilfredsstillende grad. Der konkluderes derfor, at 
 gruppen har overholdt og efterlevet de forventninger der er angivet i gruppekontrakten.
 
-Projektet og vores løsninger på user stories er for gruppen meget tilfredsstillende, og gruppen er positivt instillede
+Projektet og vores løsninger på user stories er for gruppen meget tilfredsstillende, og gruppen er positivt indstillede
 til det færdige produkt der er produceret. Dette er som følge af en god prioritering undervejs, samt løbende dialog 
 om udfordringer, spørgsmål og idéer til udviklingen. 
 
@@ -1193,7 +1193,7 @@ I dette afsnit reflekteres der over, hvordan projektet kunne være optimeret, op
 
 Selvom projektets deadlines blev overholdt, kunne det overordnede forløb have været struktureret mere proaktivt. Det Gantt-diagram, der præsenteres i planlægningsafsnittet, blev primært udarbejdet retrospektivt for at vise udviklingen. Hvis et tilsvarende planlægningsværktøj i stedet var blevet anvendt aktivt fra projektets start, ville det have skabt langt bedre forudsætninger for løbende at estimere tidsforbrug, uddelegere arbejdsbyrden og håndtere opgaver med indbyrdes afhængigheder.
 
-Dette ville have givet en mere struktureret ramme for afstemning af forventninger og ville havet gjort det nemmere for de enkelte gruppemedlemmer proaktivt at overtage nye opgaver.
+Dette ville have givet en mere struktureret ramme for afstemning af forventninger og ville have gjort det nemmere for de enkelte gruppemedlemmer proaktivt at overtage nye opgaver.
 
 #### Tekniske og implementeringsmæssige forbedringer
 
@@ -1215,7 +1215,7 @@ Erfaringen viser, at en dybere domæneanalyse inden database-designet kunne have
 
 ##### Brud på DRY-princippet i præsentationslaget (Modals)
 
-Under udviklingen af brugergrænsefladen opstod der et brud på DRY-princippet (Don't Repeat Yourself!) i forbindelse med håndteringen af modals (dialogbokse). Da behovet for forskellige modals opstod på tværs af platformen, resulterede dette i oprettelsen af adskillige, stortset identiske HTML-templates til de enkelte modals.
+Under udviklingen af brugergrænsefladen opstod der et brud på DRY-princippet (Don't Repeat Yourself!) i forbindelse med håndteringen af modals (dialogbokse). Da behovet for forskellige modals opstod på tværs af platformen, resulterede dette i oprettelsen af adskillige, stort set identiske HTML-templates til de enkelte modals.
 
 En langt bedre tilgang havde været at udvikle en generisk, genanvendelig modal-komponent i Thymeleaf-skabelonerne fra starten. Ved at lade modalen konfigurere dynamisk via parametre (f.eks. titel, inputfelter og form-aktions), kunne mængden af redundant frontend-kode have været reduceret, hvilket ligeledes ville have lettet den efterfølgende maintainability.
 
@@ -1225,7 +1225,7 @@ Klassen `H2Repository` voksede enormt under implementeringen til en unødigt sto
 
 For at opnå en højere grad af high cohesion og bedre læsbarhed, burde denne fil have været delt ud i mindre, domænespecifikke repositories (eksempelvis et `UserRepository`, `ProjectRepository` og `StudyLineRepository`). Dette ville have isoleret SQL-requests'ne til deres respektive ansvarsområder og gjort at kodebasen blev mere overskuelig.
 
-Derudover var navngivningen af metoderne i `H2Repository` problematisk ift. manglende konsistens, da der ikke var fastsat nogle naming conventions far start. Etableringen af en fast standard for navne af metoder (fx. brug af præfixer som `findBy...`, `update...` eller `existsBy...`) ville have øget læsbarheden, søgbarheden og gennemsigtigheden på tværs af systemets lag.
+Derudover var navngivningen af metoderne i `H2Repository` problematisk ift. manglende konsistens, da der ikke var fastsat nogle naming conventions fra start. Etableringen af en fast standard for navne af metoder (fx. brug af præfixer som `findBy...`, `update...` eller `existsBy...`) ville have øget læsbarheden, søgbarheden og gennemsigtigheden på tværs af systemets lag.
 
 ##### Teststrategi og løbende validering
 
