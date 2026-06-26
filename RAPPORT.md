@@ -31,7 +31,7 @@ authors:
 | **Planlægning og design** | ?% | ?% | 100%             | ?% |
 | **Implementering** | ?% | ~50% | 20%              | ?% |
 | **Validering** | ?% | ?% | ?%               | ?% |
-| **Diskussion** | ?% | ?% | ?%               | ?% |
+| **Diskussion** | ?% | ?% | 50%              | ?% |
 
 ## Use of AI
 ### s255896 (Lasse Pedersen)
@@ -334,7 +334,7 @@ at producere noget kode før M1.
 #### Ændringer efter M2
 Under mødet med kunden blev vores tolkning af rolle systemet udfordret. Det resulterede i at vi var nødt til at sætte tid af til at omskrive 
 vores rolle system, og tilhørende systemer. Vi valgte her at fortsætte med at implementere nye funktionaliteter mens rollesystemet blev omskrevet. 
-Konsekvenserne af dette vil vi reflektere yderligere over i vores diskussion. Dette vil vi vende tilbage til i diskussionen.  
+Konsekvenserne af dette vil vi reflektere yderligere over i vores diskussion. Implikationerne af dette vil der vendes tilbage til i diskussionen.  
 
 ### Arkitektur
 
@@ -1091,14 +1091,24 @@ Inden projektet gik i gang indleverede vi en gruppekontrakt, for at danne så go
 Dette gjorde det muligt for os at afstemme vores forventninger med hinanden 
 inden projektet gik i gang.
 
-
-
 ### Hvad kunne vi gøre bedre. 
 
 For at have struktureret vores planlægning og arbejde bedre, kunne vi ha brugt nogle værktøjer til at ligge en mere konkret plan 
 end den vi havde. På den måde kunne vi ha skabt en bedre forudsætning for at overtage nye arbejdsopgaver, og uddelegere arbejdet bedre. I vores planlægningsafsnit 
 viser vi med et Gantt diagram hvordan vi udviklet de forskellige funktioner til vores projekt. Sådan et værktøj kunne have været godt til at lave en mere udarbejdet plan. 
 proaktivt. 
+
+Som nævnt i vores planlægning og design afsnit havde vi efter ("M2"), en udfordring med vores rolle system, 
+der resulterede i tilføjelsen af en ny relation i vores database. Dette betød at den kode der var blevet implementeret i sammenhæng med den del af databasen skulle omskrives for bedre at imødekomme kundens behov. 
+Gruppen havde fået indtrykket af at rollen på den enkelte user var en "global" rolle - det vil sige at rollen tilhørte en user alene. Efter mødet 
+skulle rolle systemet laves om, så rollen tilhørte en user i sammenhæng med en studielinje. Dette var en bekostelig fejl, der gjorde at gruppen var nødt 
+til at afsætte mere tid til at omskrive meget af den kode der var blevet produceret i sammenhæng med rolle systemet, hvilket betød at der ikke 
+var lige så meget tid til at løse nye user stories. På et strukturelt niveau kunne gruppen have hindret dette ved at lave en mere gennemarbejdet analyse af den tilhørende user story, 
+samt tage kontakt til kunden forud for mødet. For at gøre uforudsete problemer som dette nemmere at løse, ville det ha været en fordel for gruppen at lave en 
+mere generisk database, hvor man for eksempel kunne have tilføjet en kolonne til en user-role tabel, i stedet for at tilføje en hel ny tabel. 
+På trods af den forøgede arbejdsbyrde, har gruppen lært en del af denne fejl, og er blevet gjort opmærksom på vigtigheden i 
+den grundige analyse forud for udviklingen. 
+
 
 
 
