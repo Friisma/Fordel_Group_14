@@ -24,6 +24,7 @@ authors:
 
 
 ## Report contribution
+
 | Del af rapporten          | Casper (s255762) | Lasse (s255896) | Magnus (s251019) | Mahmoud (s244632) |
 |---------------------------|------------------|-----------------|------------------|-------------------|
 | **Indledning**            | 0%               | 100%            | 0%               | 0%                |
@@ -32,6 +33,7 @@ authors:
 | **Implementering**        | ?%               | 60%             | 20%              | ?%                |
 | **Validering**            | ?%               | ?%              | ?%               | ?%                |
 | **Diskussion**            | ?%               | 30%             | ?%               | ?%                |
+
 
 ## Use of AI
 ### s255896 (Lasse Pedersen)
@@ -55,6 +57,9 @@ authors:
 > 
 > Derudover har jeg brugt AI til at rette stavefejl i rapporten, og til at hjælpe med at kontrollere at meningen bag det jeg skriver, 
 > også er det der opfattes af læseren - dog uden at skrive teksten for mig.  
+
+### s244632 (Mahmoud)
+> Jeg har anvendt AI-værktøjer til sproglig og grammatisk kvalitetssikring og til at finde stavefejl og manglende kommaer i min egne tekster. Da jeg er ordblind, laver jeg ofte stavefejl, og AI har derfor fungeret som et hjælpemiddel til korrekturlæsning. AI er ikke blivet brugt til at formulere eller udvikle indholdet. Derudover har jeg anvendt AI som et læringsværktøj til at søge viden og få forklaringer på spørgsmål som jeg havde svært ved at forstå. AI har kun været brugt som en hjælp til at forstå emnet bedre.  
 ## Statement on code contribution score
 i §2 i vores gruppe kontrakt har vi noteret:
 > "Vi vil gerne prøve at fordele arbejdsmængden nogenlunde lige, i sådan grad at alle er tilfredse med deres bidragelse."
@@ -391,7 +396,45 @@ Ting der er gode at få med:
 - [ ] En forklaring af specielet interessant eller vigtig kode.
   - Her kan I bruge sekvens diagrammer, tilstands diagrammer, eller kode eksempler.
 
+### Implementerede user stories og tidsforløb
 
+Som beskrevet tidligere under Planlægning, bliv implementering delt op efter de forskellige kundemøde. Før M1 brugte vi mest tid på at forstå den eksisterende kodebase, de forskellige user stories og hvad kunden forventede af systemet. Derfor blev der kun implementeret meget lidt kode før M1.
+
+Mellem M1 og M2 arbejdede vi på at få et MVP på plads. Her fokuserede vi først på de dele af systemet, som de andre funktioner byggede videre på. Det var blandt anden login, brugerhåndtering, roller, study lines og project creation. Disse dele gjorde det muligt at arbejde videre med de mere sammenhængende flows i systemet.
+
+Efter M2 arbejdede vi videre med de user stories, som enten ikke var færdige endnu, eller som byggede oven på den funktionalitet vi allerede havde lavet. Her arbejdede vi blandt andet med projekter, invitationer, advisor-funktioner, student progress, password expiry og rettigheder. Vi måtte også ændre i rollesystemet, da vores første forståelse af rollerne ikke passede helt med kundens forventninger.
+
+Frem mod F1 blev fokus flyttet fra nye funktioner til at samle systemet, rette fejl og gøre det klar til præsentation. De sidste dage blev især brugt på JUnit tests og på at forbedre de vigtigste flows.
+
+### Værktøjer og biblioteker 
+
+Projektet er lavet som en Java webapplikation med Spring Boot. Maven bruges til at bygge og køre projektet. Thymeleaf bruges til HTML-siderne, og H2 bruges som database i projektet, blandt andet under udvikling og test.
+
+Det vigtigste værktøjer og biblioteker er Java 21, Spring Boot 3.4.4, Maven, Thymeleaf, H2, htmx-spring-boot-thymeleaf 4.0.1, spring-security-crypto 6.4.5, BouncyCastle 1.76, JUnit og JaCoCo 0.8.13.
+
+### Sådan køres projektet 
+
+Projektet kan køres lokalt med Maven. Først åbnes projektmappen i en terminal, og derefter kan applikationen startes med:
+
+```bash
+mvn spring-boot:run
+```
+
+Når applikationen kører, kan man åbne den i browseren på:
+
+```text
+http://localhost:8080
+```
+Testene kan køres med:
+
+```bash
+mvn verify
+```
+Efter testkørslen kan code coverage ses i:
+
+```text
+target/site/jacoco/index.html
+```
 Husk at bruge de rigtige pile i klasse-diagrammet (By Yanpas - Own work, [CC BY-SA 4.0](https://commons.wikimedia.org/w/index.php?curid=48015014)):
 
 <img src="graphics/uml_classes_en.svg" width="250pt" />
@@ -1095,11 +1138,11 @@ I kan beskrive hvilke ekstra steps I har taget for at få accepttest til at kør
 
 Ting der er gode at få med:
 
-- [ ] En beskrivelse af hvilke systemer som koden er blevet testet på.
+- [x] En beskrivelse af hvilke systemer som koden er blevet testet på.
   - Linux, MacOSX, Windows?
   - Versioner af Java?
-- [ ] En gennem gang af de accepttest der lykkedes og ikke lykkedes.
-- [ ] En forklaring af brug af unit-test og code coverage.
+- [x] En gennem gang af de accepttest der lykkedes og ikke lykkedes.
+- [x] En forklaring af brug af unit-test og code coverage.
   - Screen shots fra jeres IDE med code coverage.
 
 For at validere hjemmesiden har vi brugt både automatiske test og manuelle test. De automatiske test bliv kørt med Maven, og manuelle test bliv brugt til at kontrollere de vigtigste flows i browseren. På den måde har vi både testet enkelte dele af koden og hvordan systemer virker samlet.
