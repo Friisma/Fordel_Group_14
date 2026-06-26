@@ -1112,19 +1112,6 @@ Dette giver en meget intuitiv søgning. Hvis en administrator leder efter en spe
 
 ## Validering
 
-> _Virker det?_
-
-I denne sektion skal I forklare hvorfor I tænker at koden I har afleveret virker.
-I kan beskrive hvilke ekstra steps I har taget for at få accepttest til at kører nemt.
-
-Ting der er gode at få med:
-
-- [x] En beskrivelse af hvilke systemer som koden er blevet testet på.
-  - Linux, MacOSX, Windows?
-  - Versioner af Java?
-- [x] En gennem gang af de accepttest der lykkedes og ikke lykkedes.
-- [x] En forklaring af brug af unit-test og code coverage.
-  - Screen shots fra jeres IDE med code coverage.
 
 For at validere hjemmesiden har vi brugt både automatiske test og manuelle test. De automatiske test bliv kørt med Maven, og manuelle test bliv brugt til at kontrollere de vigtigste flows i browseren. På den måde har vi både testet enkelte dele af koden og hvordan systemer virker samlet.
 
@@ -1165,18 +1152,6 @@ Samlet set viser testerne og de manuelle gennemgange, at de vigtigste dele at sy
 
 
 
-### Diskussion
-
-> _Hvad har vi lært?_
-
-I denne sektion er en refleksion over hvad I mangler, hvordan gruppearbejdet er gået og hvad I gerne vil have lavet, hvis I har haft mere tid.
-Dette er et godt sted at rede en karakter, hvis man har lavet nogle fejl :).
-
-Ting der er gode at få med:
-
-- [ ] Hvad gik godt, hvad gik dårligt?
-- [ ] Næste gang, hvad ville I gøre anderledes?
-- [ ] Hvad har I lært?
 
 ## Diskussion
 I denne diskussion vil vi først gennemgå de succeser vi har haft i vores projekt, 
@@ -1198,6 +1173,13 @@ om udfordringer, spørgsmål og idéer til udviklingen.
 Et af produktets bedste aspekter, er dets UI og user-feedback implementationer, der viser at gruppen har haft 
 et overskud, til at producere gennemførte funktionaliteter, der ikke bare løser user stories, men føles også 
 komplette og intuitive at bruge. 
+
+Gennem projektets udarbejdelse, har der i gruppen været mulighed for at bruge nogle af de evner og værktøjer der er blevet erhvervet 
+gennem de første to semestre i praksis. Dette har været en meget lærerig oplevelse, hvilket har skabt gode forudsætninger for at udvikle fremtidige 
+projekter. Fagets struktur har samtidigt været med til at bidrage til idéen om at udvikle produkter til en kunde, hvilket har været 
+spændende og udfordrende, og givet os et godt indblik i softwareudvikling i praksis. 
+Derudover har gruppens medlemmer udvidet deres værktøjer til at bygge java-applikationer. Dette inkluderer blandt 
+andet Thymeleaf, Pico, H2-databasen, samt en forbedring af vores færdigheder til udvikling med Spring Boot.   
 
 
 
