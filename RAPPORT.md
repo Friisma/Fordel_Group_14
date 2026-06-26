@@ -71,7 +71,7 @@ at dette er blevet overholdt. På trods af forskelle i contribution-scorerne har
 de kunne, og samarbejdet har været godt gennem hele projektforløbet.
 
 Udover code contribution score, er der også mere strukturelle arbejdsopgaver, der ikke bliver afspejles i scoren
-— herunder planlægning, koordinering og idé generering
+— herunder planlægning, koordinering og idé generering.
 
 
 ## Indledning
@@ -350,7 +350,8 @@ væk fra view laget, så de enkelte lag kan ændres uafhængigt af hinanden.
 - **resources** indeholder database migrations, HTML-skabeloner og statiske filer som CSS og JavaScript.
 
 Ved at bruge denne arkitektur, har vi en klar opdeling af ansvar, hvor ændringer i ét lag, har minimal påvirkning på de øvrige lag. Det har givet os fleksibilitet i udviklingen
-og gjort det nemmere for os at arbejde parallelt på de forskellige dele af systemet.
+og gjort det nemmere for os at arbejde parallelt på de forskellige dele af systemet. I vores diskussion vil vi komme ind på hvordan 
+man kunne have styrket **separation of concerns** ved at lave en endnu bedre arkitektur. 
 
 ### Delsystemer
 
@@ -375,28 +376,10 @@ For at give et billede på hvordan vi vil implementere de forskellige delsysteme
 Diagrammet viser hvordan en bruger interagerer med systemet for at oprette et projekt. Controlleren modtager requestet,
 videresender det til service-laget, som koordinerer kald til repository-laget for at gemme projektet i databasen.
 
-### Implementering
+## Implementering
 
-> _Hvad fik vi lavet?_
 
-Denne sektion er dedikeret til at beskrive hvad I har lavet.
-
-Ting der er gode at få med:
-
-- [ ] En forklaring af hvilke user stories I har nået, og på hvilke tidspunkter.
-- [ ] En liste over de værktøjer, biblioteker, og ekstern kode I har brugt med versioner.
-  - Java version, GUI_Library, IDE version, osv.
-- [ ] En beskrivelse af hvordan man kører jeres kode.
-- [x] Et overblik over koden.
-  - Her kan I bruge et klasse diagram til at beskrive hvordan det ser ud.
-- [x] En gennemgang af de patterns I har gjort brug af.
-  - Dependency Inversion/Injection, MVC, Observer Pattern, GoF, osv...
-  - Her kan I bruge klasse diagrammer og sekvens diagrammer.
-  
-- [ ] En forklaring af specielet interessant eller vigtig kode.
-  - Her kan I bruge sekvens diagrammer, tilstands diagrammer, eller kode eksempler.
-
-### Implementerede user stories og tidsforløb
+#### Implementerede user stories og tidsforløb
 
 Som beskrevet tidligere under Planlægning, bliv implementering delt op efter de forskellige kundemøde. Før M1 brugte vi mest tid på at forstå den eksisterende kodebase, de forskellige user stories og hvad kunden forventede af systemet. Derfor blev der kun implementeret meget lidt kode før M1.
 
@@ -406,13 +389,13 @@ Efter M2 arbejdede vi videre med de user stories, som enten ikke var færdige en
 
 Frem mod F1 blev fokus flyttet fra nye funktioner til at samle systemet, rette fejl og gøre det klar til præsentation. De sidste dage blev især brugt på JUnit tests og på at forbedre de vigtigste flows.
 
-### Værktøjer og biblioteker 
+#### Værktøjer og biblioteker 
 
 Projektet er lavet som en Java webapplikation med Spring Boot. Maven bruges til at bygge og køre projektet. Thymeleaf bruges til HTML-siderne, og H2 bruges som database i projektet, blandt andet under udvikling og test.
 
 Det vigtigste værktøjer og biblioteker er Java 21, Spring Boot 3.4.4, Maven, Thymeleaf, H2, htmx-spring-boot-thymeleaf 4.0.1, spring-security-crypto 6.4.5, BouncyCastle 1.76, JUnit og JaCoCo 0.8.13.
 
-### Sådan køres projektet 
+#### Sådan køres projektet 
 
 Projektet kan køres lokalt med Maven. Først åbnes projektmappen i en terminal, og derefter kan applikationen startes med:
 
@@ -435,9 +418,7 @@ Efter testkørslen kan code coverage ses i:
 ```text
 target/site/jacoco/index.html
 ```
-Husk at bruge de rigtige pile i klasse-diagrammet (By Yanpas - Own work, [CC BY-SA 4.0](https://commons.wikimedia.org/w/index.php?curid=48015014)):
 
-<img src="graphics/uml_classes_en.svg" width="250pt" />
 
 #### Database og database design
 
@@ -1197,8 +1178,6 @@ Ting der er gode at få med:
 - [ ] Næste gang, hvad ville I gøre anderledes?
 - [ ] Hvad har I lært?
 
-**HUSK AT SKRIV OM VORES MÆRKELIGE ROLLE SYSTEM**
-**REFLEKTER OVER HVAD VI KUNNE HAVE GJORT ANDERLEDES I FORHOLD TIL PLANLÆGNINGEN**
 ## Diskussion
 I denne diskussion vil vi først gennemgå de succeser vi har haft i vores projekt, 
 samt vurdere om vi har overholdt vores gruppekontrakt. Herefter vil vi gennemgå de ting vi kunne ha gjort bedre, og de ting 
@@ -1208,7 +1187,16 @@ mere tid.
 ### Hvad er gået godt. 
 Inden projektet gik i gang indleverede vi en gruppekontrakt, for at danne så gode rammer om vores gruppearbejde som muligt. 
 Dette gjorde det muligt for os at afstemme vores forventninger med hinanden 
-inden projektet gik i gang.
+inden projektet gik i gang. Det er gruppens samlede vurdering at samarbejdet har været godt, og der er på trods 
+af niveau forskelle, blevet bidraget fra alle gruppemedlemmer i en tilfredsstillende grad.
+
+Projektet og vores løsninger på user stories er for gruppen meget tilfredsstillende, og gruppen er positivt instillede
+til det færdige produkt der er produceret. Dette er som følge af en god prioritering undervejs, samt løbende dialog 
+om udfordringer, spørgsmål og idéer til udviklingen. 
+
+Et af produktets bedste aspekter, er dets UI og user-feedback implementationer, der viser at gruppen har haft 
+et overskud, til at producere gennemførte funktionaliteter, der ikke bare løser user stories, men føles også 
+komplette og intuitive at bruge. 
 
 
 
