@@ -28,10 +28,10 @@ authors:
 | Del af rapporten          | Casper (s255762) | Lasse (s255896) | Magnus (s251019) | Mahmoud (s244632) |
 |---------------------------|------------------|-----------------|------------------|-------------------|
 | **Indledning**            | 0%               | 100%            | 0%               | 0%                |
-| **Kravanalyse**           | 100%             | ?%              | ?%               | ?%                |
+| **Kravanalyse**           | 100%             | 0%              | 0%               | ?%                |
 | **Planlægning og design** | 0%               | 0%              | 100%             | 0%                |
 | **Implementering**        | ?%               | 60%             | 20%              | ?%                |
-| **Validering**            | ?%               | ?%              | ?%               | ?%                |
+| **Validering**            | ?%               | 0%              | 0%               | 100%              |
 | **Diskussion**            | ?%               | 50%             | 50%              | ?%                |
 
 
@@ -284,7 +284,7 @@ kunne der herefter arbejdes på at skabe sammenhængende funktioner, som at give
 
 ### Planlægning
 
-For at have den ovenstående tilgang til vores user stories, krævede det at vi som gruppe kunne uddelegere de forskellige del-opgaver. 
+For at arbejde ud fra denne tilgang til vores user stories, krævede det at vi som gruppe kunne uddelegere de forskellige del-opgaver. 
 Derfor aftalte vi i vores gruppe kontrakt, at der som udgangspunkt skulle mødes 2-3 gange om ugen. Dette bidragede til at skabe overblik over vores fremskridt 
 med user stories, og uddelegere user stories og del opgaver der afhænger af nogle af de delsystemer der allerede er blevet eller ville blive
 implementeret. 
@@ -292,28 +292,28 @@ implementeret.
 For at give et indtryk af vores fremgangsmåde har vi, efter vores sidste møde ("F1"), lavet nedenstående Gantt-diagram for at vise 
 hvordan vi har grebet de forskellige user stories an. Gantt diagrammet viser blandt andet hvilke arbejdsopgaver der kunne løses uden nogle foregående
 funktionaliteter, og hvilke user stories der direkte afhænger af løsningen på andre del-opgaver. For at gøre diagrammet mere overskueligt 
-fungere de forskellige møder med kunden som en "nulstilling" for at gøre diagrammet mere overskueligt.
+fungere de forskellige møder med kunden som en "nulstilling" for af tidslinjen.
 
 
 
 ![Gantt-diagram](rapport-items/Gantt_diagram.png)
 
-Som det ses i Gantt diagrammet har vi arbejdet ud fra nogle møder med vores kunde, der har fungeret som deadlines af udvalgte user stories.
-I den anledning kunne møderne også bruges til at undersøge hvad der ligges mest vægt på fra kundens side, og hvad der skal tilrettes
+Som det fremgår i Gantt diagrammet har vi arbejdet ud fra nogle møder med vores kunde, der har fungeret som deadlines af udvalgte user stories.
+I den anledning kunne møderne også bruges til at undersøge hvad der lægges mest vægt på fra kundens side, og hvad der skal tilrettes
 af det der allerede var blevet udviklet.
 
-Inden vores andet møde med kunden ("M2"), aftalte vi at have produceret et "minimal viable product" (MVP), ud fra de tilgængelige user stories, 
+Inden vores andet møde med kunden ("M2"), aftalte vi at have produceret et "minimal viable product" (MVP), baseret på de tilgængelige user stories, 
 og de indtryk vi havde fået fra kundens prioriteringer. Dette viste sig at fungere som en god milepæl for vores projekt, da de udvalgte user stories lagde et godt fundament
 for de user stories vi blev præsenteret for efter mødet. 
 
-op til mødet var vi også tvunget til at tage nogle beslutninger om hvilke user stories vi i første omgang ikke havde tid
+Op til mødet var vi også tvunget til at tage stilling til hvilke user stories vi i første omgang ikke havde tid
 til at færdiggøre, hvilket også blev gjort ud fra de indtryk vi havde fået fra kunden. Vi valgte blandt andet at fokusere mest på at etablere 
 noget funktionelt i forhold til at få oprettet projekter, og etablere en kommunikation, hvilket var et af de punkter kunden lagde vægt på. 
 Her valgte vi også at fravælge udvalgte user stories som US23 (add student progress), hvilket vi også har defineret som et "should have" i 
 stedet for et must have i vores MoSCoW analyse.
 
 Efter vores andet møde ("M2") og frem mod den endelige præsentation af vores produkt ("F1"), kunne vi fokusere på at få udviklet nogle af de user stories vi ikke nåede 
-frem til mødet, samt de nye user stories der allerede byggede på noget af den funktionalitet vi havde implementeret. Gruppen planlagde at der, de sidste 2 dage op til mødet 
+at færdiggøre frem til mødet, samt de nye user stories der allerede byggede på noget af den funktionalitet vi havde implementeret. Gruppen planlagde at der, de sidste 2 dage op til mødet 
 ikke skulle udvikles nye funktionaliteter, men fokuseres på JUnit test, samt at raffinere vores produkt og gøre det klar til at blive præsenteret for kunden. 
 
 Dette resulterede i at vi nåede alle user stories undtagen US27 (A change of language), som vi også har fravalgt os i vores MoSCoW analyse, for at holde fokus på de 
@@ -374,7 +374,8 @@ For at give et billede på hvordan vi vil implementere de forskellige delsysteme
 ![sequence diagram](rapport-items/create_project_sequence.png)
 
 Diagrammet viser hvordan en bruger interagerer med systemet for at oprette et projekt. Controlleren modtager requestet,
-videresender det til service-laget, som koordinerer kald til repository-laget for at gemme projektet i databasen.
+videresender det til service-laget, som koordinerer kald til repository-laget for at gemme projektet i databasen. I diagrammet viser vi også hvordan 
+vi giver brugeren respons - dette uddybes yderligere i implementering. 
 
 ## Implementering
 
