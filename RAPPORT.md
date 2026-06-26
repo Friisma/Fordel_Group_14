@@ -30,8 +30,8 @@ authors:
 | **Indledning**            | 0%               | 100%            | 0%               | 0%                |
 | **Kravanalyse**           | 100%             | ?%              | ?%               | ?%                |
 | **Planlægning og design** | 0%               | 0%              | 100%             | 0%                |
-| **Implementering**        | ?%               | 60%             | 20%              | ?%                |
-| **Validering**            | ?%               | ?%              | ?%               | ?%                |
+| **Implementering**        | ?%               | 60%             | 20%              | 20%               |
+| **Validering**            | ?%               | ?%              | ?%               | 100%              |
 | **Diskussion**            | ?%               | 50%             | 50%              | ?%                |
 
 
