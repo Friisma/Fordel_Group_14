@@ -28,11 +28,11 @@ authors:
 | Del af rapporten          | Casper (s255762) | Lasse (s255896) | Magnus (s251019) | Mahmoud (s244632) |
 |---------------------------|------------------|-----------------|------------------|-------------------|
 | **Indledning**            | 0%               | 100%            | 0%               | 0%                |
-| **Kravanalyse**           | ?%               | ?%              | ?%               | ?%                |
+| **Kravanalyse**           | 100%             | ?%              | ?%               | ?%                |
 | **Planlægning og design** | 0%               | 0%              | 100%             | 0%                |
 | **Implementering**        | ?%               | 60%             | 20%              | ?%                |
 | **Validering**            | ?%               | ?%              | ?%               | ?%                |
-| **Diskussion**            | ?%               | 30%             | ?%               | ?%                |
+| **Diskussion**            | ?%               | 50%             | 50%              | ?%                |
 
 
 ## Use of AI
@@ -1188,7 +1188,8 @@ mere tid.
 Inden projektet gik i gang indleverede vi en gruppekontrakt, for at danne så gode rammer om vores gruppearbejde som muligt. 
 Dette gjorde det muligt for os at afstemme vores forventninger med hinanden 
 inden projektet gik i gang. Det er gruppens samlede vurdering at samarbejdet har været godt, og der er på trods 
-af niveau forskelle, blevet bidraget fra alle gruppemedlemmer i en tilfredsstillende grad.
+af niveau forskelle, blevet bidraget fra alle gruppemedlemmer i en tilfredsstillende grad. Der konkluderes derfor, at 
+gruppen har overholdt og efterlevet de forventninger der er angivet i gruppekontrakten.
 
 Projektet og vores løsninger på user stories er for gruppen meget tilfredsstillende, og gruppen er positivt instillede
 til det færdige produkt der er produceret. Dette er som følge af en god prioritering undervejs, samt løbende dialog 
@@ -1249,6 +1250,14 @@ Som beskrevet i rapportens indledende afsnit, opstod der kritiske problemer med 
 
 I en fremtidigt opgave som denne vil det være optimalt at integrere testskrivningen som en fast del af den daglige udvikling, frem for en "isoleret" aktivitet til sidst. Ved at skrive unit tests og integrationstests løbende i takt med, at business-logic implementeres, sikres en konstant høj testdækning. Dette validerer ikke kun koden løbende, men fanger også problemer på tværs af gruppens lokale udviklingsmiljøer i tide, hvilket minimerer risikoen for problemer tæt på aflevering.
 
+
+### Manglende implementationer. 
+Havde gruppen haft mere tid til at udvikle på "fordel" projektet, ville der lægges et fokus på at gøre de allerede implementerede funktionaliteter endnu mere fuldstændige, 
+i et forsøg på at skabe et større sammenhæng i de delsystemer der er implementeret. Et eksempel på dette kunne være et større sammenspil 
+mellem "advisor-workload" og "project-status". 
+
+Derudover ville der også implementeres nogle kvalitetsforbedringer såsom US27 (Change of language) eller bedre understøttelse af accesibility/tilgængelighed,
+der er blevet fravalgt som følge af prioritering af kerne funktionalitet. 
 
 ## Kilder
 
