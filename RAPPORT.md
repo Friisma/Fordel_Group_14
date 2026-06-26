@@ -1218,17 +1218,6 @@ I dette afsnit reflekteres der over, hvordan projektet kunne være optimeret, op
 
 #### Organiseringsrelaterede forbedringer og projektstyring
 
-Som nævnt i vores planlægning og design afsnit havde vi efter ("M2"), en udfordring med vores rolle system, 
-der resulterede i tilføjelsen af en ny relation i vores database. Dette betød at den kode der var blevet implementeret i sammenhæng med den del af databasen skulle omskrives for bedre at imødekomme kundens behov. 
-Gruppen havde fået indtrykket af at rollen på den enkelte user var en "global" rolle - det vil sige at rollen tilhørte en user alene. Efter mødet 
-skulle rolle systemet laves om, så rollen tilhørte en user i sammenhæng med en studielinje. Dette var en bekostelig fejl, der gjorde at gruppen var nødt 
-til at afsætte mere tid til at omskrive meget af den kode der var blevet produceret i sammenhæng med rolle systemet, hvilket betød at der ikke 
-var lige så meget tid til at løse nye user stories. På et strukturelt niveau kunne gruppen have hindret dette ved at lave en mere gennemarbejdet analyse af den tilhørende user story, 
-samt tage kontakt til kunden forud for mødet. For at gøre uforudsete problemer som dette nemmere at løse, ville det ha været en fordel for gruppen at lave en 
-mere generisk database, hvor man for eksempel kunne have tilføjet en kolonne til en user-role tabel, i stedet for at tilføje en hel ny tabel. 
-På trods af den forøgede arbejdsbyrde, har gruppen lært en del af denne fejl, og er blevet gjort opmærksom på vigtigheden i 
-den grundige analyse forud for udviklingen. 
-
 
 Selvom projektets deadlines blev overholdt, kunne det overordnede forløb have været struktureret mere proaktivt. Det Gantt-diagram, der præsenteres i planlægningsafsnittet, blev primært udarbejdet retrospektivt for at vise udviklingen. Hvis et tilsvarende planlægningsværktøj i stedet var blevet anvendt aktivt fra projektets start, ville det have skabt langt bedre forudsætninger for løbende at estimere tidsforbrug, uddelegere arbejdsbyrden og håndtere opgaver med indbyrdes afhængigheder.
 
@@ -1239,6 +1228,12 @@ Dette ville have givet en mere struktureret ramme for afstemning af forventninge
 I dette afsnit analyseres de tekniske udfordringer, der opstod undervejs i udviklingen, samt hvordan arkitekturen og implementeringen kunne have været optimeret fra projektets begyndelse.
 
 ##### Refaktorering mod en generisk databasemodel for rollestyring
+
+Som nævnt i vores planlægning og design afsnit havde vi efter ("M2"), en udfordring med vores rolle system,
+der resulterede i tilføjelsen af en ny relation i vores database. Dette betød at den kode der var blevet implementeret i sammenhæng med den del af databasen skulle omskrives for bedre at imødekomme kundens behov.
+Dette var en bekostelig fejl, der gjorde at gruppen var nødt til at afsætte mere tid til at omskrive meget af den kode der var blevet produceret i sammenhæng med rolle systemet, hvilket betød at der ikke
+var lige så meget tid til at løse nye user stories. På et strukturelt niveau kunne gruppen have hindret dette ved at lave en mere gennemarbejdet analyse af den tilhørende user story,
+samt tage kontakt til kunden forud for mødet.
 
 I starten af projektet blev koblingen mellem brugere, roller og studielinjer implementeret via specifikke relationstabeller, herunder `studyline_students` og `studyline_leaders`. Denne struktur viste sig hurtigt ikke at være generisk nok. Da det senere hen i forløbet blev et krav, at andre systemroller (såsom Advisors) på samme måde kunne have tilknytning til specifikke studielinjer, nødvendiggjorde det en stor og tidskrævende omskrivning af kodebasen.
 
