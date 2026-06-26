@@ -30,8 +30,8 @@ authors:
 | **Indledning**            | 0%               | 100%            | 0%               | 0%                |
 | **Kravanalyse**           | 100%             | 0%              | 0%               | ?%                |
 | **Planlægning og design** | 0%               | 0%              | 100%             | 0%                |
-| **Implementering**        | ?%               | 60%             | 20%              | ?%                |
-| **Validering**            | ?%               | 0%              | 0%               | 100%              |
+| **Implementering**        | ?%               | 60%             | 20%              | 20%               |
+| **Validering**            | ?%               | ?%              | ?%               | 100%              |
 | **Diskussion**            | ?%               | 50%             | 50%              | ?%                |
 
 
@@ -284,7 +284,7 @@ kunne der herefter arbejdes på at skabe sammenhængende funktioner, som at give
 
 ### Planlægning
 
-For at arbejde ud fra denne tilgang til vores user stories, krævede det at vi som gruppe kunne uddelegere de forskellige del-opgaver. 
+For at have den ovenstående tilgang til vores user stories, krævede det at vi som gruppe kunne uddelegere de forskellige del-opgaver. 
 Derfor aftalte vi i vores gruppe kontrakt, at der som udgangspunkt skulle mødes 2-3 gange om ugen. Dette bidragede til at skabe overblik over vores fremskridt 
 med user stories, og uddelegere user stories og del opgaver der afhænger af nogle af de delsystemer der allerede er blevet eller ville blive
 implementeret. 
@@ -292,7 +292,7 @@ implementeret.
 For at give et indtryk af vores fremgangsmåde har vi, efter vores sidste møde ("F1"), lavet nedenstående Gantt-diagram for at vise 
 hvordan vi har grebet de forskellige user stories an. Gantt diagrammet viser blandt andet hvilke arbejdsopgaver der kunne løses uden nogle foregående
 funktionaliteter, og hvilke user stories der direkte afhænger af løsningen på andre del-opgaver. For at gøre diagrammet mere overskueligt 
-fungere de forskellige møder med kunden som en "nulstilling" for af tidslinjen.
+fungere de forskellige møder med kunden som en "nulstilling" for at gøre diagrammet mere overskueligt.
 
 
 
